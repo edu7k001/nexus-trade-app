@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO ---
     // IMPORTANTE: Substitua 'SUA_CHAVE_PIX_AQUI' pela sua chave PIX real da conta Revolut.
-    const ADMIN_PIX_KEY = 'SUA_CHAVE_PIX_AQUI';
+    const ADMIN_PIX_KEY = '1c5c21fc-fcbc-4b28-b285-74156c727917';
     const MIN_DEPOSIT = 50;
     const BONUS_AMOUNT = 30;
     const MIN_WITHDRAW = 150;
@@ -31,5 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDown = document.getElementById('btn-down');
     const gameResult = document.getElementById('game-result');
     const btnWithdraw = document.getElementById('btn-withdraw');
+
 
     // --- FUNÇÕ
