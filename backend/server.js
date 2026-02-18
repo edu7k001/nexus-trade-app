@@ -20,20 +20,21 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
     console.log('✅ Conectado ao DB SQLite.');
     
     // Cria tabela de usuários
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT UNIQUE,
-        password TEXT,
-        pix_key TEXT,
-        balance REAL DEFAULT 0,
-        status TEXT DEFAULT 'Pendente',
-        total_deposits REAL DEFAULT 0,
-        total_withdraws REAL DEFAULT 0,
-        total_bets REAL DEFAULT 0,
-        total_wins REAL DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT UNIQUE,
+    password TEXT,
+    pix_key TEXT,
+    balance REAL DEFAULT 0,
+    status TEXT DEFAULT 'Pendente',
+    total_deposits REAL DEFAULT 0,
+    total_withdraws REAL DEFAULT 0,
+    total_bets REAL DEFAULT 0,
+    total_wins REAL DEFAULT 0,
+    rtp_individual REAL DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`); 
 
     // Tabela de histórico de jogadas
     db.run(`CREATE TABLE IF NOT EXISTS game_history (
@@ -424,7 +425,72 @@ const checkAdmin = (req, res, next) => {
         return res.status(401).json({ error: 'Não autorizado' });
     }
 };
+// ===== NOVAS ROTAS PARA ADMIN (ALTERAR SALDO E RTP) =====
 
+// Buscar detalhes de um usuário específico
+app.get('/api/admin/user/:id', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    
+    db.get(`
+        SELECT id, name, email, pix_key, balance, status, 
+               total_deposits, total_withdraws, total_bets, total_wins,
+               rtp_individual, created_at
+        FROM users 
+        WHERE id = ?
+    `, [id], (err, user) => {
+        if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
+        res.json(user);
+    });
+});
+
+// ALTERAR SALDO - Definir valor exato
+app.post('/api/admin/user/:id/balance/set', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    const { newBalance } = req.body;
+    
+    db.run('UPDATE users SET balance = ? WHERE id = ?', [newBalance, id], function(err) {
+        if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
+        res.json({ message: `Saldo alterado para R$ ${newBalance.toFixed(2)}` });
+    });
+});
+
+// ALTERAR SALDO - Adicionar valor
+app.post('/api/admin/user/:id/balance/add', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    const { amount } = req.body;
+    
+    db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, id], function(err) {
+        if (err) return res.status(500).json({ error: 'Erro ao adicionar saldo' });
+        res.json({ message: `R$ ${amount.toFixed(2)} adicionado ao saldo` });
+    });
+});
+
+// ALTERAR SALDO - Remover valor
+app.post('/api/admin/user/:id/balance/remove', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    const { amount } = req.body;
+    
+    db.run('UPDATE users SET balance = balance - ? WHERE id = ?', [amount, id], function(err) {
+        if (err) return res.status(500).json({ error: 'Erro ao remover saldo' });
+        res.json({ message: `R$ ${amount.toFixed(2)} removido do saldo` });
+    });
+});
+
+// CONFIGURAR RTP INDIVIDUAL
+app.post('/api/admin/user/:id/rtp', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    const { rtpValue } = req.body;
+    
+    db.run('UPDATE users SET rtp_individual = ? WHERE id = ?', [rtpValue, id], function(err) {
+        if (err) return res.status(500).json({ error: 'Erro ao configurar RTP' });
+        
+        if (rtpValue === null) {
+            res.json({ message: 'RTP individual removido' });
+        } else {
+            res.json({ message: `RTP configurado para ${rtpValue}%` });
+        }
+    });
+});
 // Estatísticas do dashboard
 app.get('/api/admin/stats', checkAdmin, (req, res) => {
     db.get(`
