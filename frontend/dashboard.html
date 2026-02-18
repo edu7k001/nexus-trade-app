@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Trade - Jogos</title>
     <style>
+        /* Mesmo CSS que você já tem - manter igual */
         * {
             margin: 0;
             padding: 0;
@@ -66,6 +67,12 @@
             border-radius: 50px;
             text-align: center;
             box-shadow: 0 0 20px rgba(40,167,69,0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .balance-box:hover {
+            transform: scale(1.05);
         }
         
         .balance-label {
@@ -361,6 +368,51 @@
             border: 1px solid #dc3545;
         }
         
+        /* Seção de depósito */
+        .deposit-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .deposit-title {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .deposit-input {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 2px solid #ffd700;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 16px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        
+        .deposit-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .deposit-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
         /* Histórico */
         .history-section {
             background: rgba(255,255,255,0.05);
@@ -394,7 +446,66 @@
             background: #dc3545;
         }
         
-        /* Utilitários */
+        /* Modal QR Code */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1f2f;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .qr-image {
+            max-width: 250px;
+            margin: 20px 0;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+        }
+        
+        .pix-key {
+            word-break: break-all;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .copy-btn {
+            padding: 8px 20px;
+            background: #ffd700;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            cursor: pointer;
+        }
+        
         .hidden {
             display: none;
         }
@@ -412,12 +523,19 @@
                 </div>
             </div>
             
-            <div class="balance-box">
+            <div class="balance-box" onclick="showDepositModal()">
                 <div class="balance-label">SALDO</div>
                 <div class="balance-value" id="user-balance">R$ 0,00</div>
             </div>
             
             <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+        
+        <!-- Seção de depósito (se status pendente) -->
+        <div id="deposit-section" class="deposit-section">
+            <h3 class="deposit-title">💰 ATIVE SUA CONTA</h3>
+            <p>Faça um depósito mínimo de <strong>R$ 50,00</strong> para começar a jogar!</p>
+            <button class="deposit-btn" onclick="showDepositModal()">FAZER DEPÓSITO</button>
         </div>
         
         <!-- Seletor de jogos -->
@@ -432,7 +550,7 @@
             </div>
             <div class="game-tab" onclick="selectGame('crash')">
                 <div class="game-icon">✈️</div>
-                <div class="game-name">AVIAOZINHO</div>
+                <div class="game-name">AVIÃOZINHO</div>
             </div>
         </div>
         
@@ -518,52 +636,109 @@
         <!-- Histórico -->
         <div class="history-section">
             <h3 class="history-title">📊 ÚLTIMAS JOGADAS</h3>
-            <div class="history-list" id="history-list">
-                <div class="history-item win">Slot: +R$ 20,00</div>
-                <div class="history-item lose">Dados: -R$ 10,00</div>
-                <div class="history-item win">Avião: +R$ 35,00</div>
-            </div>
+            <div class="history-list" id="history-list"></div>
+        </div>
+    </div>
+    
+    <!-- Modal QR Code -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2 style="color: #ffd700;">DEPÓSITO PIX</h2>
+            <img id="qr-code-img" class="qr-image" src="" alt="QR Code PIX">
+            <p id="pix-key-display" class="pix-key">Carregando...</p>
+            <button class="copy-btn" onclick="copyPixKey()">📋 COPIAR CHAVE</button>
+            <p style="margin-top: 15px; font-size: 12px; color: #aaa;">Após o depósito, clique em "JÁ DEPOSITEI" no painel</p>
         </div>
     </div>
     
     <script>
-        // Dados do usuário (simulado por enquanto)
-        let userData = {
-            id: 1,
-            name: 'Usuário Teste',
-            email: 'teste@email.com',
-            balance: 1000
-        };
-        
-        // Estado dos jogos
-        let currentGame = 'slot';
+        // Dados do usuário
+        let userData = null;
         let diceChoice = 'sum7';
         let crashInterval = null;
         let crashMultiplier = 1.0;
         let crashActive = false;
         let crashBetAmount = 0;
         
-        // Elementos do DOM
-        const userName = document.getElementById('user-name');
-        const userEmail = document.getElementById('user-email');
-        const userBalance = document.getElementById('user-balance');
-        const userAvatar = document.getElementById('user-avatar');
+        // Carregar dados do usuário ao iniciar
+        async function loadUserData() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            userData = JSON.parse(userStr);
+            
+            try {
+                // Buscar dados atualizados do servidor
+                const response = await fetch(`/api/user/${userData.id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    userData = { ...userData, ...data };
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar usuário:', error);
+                updateUI();
+            }
+        }
         
-        // Mostrar dados do usuário
-        userName.textContent = userData.name;
-        userEmail.textContent = userData.email;
-        userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
-        userAvatar.textContent = userData.name.charAt(0).toUpperCase();
+        // Atualizar interface
+        function updateUI() {
+            document.getElementById('user-name').textContent = userData.name;
+            document.getElementById('user-email').textContent = userData.email;
+            document.getElementById('user-balance').textContent = `R$ ${(userData.balance || 0).toFixed(2)}`;
+            document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
+            
+            // Mostrar seção de depósito se status pendente
+            const depositSection = document.getElementById('deposit-section');
+            if (userData.status === 'Pendente') {
+                depositSection.style.display = 'block';
+            } else {
+                depositSection.style.display = 'none';
+            }
+        }
         
-        // Função para selecionar jogo
+        // ===== FUNÇÕES DE DEPÓSITO =====
+        async function showDepositModal() {
+            const modal = document.getElementById('qr-modal');
+            modal.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/pix-qrcode');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('qr-code-img').src = data.qrcode;
+                    document.getElementById('pix-key-display').textContent = data.pixKey;
+                } else {
+                    alert('Erro ao carregar QR Code');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('qr-modal').style.display = 'none';
+        }
+        
+        function copyPixKey() {
+            const pixKey = document.getElementById('pix-key-display').textContent;
+            navigator.clipboard.writeText(pixKey);
+            alert('Chave PIX copiada!');
+        }
+        
+        // ===== FUNÇÕES DE SELEÇÃO DE JOGOS =====
         function selectGame(game) {
             currentGame = game;
             
-            // Atualizar tabs
             document.querySelectorAll('.game-tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.game-tab')[game === 'slot' ? 0 : game === 'dice' ? 1 : 2].classList.add('active');
             
-            // Mostrar jogo correspondente
             document.getElementById('slot-game').classList.add('hidden');
             document.getElementById('dice-game').classList.add('hidden');
             document.getElementById('crash-game').classList.add('hidden');
@@ -571,7 +746,6 @@
             document.getElementById(game + '-game').classList.remove('hidden');
         }
         
-        // Função para selecionar opção dos dados
         function selectDice(option) {
             document.querySelectorAll('.dice-option').forEach(opt => opt.classList.remove('selected'));
             event.target.classList.add('selected');
@@ -579,14 +753,19 @@
         }
         
         // ===== JOGO 1: CAÇA-NÍQUEL =====
-        function playSlot() {
+        async function playSlot() {
+            if (userData.status === 'Pendente') {
+                alert('Você precisa fazer um depósito primeiro!');
+                showDepositModal();
+                return;
+            }
+            
             const bet = parseFloat(document.getElementById('slot-bet').value);
             const resultDiv = document.getElementById('slot-result');
             const reel1 = document.getElementById('reel1');
             const reel2 = document.getElementById('reel2');
             const reel3 = document.getElementById('reel3');
             
-            // Verificar saldo
             if (bet > userData.balance) {
                 resultDiv.classList.remove('hidden', 'win', 'lose');
                 resultDiv.classList.add('lose');
@@ -594,74 +773,64 @@
                 return;
             }
             
-            // Deduzir aposta
-            userData.balance -= bet;
-            userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
-            
-            // Animação de giro
-            reel1.classList.add('spinning');
-            reel2.classList.add('spinning');
-            reel3.classList.add('spinning');
-            
-            // Símbolos
-            const symbols = ['🍒', '💎', '7️⃣', '⭐'];
-            const multipliers = [2, 5, 10, 20];
-            
-            setTimeout(() => {
-                // Parar animação
-                reel1.classList.remove('spinning');
-                reel2.classList.remove('spinning');
-                reel3.classList.remove('spinning');
+            // Chamar API do jogo
+            try {
+                const response = await fetch('/api/game/slot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userData.id,
+                        betAmount: bet
+                    })
+                });
                 
-                // Resultado aleatório
-                const r1 = Math.floor(Math.random() * symbols.length);
-                const r2 = Math.floor(Math.random() * symbols.length);
-                const r3 = Math.floor(Math.random() * symbols.length);
+                const data = await response.json();
                 
-                reel1.textContent = symbols[r1];
-                reel2.textContent = symbols[r2];
-                reel3.textContent = symbols[r3];
-                
-                // Verificar vitória
-                let win = 0;
-                let message = '';
-                
-                if (r1 === r2 && r2 === r3) {
-                    win = bet * multipliers[r1];
-                    message = `🎉 GRANDE VITÓRIA! +R$ ${win.toFixed(2)}`;
-                    resultDiv.classList.add('win');
-                } else if (r1 === r2 || r2 === r3 || r1 === r3) {
-                    win = bet * 0.5;
-                    message = `👍 PEQUENA VITÓRIA! +R$ ${win.toFixed(2)}`;
-                    resultDiv.classList.add('win');
+                if (response.ok) {
+                    // Animação
+                    reel1.classList.add('spinning');
+                    reel2.classList.add('spinning');
+                    reel3.classList.add('spinning');
+                    
+                    setTimeout(() => {
+                        reel1.classList.remove('spinning');
+                        reel2.classList.remove('spinning');
+                        reel3.classList.remove('spinning');
+                        
+                        reel1.textContent = data.symbols[0];
+                        reel2.textContent = data.symbols[1];
+                        reel3.textContent = data.symbols[2];
+                        
+                        userData.balance = data.newBalance;
+                        updateUI();
+                        
+                        resultDiv.classList.remove('hidden', 'win', 'lose');
+                        resultDiv.classList.add(data.win > 0 ? 'win' : 'lose');
+                        resultDiv.innerHTML = data.message;
+                        
+                        addToHistory(`Slot: ${data.message}`);
+                    }, 1000);
                 } else {
-                    win = 0;
-                    message = `😢 PERDEU! -R$ ${bet.toFixed(2)}`;
-                    resultDiv.classList.add('lose');
+                    alert(data.error || 'Erro no jogo');
                 }
-                
-                // Atualizar saldo
-                userData.balance += win;
-                userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
-                
-                // Mostrar resultado
-                resultDiv.classList.remove('hidden');
-                resultDiv.innerHTML = message;
-                
-                // Adicionar ao histórico
-                addToHistory(`Slot: ${message}`);
-                
-            }, 1000);
+            } catch (error) {
+                alert('Erro de conexão');
+            }
         }
         
         // ===== JOGO 2: DADOS =====
-        function playDice() {
+        async function playDice() {
+            if (userData.status === 'Pendente') {
+                alert('Você precisa fazer um depósito primeiro!');
+                showDepositModal();
+                return;
+            }
+            
             const bet = parseFloat(document.getElementById('dice-bet').value);
             const resultDiv = document.getElementById('dice-result');
             const dice1 = document.getElementById('dice1');
             const dice2 = document.getElementById('dice2');
             
-            // Verificar saldo
             if (bet > userData.balance) {
                 resultDiv.classList.remove('hidden', 'win', 'lose');
                 resultDiv.classList.add('lose');
@@ -669,141 +838,95 @@
                 return;
             }
             
-            // Deduzir aposta
-            userData.balance -= bet;
-            userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
+            // Mapear opção para o backend
+            const betType = {
+                type: diceChoice.startsWith('sum') ? 'sum' : 
+                      diceChoice === 'double' ? 'double' : 'specific',
+                value: diceChoice === 'sum7' ? 7 :
+                       diceChoice === 'sum2' ? 2 :
+                       diceChoice === 'sum12' ? 12 :
+                       diceChoice === 'one' ? 1 :
+                       diceChoice === 'six' ? 6 : 0
+            };
             
-            // Animação
-            dice1.classList.add('rolling');
-            dice2.classList.add('rolling');
-            
-            // Faces dos dados
-            const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-            
-            setTimeout(() => {
-                dice1.classList.remove('rolling');
-                dice2.classList.remove('rolling');
+            try {
+                const response = await fetch('/api/game/dice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userData.id,
+                        betAmount: bet,
+                        betType: betType
+                    })
+                });
                 
-                // Resultado aleatório
-                const d1 = Math.floor(Math.random() * 6) + 1;
-                const d2 = Math.floor(Math.random() * 6) + 1;
+                const data = await response.json();
                 
-                dice1.textContent = diceFaces[d1 - 1];
-                dice2.textContent = diceFaces[d2 - 1];
-                
-                const sum = d1 + d2;
-                
-                // Verificar vitória baseado na escolha
-                let win = 0;
-                let message = '';
-                
-                switch(diceChoice) {
-                    case 'sum7':
-                        if (sum === 7) {
-                            win = bet * 5;
-                            message = `🎉 SOMA 7! +R$ ${win.toFixed(2)}`;
-                        }
-                        break;
-                    case 'sum2':
-                        if (sum === 2) {
-                            win = bet * 15;
-                            message = `🎉 SOMA 2! +R$ ${win.toFixed(2)}`;
-                        }
-                        break;
-                    case 'sum12':
-                        if (sum === 12) {
-                            win = bet * 15;
-                            message = `🎉 SOMA 12! +R$ ${win.toFixed(2)}`;
-                        }
-                        break;
-                    case 'double':
-                        if (d1 === d2) {
-                            win = bet * 8;
-                            message = `🎉 DUPLA DE ${d1}! +R$ ${win.toFixed(2)}`;
-                        }
-                        break;
-                    case 'one':
-                        if (d1 === 1 || d2 === 1) {
-                            win = bet * 6;
-                            message = `🎉 SAIU NÚMERO 1! +R$ ${win.toFixed(2)}`;
-                        }
-                        break;
-                    case 'six':
-                        if (d1 === 6 || d2 === 6) {
-                            win = bet * 6;
-                            message = `🎉 SAIU NÚMERO 6! +R$ ${win.toFixed(2)}`;
-                        }
-                        break;
-                }
-                
-                if (win > 0) {
-                    resultDiv.classList.add('win');
-                    resultDiv.classList.remove('lose');
+                if (response.ok) {
+                    dice1.classList.add('rolling');
+                    dice2.classList.add('rolling');
+                    
+                    setTimeout(() => {
+                        dice1.classList.remove('rolling');
+                        dice2.classList.remove('rolling');
+                        
+                        const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+                        dice1.textContent = diceFaces[data.dice[0] - 1];
+                        dice2.textContent = diceFaces[data.dice[1] - 1];
+                        
+                        userData.balance = data.newBalance;
+                        updateUI();
+                        
+                        resultDiv.classList.remove('hidden', 'win', 'lose');
+                        resultDiv.classList.add(data.win > 0 ? 'win' : 'lose');
+                        resultDiv.innerHTML = data.message;
+                        
+                        addToHistory(`Dados: ${data.message}`);
+                    }, 800);
                 } else {
-                    win = 0;
-                    message = `😢 PERDEU! Soma: ${sum} -R$ ${bet.toFixed(2)}`;
-                    resultDiv.classList.add('lose');
-                    resultDiv.classList.remove('win');
+                    alert(data.error || 'Erro no jogo');
                 }
-                
-                // Atualizar saldo
-                userData.balance += win;
-                userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
-                
-                // Mostrar resultado
-                resultDiv.classList.remove('hidden');
-                resultDiv.innerHTML = message;
-                
-                // Adicionar ao histórico
-                addToHistory(`Dados: ${message}`);
-                
-            }, 800);
+            } catch (error) {
+                alert('Erro de conexão');
+            }
         }
         
         // ===== JOGO 3: AVIÃOZINHO =====
-        function startCrash() {
-            const bet = parseFloat(document.getElementById('crash-bet').value);
-            const startBtn = document.getElementById('crash-start');
-            const cashoutBtn = document.getElementById('crash-cashout');
-            const multiplierEl = document.getElementById('multiplier');
-            const planeEl = document.getElementById('plane');
-            const resultDiv = document.getElementById('crash-result');
-            
-            // Verificar saldo
-            if (bet > userData.balance) {
-                resultDiv.classList.remove('hidden', 'win', 'lose');
-                resultDiv.classList.add('lose');
-                resultDiv.innerHTML = '❌ SALDO INSUFICIENTE';
+        async function startCrash() {
+            if (userData.status === 'Pendente') {
+                alert('Você precisa fazer um depósito primeiro!');
+                showDepositModal();
                 return;
             }
             
-            // Deduzir aposta
+            const bet = parseFloat(document.getElementById('crash-bet').value);
+            
+            if (bet > userData.balance) {
+                document.getElementById('crash-result').classList.remove('hidden', 'win', 'lose');
+                document.getElementById('crash-result').classList.add('lose');
+                document.getElementById('crash-result').innerHTML = '❌ SALDO INSUFICIENTE';
+                return;
+            }
+            
+            // Iniciar jogo local
             userData.balance -= bet;
-            userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
+            updateUI();
             crashBetAmount = bet;
             
-            // Esconder resultado anterior
-            resultDiv.classList.add('hidden');
+            document.getElementById('crash-start').classList.add('hidden');
+            document.getElementById('crash-cashout').classList.remove('hidden');
+            document.getElementById('crash-result').classList.add('hidden');
             
-            // Iniciar jogo
             crashActive = true;
             crashMultiplier = 1.0;
-            multiplierEl.textContent = '1.00';
+            document.getElementById('multiplier').textContent = '1.00';
+            document.getElementById('plane').style.animation = 'fly 2s linear infinite';
             
-            startBtn.classList.add('hidden');
-            cashoutBtn.classList.remove('hidden');
-            
-            // Animação do avião
-            planeEl.style.animation = 'fly 2s linear infinite';
-            
-            // Loop do multiplicador
             crashInterval = setInterval(() => {
                 if (crashActive) {
-                    // Aumentar multiplicador
                     crashMultiplier += 0.01;
-                    multiplierEl.textContent = crashMultiplier.toFixed(2);
+                    document.getElementById('multiplier').textContent = crashMultiplier.toFixed(2);
                     
-                    // Chance de crash (aumenta com o tempo)
                     if (Math.random() < 0.02) {
                         crashGame();
                     }
@@ -811,63 +934,75 @@
             }, 100);
         }
         
-        function crashGame() {
+        async function crashGame() {
             if (!crashActive) return;
             
             crashActive = false;
             clearInterval(crashInterval);
             
-            const startBtn = document.getElementById('crash-start');
-            const cashoutBtn = document.getElementById('crash-cashout');
-            const multiplierEl = document.getElementById('multiplier');
-            const planeEl = document.getElementById('plane');
+            document.getElementById('plane').style.animation = 'none';
+            
+            // Registrar perda no backend
+            try {
+                await fetch('/api/game/crash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userData.id,
+                        betAmount: crashBetAmount,
+                        cashoutMultiplier: 0
+                    })
+                });
+            } catch (error) {}
+            
+            document.getElementById('crash-start').classList.remove('hidden');
+            document.getElementById('crash-cashout').classList.add('hidden');
+            
             const resultDiv = document.getElementById('crash-result');
-            
-            // Parar animação
-            planeEl.style.animation = 'none';
-            
-            // Mostrar resultado
             resultDiv.classList.remove('hidden', 'win', 'lose');
             resultDiv.classList.add('lose');
             resultDiv.innerHTML = `💥 CRASH! Perdeu R$ ${crashBetAmount.toFixed(2)}`;
             
-            // Adicionar ao histórico
             addToHistory(`Avião: Perdeu R$ ${crashBetAmount.toFixed(2)}`);
-            
-            // Resetar botões
-            startBtn.classList.remove('hidden');
-            cashoutBtn.classList.add('hidden');
         }
         
-        function cashout() {
+        async function cashout() {
             if (!crashActive) return;
             
             crashActive = false;
             clearInterval(crashInterval);
             
             const win = crashBetAmount * crashMultiplier;
-            userData.balance += win;
-            userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
             
-            const startBtn = document.getElementById('crash-start');
-            const cashoutBtn = document.getElementById('crash-cashout');
-            const planeEl = document.getElementById('plane');
+            // Registrar vitória no backend
+            try {
+                const response = await fetch('/api/game/crash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userData.id,
+                        betAmount: crashBetAmount,
+                        cashoutMultiplier: crashMultiplier
+                    })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    userData.balance = data.newBalance;
+                    updateUI();
+                }
+            } catch (error) {}
+            
+            document.getElementById('plane').style.animation = 'none';
+            document.getElementById('crash-start').classList.remove('hidden');
+            document.getElementById('crash-cashout').classList.add('hidden');
+            
             const resultDiv = document.getElementById('crash-result');
-            
-            // Parar animação
-            planeEl.style.animation = 'none';
-            
-            // Mostrar resultado
             resultDiv.classList.remove('hidden', 'win', 'lose');
             resultDiv.classList.add('win');
             resultDiv.innerHTML = `💰 RETIRADA! ${crashMultiplier.toFixed(2)}x +R$ ${(win - crashBetAmount).toFixed(2)}`;
             
-            // Adicionar ao histórico
             addToHistory(`Avião: Ganhou R$ ${(win - crashBetAmount).toFixed(2)}`);
-            
-            // Resetar botões
-            startBtn.classList.remove('hidden');
-            cashoutBtn.classList.add('hidden');
         }
         
         // Função para adicionar ao histórico
@@ -878,16 +1013,26 @@
             item.textContent = text;
             historyList.insertBefore(item, historyList.firstChild);
             
-            // Limitar histórico
             while (historyList.children.length > 10) {
                 historyList.removeChild(historyList.lastChild);
             }
         }
         
-        // Função de logout
+        // Logout
         function logout() {
-            alert('Saindo... (implementar depois)');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
         }
+        
+        // Inicializar
+        loadUserData();
+        
+        // Fechar modal com ESC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
