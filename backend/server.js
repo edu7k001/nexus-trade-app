@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
+const QRCode = require('qrcode');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
@@ -11,7 +12,6 @@ const PORT = process.env.PORT || 3001;
 // Configurações
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Conecta ao banco de dados SQLite
@@ -28,6 +28,22 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
         pix_key TEXT,
         balance REAL DEFAULT 0,
         status TEXT DEFAULT 'Pendente',
+        total_deposits REAL DEFAULT 0,
+        total_withdraws REAL DEFAULT 0,
+        total_bets REAL DEFAULT 0,
+        total_wins REAL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Tabela de histórico de jogadas
+    db.run(`CREATE TABLE IF NOT EXISTS game_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        game TEXT,
+        bet_amount REAL,
+        result TEXT,
+        win_amount REAL,
+        multiplier REAL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -49,23 +65,43 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    // Tabela de estatísticas da casa
+    db.run(`CREATE TABLE IF NOT EXISTS house_stats (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        total_bets REAL DEFAULT 0,
+        total_paid REAL DEFAULT 0,
+        house_profit REAL DEFAULT 0
+    )`);
+
     // Configurações do admin
     db.run(`CREATE TABLE IF NOT EXISTS admin_config (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         pix_key TEXT,
         min_deposit REAL,
         bonus_amount REAL,
-        min_withdraw REAL
+        min_withdraw REAL,
+        slot_min_bet REAL DEFAULT 5,
+        dice_min_bet REAL DEFAULT 5,
+        crash_min_bet REAL DEFAULT 5,
+        slot_rtp REAL DEFAULT 95,
+        dice_rtp REAL DEFAULT 95,
+        crash_rtp REAL DEFAULT 95,
+        slot_volatility TEXT DEFAULT 'medium',
+        dice_volatility TEXT DEFAULT 'medium',
+        crash_volatility TEXT DEFAULT 'medium'
     )`, (err) => {
         if (!err) {
             db.get('SELECT * FROM admin_config WHERE id = 1', (err, row) => {
                 if (!row) {
                     db.run(`INSERT INTO admin_config 
-                        (id, pix_key, min_deposit, bonus_amount, min_withdraw) 
-                        VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 50, 30, 150)`);
-                    console.log('✅ Chave PIX configurada: 1c5c21fc-fcbc-4b28-b285-74156c727917');
+                        (id, pix_key, min_deposit, bonus_amount, min_withdraw, slot_rtp, dice_rtp, crash_rtp) 
+                        VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 50, 30, 150, 95, 95, 95)`);
                 }
             });
+            
+            // Inicializa estatísticas da casa
+            db.run(`INSERT OR IGNORE INTO house_stats (id, total_bets, total_paid, house_profit) 
+                    VALUES (1, 0, 0, 0)`);
             
             // Cria usuário admin padrão
             const saltRounds = 10;
@@ -76,58 +112,47 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
     });
 });
 
-// ===== ROTA DO QR CODE (USANDO A IMAGEM DA PASTA IMAGES) =====
+// ===== ROTA DO QR CODE =====
 app.get('/api/pix-qrcode', (req, res) => {
-    // Verifica se a imagem existe
     const imagePath = path.join(__dirname, '../frontend/images/pix-nexus.png');
     
     if (fs.existsSync(imagePath)) {
-        // Se a imagem existe, retorna o caminho
         db.get('SELECT pix_key FROM admin_config WHERE id = 1', (err, row) => {
             if (err || !row) {
                 return res.status(500).json({ error: 'Erro ao buscar chave PIX' });
             }
             
-            // Retorna a imagem estática
             res.json({ 
                 success: true,
-                qrcode: '/images/pix-nexus.png', // Caminho da imagem
+                qrcode: '/images/pix-nexus.png',
                 pixKey: row.pix_key,
-                message: 'QR Code carregado da pasta images!',
-                imageExists: true
+                message: 'QR Code carregado!'
             });
         });
     } else {
-        // Se a imagem não existe, avisa o usuário
         res.status(404).json({ 
-            error: 'Imagem do QR Code não encontrada. Por favor, baixe o QR Code do https://geradordepix.com e salve como frontend/images/pix-nexus.png' 
+            error: 'Imagem do QR Code não encontrada' 
         });
     }
 });
 
 // ===== ROTAS DE AUTENTICAÇÃO =====
-
-// Página de cadastro
 app.get('/cadastro', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/cadastro.html'));
 });
 
-// Página de login
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
-// Página do admin
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/admin.html'));
 });
 
-// Dashboard do usuário
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/dashboard.html'));
 });
 
-// API de registro
 app.post('/api/register', async (req, res) => {
     const { name, email, password, pixKey } = req.body;
     
@@ -158,7 +183,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// API de login
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     
@@ -198,145 +222,6 @@ app.post('/api/request-deposit', (req, res) => {
     );
 });
 
-// ===== ROTAS DO ADMIN =====
-const checkAdmin = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-        return res.status(401).json({ error: 'Não autorizado' });
-    }
-    
-    try {
-        const base64Credentials = authHeader.split(' ')[1];
-        const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
-        const [email, password] = credentials.split(':');
-        
-        db.get('SELECT * FROM users WHERE email = ? AND status = "Admin"', [email], async (err, admin) => {
-            if (err || !admin) return res.status(401).json({ error: 'Não autorizado' });
-            
-            const validPassword = await bcrypt.compare(password, admin.password);
-            if (!validPassword) return res.status(401).json({ error: 'Não autorizado' });
-            
-            req.admin = admin;
-            next();
-        });
-    } catch (error) {
-        return res.status(401).json({ error: 'Não autorizado' });
-    }
-};
-
-// Listar depósitos pendentes
-app.get('/api/admin/deposits', checkAdmin, (req, res) => {
-    db.all(`
-        SELECT d.*, u.name, u.email, u.pix_key 
-        FROM deposits d 
-        JOIN users u ON d.user_id = u.id 
-        WHERE d.status = 'Pendente'
-        ORDER BY d.created_at DESC
-    `, [], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Erro ao buscar depósitos' });
-        res.json(rows);
-    });
-});
-
-// Confirmar depósito
-app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
-    const { id } = req.params;
-    const { amount } = req.body;
-    
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-        
-        db.get('SELECT user_id FROM deposits WHERE id = ?', [id], (err, deposit) => {
-            if (err || !deposit) {
-                db.run('ROLLBACK');
-                return res.status(404).json({ error: 'Depósito não encontrado' });
-            }
-            
-            db.run('UPDATE deposits SET status = "Confirmado" WHERE id = ?', [id]);
-            db.run('UPDATE users SET balance = balance + ?, status = "Ativo" WHERE id = ?',
-                [amount, deposit.user_id]);
-            
-            db.run('COMMIT');
-            res.json({ message: 'Depósito confirmado!' });
-        });
-    });
-});
-
-// Listar saques pendentes
-app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
-    db.all(`
-        SELECT wr.*, u.name, u.email, u.pix_key 
-        FROM withdraw_requests wr 
-        JOIN users u ON wr.user_id = u.id 
-        WHERE wr.status = 'Pendente'
-    `, [], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Erro ao buscar saques' });
-        res.json(rows);
-    });
-});
-
-// Aprovar saque
-app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
-    const { id } = req.params;
-    
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-        
-        db.get('SELECT user_id, amount FROM withdraw_requests WHERE id = ?', [id], (err, withdraw) => {
-            if (err || !withdraw) {
-                db.run('ROLLBACK');
-                return res.status(404).json({ error: 'Saque não encontrado' });
-            }
-            
-            db.run('UPDATE users SET balance = balance - ? WHERE id = ?',
-                [withdraw.amount, withdraw.user_id]);
-            db.run('UPDATE withdraw_requests SET status = "Aprovado" WHERE id = ?', [id]);
-            
-            db.run('COMMIT');
-            res.json({ message: 'Saque aprovado!' });
-        });
-    });
-});
-
-// Buscar dados do usuário
-app.get('/api/user/:id', (req, res) => {
-    db.get('SELECT id, name, email, pix_key, balance, status FROM users WHERE id = ?',
-        [req.params.id],
-        (err, user) => {
-            if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
-            res.json(user);
-        }
-    );
-});
-
-// Solicitar saque
-app.post('/api/request-withdraw', (req, res) => {
-    const { userId, amount } = req.body;
-    
-    db.get('SELECT balance FROM users WHERE id = ?', [userId], (err, user) => {
-        if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
-        if (user.balance < amount) return res.status(400).json({ error: 'Saldo insuficiente' });
-        
-        db.get('SELECT min_withdraw FROM admin_config WHERE id = 1', (err, config) => {
-            if (amount < config.min_withdraw) {
-                return res.status(400).json({ error: `Saque mínimo: R$${config.min_withdraw}` });
-            }
-            
-            db.run('INSERT INTO withdraw_requests (user_id, amount) VALUES (?, ?)',
-                [userId, amount],
-                function(err) {
-                    if (err) return res.status(500).json({ error: 'Erro ao solicitar saque' });
-                    res.json({ message: 'Saque solicitado!' });
-                }
-            );
-        });
-    });
-});
-
-// Rota principal - redireciona para login
-app.get('/', (req, res) => {
-    res.redirect('/login');
-});
 // ===== ROTAS DE JOGOS =====
 
 // Rota para jogar slots
@@ -346,7 +231,6 @@ app.post('/api/game/slot', (req, res) => {
     db.serialize(() => {
         db.run('BEGIN TRANSACTION');
         
-        // Buscar saldo do usuário
         db.get('SELECT balance, status FROM users WHERE id = ?', [userId], (err, user) => {
             if (err || !user) {
                 db.run('ROLLBACK');
@@ -363,7 +247,6 @@ app.post('/api/game/slot', (req, res) => {
                 return res.status(400).json({ error: 'Saldo insuficiente' });
             }
             
-            // Gerar resultado
             const symbols = ['🍒', '💎', '7️⃣', '⭐'];
             const multipliers = [2, 5, 10, 20];
             
@@ -387,11 +270,9 @@ app.post('/api/game/slot', (req, res) => {
             
             const newBalance = user.balance - betAmount + winAmount;
             
-            // Atualizar saldo
             db.run('UPDATE users SET balance = ?, total_bets = total_bets + ?, total_wins = total_wins + ? WHERE id = ?',
                 [newBalance, betAmount, winAmount, userId]);
             
-            // Registrar histórico
             db.run('INSERT INTO game_history (user_id, game, bet_amount, result, win_amount, multiplier) VALUES (?, ?, ?, ?, ?, ?)',
                 [userId, 'slot', betAmount, message, winAmount, winAmount / betAmount]);
             
@@ -432,7 +313,6 @@ app.post('/api/game/dice', (req, res) => {
                 return res.status(400).json({ error: 'Saldo insuficiente' });
             }
             
-            // Gerar resultado
             const d1 = Math.floor(Math.random() * 6) + 1;
             const d2 = Math.floor(Math.random() * 6) + 1;
             const sum = d1 + d2;
@@ -440,7 +320,6 @@ app.post('/api/game/dice', (req, res) => {
             let winAmount = 0;
             let message = '';
             
-            // Verificar vitória baseado no tipo de aposta
             if (betType.type === 'sum' && sum === betType.value) {
                 winAmount = betAmount * 5;
                 message = `🎉 SOMA ${sum}! +R$ ${winAmount.toFixed(2)}`;
@@ -517,9 +396,10 @@ app.post('/api/game/crash', (req, res) => {
         });
     });
 });
+
 // ===== ROTAS DO ADMIN =====
 
-// Middleware de autenticação do admin
+// Middleware de autenticação do admin (UMA ÚNICA VEZ!)
 const checkAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -737,6 +617,59 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
         }
     );
 });
+
+// Buscar dados do usuário
+app.get('/api/user/:id', (req, res) => {
+    db.get('SELECT id, name, email, pix_key, balance, status, total_deposits, total_withdraws, total_bets, total_wins FROM users WHERE id = ?',
+        [req.params.id],
+        (err, user) => {
+            if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
+            res.json(user);
+        }
+    );
+});
+
+// Buscar histórico do usuário
+app.get('/api/user/:id/history', (req, res) => {
+    db.all('SELECT * FROM game_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 20',
+        [req.params.id],
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: 'Erro ao buscar histórico' });
+            res.json(rows);
+        }
+    );
+});
+
+// Solicitar saque
+app.post('/api/request-withdraw', (req, res) => {
+    const { userId, amount } = req.body;
+    
+    db.get('SELECT balance FROM users WHERE id = ?', [userId], (err, user) => {
+        if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
+        if (user.balance < amount) return res.status(400).json({ error: 'Saldo insuficiente' });
+        
+        db.get('SELECT min_withdraw FROM admin_config WHERE id = 1', (err, config) => {
+            if (amount < config.min_withdraw) {
+                return res.status(400).json({ error: `Saque mínimo: R$${config.min_withdraw}` });
+            }
+            
+            db.run('INSERT INTO withdraw_requests (user_id, amount) VALUES (?, ?)',
+                [userId, amount],
+                function(err) {
+                    if (err) return res.status(500).json({ error: 'Erro ao solicitar saque' });
+                    res.json({ message: 'Saque solicitado!' });
+                }
+            );
+        });
+    });
+});
+
+// Rota principal
+app.get('/', (req, res) => {
+    res.redirect('/login');
+});
+
+// Inicia o servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Login: https://nexus-trade-app1.onrender.com/login`);
