@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Trade - Painel Admin</title>
+    <title>Nexus Trade - Painel Administrativo</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,14 +14,14 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0b0f1a 0%, #1a1f2f 100%);
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0b0e 0%, #1a1f2e 100%);
             color: #fff;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -27,28 +29,31 @@
         /* Header */
         .admin-header {
             background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
             border: 1px solid #ffd700;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
 
         .admin-title {
             color: #ffd700;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .admin-title span {
             background: #ffd700;
             color: #000;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 8px 15px;
+            border-radius: 50px;
             font-size: 14px;
         }
 
@@ -56,15 +61,17 @@
             background: rgba(255,255,255,0.1);
             border: 1px solid #ffd700;
             color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 30px;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
+            font-weight: 600;
         }
 
         .logout-btn:hover {
             background: #dc3545;
             border-color: #dc3545;
+            transform: translateY(-2px);
         }
 
         /* Cards de estatísticas */
@@ -77,27 +84,44 @@
 
         .stat-card {
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,215,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.2);
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+            animation: shine 3s infinite;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
             border-color: #ffd700;
-            box-shadow: 0 5px 20px rgba(255,215,0,0.2);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.2);
         }
 
         .stat-title {
             color: #aaa;
             font-size: 14px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .stat-value {
             font-size: 32px;
-            font-weight: bold;
+            font-weight: 700;
             color: #ffd700;
         }
 
@@ -110,30 +134,47 @@
         /* Abas */
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
         }
 
         .tab {
-            padding: 15px 25px;
+            padding: 15px 30px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
-            font-weight: bold;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .tab:hover {
-            background: rgba(255,215,0,0.1);
             border-color: #ffd700;
+            transform: translateY(-2px);
         }
 
         .tab.active {
-            background: #ffd700;
+            background: linear-gradient(135deg, #ffd700, #ffa500);
             border-color: #ffd700;
             color: #000;
+        }
+
+        .tab.active i {
+            color: #000;
+        }
+
+        .badge {
+            background: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 50px;
+            font-size: 12px;
+            margin-left: 8px;
         }
 
         /* Conteúdo das abas */
@@ -147,10 +188,11 @@
 
         /* Tabelas */
         .table-container {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 15px;
-            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 20px;
+            padding: 25px;
             overflow-x: auto;
         }
 
@@ -164,22 +206,24 @@
             padding: 15px 10px;
             color: #ffd700;
             border-bottom: 2px solid #ffd700;
+            font-weight: 600;
         }
 
         td {
-            padding: 12px 10px;
+            padding: 15px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         tr:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
         }
 
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 5px 12px;
+            border-radius: 50px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
+            display: inline-block;
         }
 
         .status-pendente {
@@ -206,11 +250,12 @@
         .action-btn {
             padding: 8px 15px;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             margin: 0 5px;
             transition: all 0.3s;
+            font-size: 13px;
         }
 
         .btn-confirm {
@@ -220,6 +265,8 @@
 
         .btn-confirm:hover {
             background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
         }
 
         .btn-reject {
@@ -229,6 +276,8 @@
 
         .btn-reject:hover {
             background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220,53,69,0.3);
         }
 
         .btn-view {
@@ -240,12 +289,18 @@
             background: #138496;
         }
 
+        .btn-edit {
+            background: #ffd700;
+            color: #000;
+        }
+
         /* Formulários */
         .config-form {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 15px;
-            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 20px;
+            padding: 30px;
         }
 
         .form-group {
@@ -256,47 +311,52 @@
             display: block;
             margin-bottom: 8px;
             color: #ffd700;
+            font-weight: 600;
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 12px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #ffd700;
-            border-radius: 8px;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 10px;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
+            transition: all 0.3s;
         }
 
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255,215,0,0.3);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
 
         .save-btn {
-            background: #ffd700;
+            background: linear-gradient(135deg, #ffd700, #ffa500);
             color: #000;
-            padding: 15px 30px;
+            padding: 15px 40px;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
+            margin-top: 20px;
         }
 
         .save-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(255,215,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.3);
         }
 
         /* Modal */
@@ -307,8 +367,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 5000;
         }
 
         .modal-content {
@@ -316,20 +377,20 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #1a1f2f;
-            padding: 30px;
-            border-radius: 15px;
+            background: linear-gradient(135deg, #1a1f2f, #0b0f1a);
+            padding: 40px;
+            border-radius: 30px;
             border: 2px solid #ffd700;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
-            max-height: 90vh;
+            max-height: 80vh;
             overflow-y: auto;
         }
 
         .modal-close {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 20px;
+            right: 20px;
             background: none;
             border: none;
             color: #ffd700;
@@ -339,33 +400,49 @@
 
         .modal-title {
             color: #ffd700;
-            margin-bottom: 20px;
-        }
-
-        .bet-input {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ffd700;
-            background: rgba(255,255,255,0.1);
-            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
         }
 
         /* Loading */
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 50px;
             color: #ffd700;
         }
 
-        /* Mensagens */
-        .success-message {
-            color: #28a745;
-            margin-top: 10px;
+        /* Notificações em tempo real */
+        .live-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26,31,47,0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #ffd700;
+            border-left: 4px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: white;
+            z-index: 6000;
+            animation: slideInRight 0.3s;
+            max-width: 350px;
         }
 
-        .error-message {
-            color: #dc3545;
-            margin-top: 10px;
+        .live-notification.success {
+            border-left-color: #28a745;
+        }
+
+        .live-notification.warning {
+            border-left-color: #fd7e14;
+        }
+
+        .live-notification.error {
+            border-left-color: #dc3545;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         /* Responsividade */
@@ -377,6 +454,14 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -385,16 +470,18 @@
         <!-- Header -->
         <div class="admin-header">
             <div class="admin-title">
-                👑 PAINEL ADMINISTRATIVO
-                <span id="admin-name"></span>
+                👑 NEXUS TRADE ADMIN
+                <span id="admin-name">Carregando...</span>
             </div>
-            <button class="logout-btn" onclick="logout()">SAIR</button>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> SAIR
+            </button>
         </div>
 
         <!-- Cards de estatísticas -->
         <div class="stats-grid" id="stats-cards">
             <div class="stat-card">
-                <div class="stat-title">👥 TOTAL DE USUÁRIOS</div>
+                <div class="stat-title">👥 USUÁRIOS TOTAIS</div>
                 <div class="stat-value" id="total-users">0</div>
             </div>
             <div class="stat-card">
@@ -411,22 +498,66 @@
                 <div class="stat-value" id="pending-withdraws">0</div>
                 <div class="stat-sub" id="pending-withdraws-value">R$ 0</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-title">🎰 TOTAL APOSTADO</div>
+                <div class="stat-value" id="total-bets">R$ 0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">🏆 TOTAL PAGO</div>
+                <div class="stat-value" id="total-wins">R$ 0</div>
+            </div>
         </div>
 
         <!-- Abas -->
         <div class="tabs">
-            <div class="tab active" onclick="showTab('deposits')">💰 DEPÓSITOS</div>
-            <div class="tab" onclick="showTab('withdraws')">💸 SAQUES</div>
-            <div class="tab" onclick="showTab('users')">👥 USUÁRIOS</div>
-            <div class="tab" onclick="showTab('history')">📊 HISTÓRICO</div>
-            <div class="tab" onclick="showTab('config')">⚙️ CONFIGURAÇÕES</div>
+            <div class="tab active" onclick="showTab('dashboard')">
+                <i class="fas fa-chart-line"></i> DASHBOARD
+            </div>
+            <div class="tab" onclick="showTab('deposits')">
+                <i class="fas fa-arrow-down"></i> DEPÓSITOS
+                <span class="badge" id="deposits-badge">0</span>
+            </div>
+            <div class="tab" onclick="showTab('withdraws')">
+                <i class="fas fa-arrow-up"></i> SAQUES
+                <span class="badge" id="withdraws-badge">0</span>
+            </div>
+            <div class="tab" onclick="showTab('users')">
+                <i class="fas fa-users"></i> USUÁRIOS
+            </div>
+            <div class="tab" onclick="showTab('history')">
+                <i class="fas fa-history"></i> HISTÓRICO
+            </div>
+            <div class="tab" onclick="showTab('config')">
+                <i class="fas fa-cog"></i> CONFIGURAÇÕES
+            </div>
+        </div>
+
+        <!-- Aba: Dashboard -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="table-container">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">📊 RESUMO DO SISTEMA</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px;">
+                        <h4 style="color: #ffd700; margin-bottom: 15px;">🏦 FINANCEIRO</h4>
+                        <p>Total Depositado: <strong id="total-deposits">R$ 0</strong></p>
+                        <p>Total Sacado: <strong id="total-withdraws">R$ 0</strong></p>
+                        <p>Lucro da Casa: <strong id="house-profit">R$ 0</strong></p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px;">
+                        <h4 style="color: #ffd700; margin-bottom: 15px;">👥 USUÁRIOS</h4>
+                        <p>Usuários Ativos: <strong id="active-users">0</strong></p>
+                        <p>Novos Hoje: <strong>0</strong></p>
+                        <p>Online Agora: <strong id="online-now">0</strong></p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Aba: Depósitos -->
-        <div id="deposits-tab" class="tab-content active">
+        <div id="deposits-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">DEPÓSITOS PENDENTES</h3>
-                <table id="deposits-table">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">💰 DEPÓSITOS PENDENTES</h3>
+                <table>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -448,22 +579,24 @@
         <!-- Aba: Saques -->
         <div id="withdraws-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">SAQUES PENDENTES</h3>
-                <table id="withdraws-table">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">💸 SAQUES PENDENTES</h3>
+                <table>
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>USUÁRIO</th>
-                            <th>EMAIL</th>
+                            <th>NOME</th>
+                            <th>CPF</th>
                             <th>CHAVE PIX</th>
                             <th>VALOR</th>
+                            <th>LÍQUIDO</th>
                             <th>DATA</th>
                             <th>STATUS</th>
                             <th>AÇÕES</th>
                         </tr>
                     </thead>
                     <tbody id="withdraws-list">
-                        <tr><td colspan="8" style="text-align: center;">Carregando...</td></tr>
+                        <tr><td colspan="10" style="text-align: center;">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -472,13 +605,18 @@
         <!-- Aba: Usuários -->
         <div id="users-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">TODOS OS USUÁRIOS</h3>
-                <table id="users-table">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">👥 TODOS OS USUÁRIOS</h3>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="user-search" placeholder="🔍 Buscar por nome ou email..." 
+                           style="padding: 10px; width: 300px; background: rgba(255,255,255,0.05); border: 1px solid #ffd700; border-radius: 50px; color: white;">
+                </div>
+                <table>
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>NOME</th>
                             <th>EMAIL</th>
+                            <th>CPF</th>
                             <th>SALDO</th>
                             <th>STATUS</th>
                             <th>DEPÓSITOS</th>
@@ -489,7 +627,7 @@
                         </tr>
                     </thead>
                     <tbody id="users-list">
-                        <tr><td colspan="10" style="text-align: center;">Carregando...</td></tr>
+                        <tr><td colspan="11" style="text-align: center;">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -498,8 +636,8 @@
         <!-- Aba: Histórico -->
         <div id="history-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">HISTÓRICO DE JOGADAS</h3>
-                <table id="history-table">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">📋 HISTÓRICO DE JOGADAS</h3>
+                <table>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -545,12 +683,27 @@
                         <input type="number" id="min_withdraw" min="1" step="1">
                     </div>
                     <div class="form-group">
+                        <label>SAQUE MÁXIMO (R$)</label>
+                        <input type="number" id="max_withdraw" min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>TAXA DE SAQUE (%)</label>
+                        <input type="number" id="withdraw_fee" min="0" max="100" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label>APOSTA MÍNIMA SLOTS (R$)</label>
                         <input type="number" id="slot_min_bet" min="1" step="1">
                     </div>
                     <div class="form-group">
                         <label>APOSTA MÍNIMA DADOS (R$)</label>
                         <input type="number" id="dice_min_bet" min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>APOSTA MÍNIMA AVIÃO (R$)</label>
+                        <input type="number" id="crash_min_bet" min="1" step="1">
                     </div>
                 </div>
 
@@ -564,7 +717,7 @@
                         <input type="number" id="dice_rtp" min="1" max="100" step="1">
                     </div>
                     <div class="form-group">
-                        <label>RTP AVIÃOZINHO (%)</label>
+                        <label>RTP AVIÃO (%)</label>
                         <input type="number" id="crash_rtp" min="1" max="100" step="1">
                     </div>
                 </div>
@@ -602,25 +755,20 @@
         </div>
     </div>
 
-    <!-- Modal de confirmação -->
-    <div id="confirm-modal" class="modal">
+    <!-- Modal de edição de usuário -->
+    <div id="user-modal" class="modal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">×</button>
-            <h3 class="modal-title" id="modal-title">Confirmar Ação</h3>
-            <p id="modal-message"></p>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="action-btn btn-confirm" onclick="modalConfirm()">CONFIRMAR</button>
-                <button class="action-btn btn-reject" onclick="closeModal()">CANCELAR</button>
-            </div>
+            <button class="modal-close" onclick="closeUserModal()">×</button>
+            <h3 class="modal-title">✏️ EDITAR USUÁRIO</h3>
+            <div id="user-form"></div>
         </div>
     </div>
 
     <script>
-        // Dados do admin
+        // Configuração WebSocket
+        let ws = null;
         let adminData = JSON.parse(localStorage.getItem('user') || '{}');
-        let currentAction = null;
-        let currentId = null;
-        let currentAmount = null;
+        let reconnectAttempts = 0;
 
         // Verificar login
         if (!adminData.id || adminData.status !== 'Admin') {
@@ -629,42 +777,85 @@
 
         document.getElementById('admin-name').textContent = adminData.name;
 
-        // ===== FUNÇÕES DE MODAL =====
-        function showModal(title, message, action, id, amount = null) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            currentAction = action;
-            currentId = id;
-            currentAmount = amount;
-            document.getElementById('confirm-modal').style.display = 'block';
+        // ===== WEBSOCKET =====
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('✅ Conectado ao WebSocket');
+                reconnectAttempts = 0;
+                // Autenticar como admin
+                ws.send(JSON.stringify({ 
+                    type: 'auth', 
+                    userId: 'admin_' + adminData.id 
+                }));
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleRealTimeUpdate(data);
+            };
+            
+            ws.onclose = () => {
+                console.log('❌ WebSocket desconectado');
+                if (reconnectAttempts < 5) {
+                    reconnectAttempts++;
+                    setTimeout(connectWebSocket, 3000);
+                }
+            };
         }
 
-        function closeModal() {
-            document.getElementById('confirm-modal').style.display = 'none';
-            currentAction = null;
-            currentId = null;
-            currentAmount = null;
-        }
-
-        async function modalConfirm() {
-            if (currentAction === 'confirm-deposit') {
-                await confirmDeposit(currentId);
-            } else if (currentAction === 'reject-deposit') {
-                await rejectDeposit(currentId);
-            } else if (currentAction === 'approve-withdraw') {
-                await approveWithdraw(currentId);
-            } else if (currentAction === 'reject-withdraw') {
-                await rejectWithdraw(currentId);
+        function handleRealTimeUpdate(data) {
+            switch(data.type) {
+                case 'new_deposit':
+                    showNotification('💰 Novo depósito solicitado!', 'warning');
+                    loadDeposits();
+                    loadStats();
+                    break;
+                    
+                case 'new_withdraw':
+                    showNotification('💸 Novo saque solicitado!', 'warning');
+                    loadWithdraws();
+                    loadStats();
+                    break;
+                    
+                case 'withdraw_approved':
+                case 'withdraw_rejected':
+                    loadWithdraws();
+                    loadStats();
+                    break;
+                    
+                case 'deposit_confirmed':
+                    loadDeposits();
+                    loadStats();
+                    break;
+                    
+                case 'config_updated':
+                    showNotification('⚙️ Configurações atualizadas!', 'success');
+                    break;
             }
-            closeModal();
         }
 
-        // ===== FUNÇÕES DE AUTENTICAÇÃO =====
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `live-notification ${type}`;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // ===== AUTENTICAÇÃO =====
         function getAuthHeader() {
             return 'Basic ' + btoa(`${adminData.email}:admin123`);
         }
 
-        // ===== FUNÇÕES DE ESTATÍSTICAS =====
+        // ===== ESTATÍSTICAS =====
         async function loadStats() {
             try {
                 const response = await fetch('/api/admin/stats', {
@@ -679,13 +870,23 @@
                     document.getElementById('pending-deposits-value').textContent = `R$ ${(data.pending_deposits_value || 0).toFixed(2)}`;
                     document.getElementById('pending-withdraws').textContent = data.pending_withdraws || 0;
                     document.getElementById('pending-withdraws-value').textContent = `R$ ${(data.pending_withdraws_value || 0).toFixed(2)}`;
+                    document.getElementById('total-bets').textContent = `R$ ${(data.total_bets || 0).toFixed(2)}`;
+                    document.getElementById('total-wins').textContent = `R$ ${(data.total_wins || 0).toFixed(2)}`;
+                    document.getElementById('total-deposits').textContent = `R$ ${(data.total_deposits || 0).toFixed(2)}`;
+                    document.getElementById('total-withdraws').textContent = `R$ ${(data.total_withdraws || 0).toFixed(2)}`;
+                    document.getElementById('house-profit').textContent = `R$ ${((data.total_bets || 0) - (data.total_wins || 0)).toFixed(2)}`;
+                    document.getElementById('active-users').textContent = data.active_users || 0;
+                    
+                    // Atualizar badges
+                    document.getElementById('deposits-badge').textContent = data.pending_deposits || 0;
+                    document.getElementById('withdraws-badge').textContent = data.pending_withdraws || 0;
                 }
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
             }
         }
 
-        // ===== FUNÇÕES DE DEPÓSITOS =====
+        // ===== DEPÓSITOS =====
         async function loadDeposits() {
             try {
                 const response = await fetch('/api/admin/deposits', {
@@ -709,8 +910,8 @@
                         <td>${new Date(d.created_at).toLocaleString()}</td>
                         <td><span class="status-badge status-pendente">PENDENTE</span></td>
                         <td>
-                            <button class="action-btn btn-confirm" onclick="showModal('Confirmar Depósito', 'Confirmar depósito de R$ ${d.amount.toFixed(2)} para ${d.name}? Digite o valor a creditar (com bônus):', 'confirm-deposit', ${d.id})">✅ CONFIRMAR</button>
-                            <button class="action-btn btn-reject" onclick="showModal('Rejeitar Depósito', 'Rejeitar depósito de ${d.name}?', 'reject-deposit', ${d.id})">❌ REJEITAR</button>
+                            <button class="action-btn btn-confirm" onclick="confirmDeposit(${d.id})">✅ CONFIRMAR</button>
+                            <button class="action-btn btn-reject" onclick="rejectDeposit(${d.id})">❌ REJEITAR</button>
                         </td>
                     </tr>
                 `).join('');
@@ -733,20 +934,23 @@
                     body: JSON.stringify({ amount: parseFloat(amount) })
                 });
                 
+                const data = await response.json();
+                
                 if (response.ok) {
-                    alert('Depósito confirmado com sucesso!');
+                    alert('✅ Depósito confirmado!');
                     loadDeposits();
                     loadStats();
                 } else {
-                    const data = await response.json();
-                    alert(data.error || 'Erro ao confirmar');
+                    alert('❌ ' + (data.error || 'Erro ao confirmar'));
                 }
             } catch (error) {
-                alert('Erro de conexão');
+                alert('❌ Erro de conexão');
             }
         }
 
         async function rejectDeposit(id) {
+            if (!confirm('Rejeitar este depósito?')) return;
+            
             try {
                 const response = await fetch(`/api/admin/reject-deposit/${id}`, {
                     method: 'POST',
@@ -764,7 +968,7 @@
             }
         }
 
-        // ===== FUNÇÕES DE SAQUES =====
+        // ===== SAQUES =====
         async function loadWithdraws() {
             try {
                 const response = await fetch('/api/admin/withdraws', {
@@ -775,54 +979,66 @@
                 const tbody = document.getElementById('withdraws-list');
                 
                 if (!response.ok || withdraws.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum saque pendente</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Nenhum saque pendente</td></tr>';
                     return;
                 }
                 
                 tbody.innerHTML = withdraws.map(w => `
                     <tr>
                         <td>#${w.id}</td>
-                        <td>${w.name}</td>
-                        <td>${w.email}</td>
+                        <td>${w.user_name}</td>
+                        <td>${w.name || w.user_name}</td>
+                        <td>${w.cpf || '-'}</td>
                         <td>${w.pix_key}</td>
                         <td><strong>R$ ${w.amount.toFixed(2)}</strong></td>
+                        <td>R$ ${(w.net_amount || w.amount).toFixed(2)}</td>
                         <td>${new Date(w.created_at).toLocaleString()}</td>
                         <td><span class="status-badge status-pendente">PENDENTE</span></td>
                         <td>
-                            <button class="action-btn btn-confirm" onclick="showModal('Aprovar Saque', 'Aprovar saque de R$ ${w.amount.toFixed(2)} para ${w.name}?', 'approve-withdraw', ${w.id})">✅ APROVAR</button>
-                            <button class="action-btn btn-reject" onclick="showModal('Rejeitar Saque', 'Rejeitar saque de ${w.name}?', 'reject-withdraw', ${w.id})">❌ REJEITAR</button>
+                            <button class="action-btn btn-confirm" onclick="approveWithdraw(${w.id})">✅ APROVAR</button>
+                            <button class="action-btn btn-reject" onclick="rejectWithdraw(${w.id})">❌ REJEITAR</button>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                document.getElementById('withdraws-list').innerHTML = '<tr><td colspan="8" style="text-align: center;">Erro ao carregar</td></tr>';
+                document.getElementById('withdraws-list').innerHTML = '<tr><td colspan="10" style="text-align: center;">Erro ao carregar</td></tr>';
             }
         }
 
         async function approveWithdraw(id) {
+            if (!confirm('Aprovar este saque? O valor será debitado da conta do usuário.')) return;
+            
             try {
                 const response = await fetch(`/api/admin/withdraw/${id}/approve`, {
                     method: 'POST',
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 
+                const data = await response.json();
+                
                 if (response.ok) {
-                    alert('Saque aprovado!');
+                    alert('✅ Saque aprovado!');
                     loadWithdraws();
                     loadStats();
                 } else {
-                    alert('Erro ao aprovar');
+                    alert('❌ ' + (data.error || 'Erro ao aprovar'));
                 }
             } catch (error) {
-                alert('Erro de conexão');
+                alert('❌ Erro de conexão');
             }
         }
 
         async function rejectWithdraw(id) {
+            const reason = prompt('Motivo da rejeição (opcional):');
+            
             try {
                 const response = await fetch(`/api/admin/withdraw/${id}/reject`, {
                     method: 'POST',
-                    headers: { 'Authorization': getAuthHeader() }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ reason: reason || '' })
                 });
                 
                 if (response.ok) {
@@ -836,7 +1052,7 @@
             }
         }
 
-        // ===== FUNÇÕES DE USUÁRIOS =====
+        // ===== USUÁRIOS =====
         async function loadUsers() {
             try {
                 const response = await fetch('/api/admin/users', {
@@ -847,7 +1063,7 @@
                 const tbody = document.getElementById('users-list');
                 
                 if (!response.ok || users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Nenhum usuário encontrado</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Nenhum usuário encontrado</td></tr>';
                     return;
                 }
                 
@@ -856,6 +1072,7 @@
                         <td>#${u.id}</td>
                         <td>${u.name}</td>
                         <td>${u.email}</td>
+                        <td>${u.cpf || '-'}</td>
                         <td><strong>R$ ${u.balance.toFixed(2)}</strong></td>
                         <td><span class="status-badge ${u.status === 'Admin' ? 'status-admin' : u.status === 'Ativo' ? 'status-confirmado' : 'status-pendente'}">${u.status}</span></td>
                         <td>R$ ${(u.total_deposits || 0).toFixed(2)}</td>
@@ -863,16 +1080,115 @@
                         <td>R$ ${(u.total_bets || 0).toFixed(2)}</td>
                         <td>R$ ${(u.total_wins || 0).toFixed(2)}</td>
                         <td>
-                            <button class="action-btn btn-view" onclick="showUserModal(${u.id})">✏️ EDITAR</button>
+                            <button class="action-btn btn-view" onclick="editUser(${u.id})">✏️ EDITAR</button>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                document.getElementById('users-list').innerHTML = '<tr><td colspan="10" style="text-align: center;">Erro ao carregar</td></tr>';
+                document.getElementById('users-list').innerHTML = '<tr><td colspan="11" style="text-align: center;">Erro ao carregar</td></tr>';
             }
         }
 
-        // ===== FUNÇÕES DE HISTÓRICO =====
+        async function editUser(userId) {
+            try {
+                const response = await fetch(`/api/admin/user/${userId}`, {
+                    headers: { 'Authorization': getAuthHeader() }
+                });
+                const user = await response.json();
+                
+                if (!response.ok) {
+                    alert('Erro ao carregar usuário');
+                    return;
+                }
+                
+                const form = document.getElementById('user-form');
+                form.innerHTML = `
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" id="edit-name" value="${user.name || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit-email" value="${user.email || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <input type="text" id="edit-cpf" value="${user.cpf || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" id="edit-phone" value="${user.phone || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Chave PIX</label>
+                        <input type="text" id="edit-pix" value="${user.pix_key || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Saldo</label>
+                        <input type="number" id="edit-balance" value="${user.balance || 0}" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="edit-status">
+                            <option value="Pendente" ${user.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Ativo" ${user.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
+                            <option value="Bloqueado" ${user.status === 'Bloqueado' ? 'selected' : ''}>Bloqueado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>RTP Individual (%)</label>
+                        <input type="number" id="edit-rtp" value="${user.rtp_individual || ''}" min="1" max="100" step="1">
+                    </div>
+                    <button class="save-btn" onclick="updateUser(${user.id})">💾 SALVAR ALTERAÇÕES</button>
+                `;
+                
+                document.getElementById('user-modal').style.display = 'block';
+            } catch (error) {
+                alert('Erro ao carregar usuário');
+            }
+        }
+
+        async function updateUser(userId) {
+            const updates = {
+                name: document.getElementById('edit-name').value,
+                email: document.getElementById('edit-email').value,
+                cpf: document.getElementById('edit-cpf').value,
+                phone: document.getElementById('edit-phone').value,
+                pix_key: document.getElementById('edit-pix').value,
+                balance: parseFloat(document.getElementById('edit-balance').value),
+                status: document.getElementById('edit-status').value,
+                rtp_individual: document.getElementById('edit-rtp').value ? parseFloat(document.getElementById('edit-rtp').value) : null
+            };
+            
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/update`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(updates)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Usuário atualizado!');
+                    closeUserModal();
+                    loadUsers();
+                } else {
+                    alert('❌ ' + (data.error || 'Erro ao atualizar'));
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').style.display = 'none';
+        }
+
+        // ===== HISTÓRICO =====
         async function loadHistory() {
             try {
                 const response = await fetch('/api/admin/recent-history', {
@@ -904,7 +1220,7 @@
             }
         }
 
-        // ===== FUNÇÕES DE CONFIGURAÇÃO =====
+        // ===== CONFIGURAÇÕES =====
         async function loadConfig() {
             try {
                 const response = await fetch('/api/admin/config', {
@@ -916,9 +1232,12 @@
                     document.getElementById('pix_key').value = config.pix_key || '';
                     document.getElementById('min_deposit').value = config.min_deposit || 50;
                     document.getElementById('bonus_amount').value = config.bonus_amount || 30;
-                    document.getElementById('min_withdraw').value = config.min_withdraw || 150;
+                    document.getElementById('min_withdraw').value = config.min_withdraw || 50;
+                    document.getElementById('max_withdraw').value = config.max_withdraw || 5000;
+                    document.getElementById('withdraw_fee').value = config.withdraw_fee || 0;
                     document.getElementById('slot_min_bet').value = config.slot_min_bet || 5;
                     document.getElementById('dice_min_bet').value = config.dice_min_bet || 5;
+                    document.getElementById('crash_min_bet').value = config.crash_min_bet || 5;
                     document.getElementById('slot_rtp').value = config.slot_rtp || 95;
                     document.getElementById('dice_rtp').value = config.dice_rtp || 95;
                     document.getElementById('crash_rtp').value = config.crash_rtp || 95;
@@ -937,8 +1256,11 @@
                 min_deposit: parseFloat(document.getElementById('min_deposit').value),
                 bonus_amount: parseFloat(document.getElementById('bonus_amount').value),
                 min_withdraw: parseFloat(document.getElementById('min_withdraw').value),
+                max_withdraw: parseFloat(document.getElementById('max_withdraw').value),
+                withdraw_fee: parseFloat(document.getElementById('withdraw_fee').value),
                 slot_min_bet: parseFloat(document.getElementById('slot_min_bet').value),
                 dice_min_bet: parseFloat(document.getElementById('dice_min_bet').value),
+                crash_min_bet: parseFloat(document.getElementById('crash_min_bet').value),
                 slot_rtp: parseFloat(document.getElementById('slot_rtp').value),
                 dice_rtp: parseFloat(document.getElementById('dice_rtp').value),
                 crash_rtp: parseFloat(document.getElementById('crash_rtp').value),
@@ -972,258 +1294,42 @@
             }
         }
 
-        // ===== FUNÇÕES DE EDITAR USUÁRIO =====
-        async function showUserModal(userId) {
-            try {
-                const response = await fetch(`/api/admin/user/${userId}`, {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const user = await response.json();
-                
-                if (!response.ok) {
-                    alert('Erro ao carregar usuário');
-                    return;
-                }
-                
-                // Criar modal
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                modal.style.display = 'block';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
-                        <h3 class="modal-title">✏️ EDITAR USUÁRIO: ${user.name}</h3>
-                        
-                        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                            <p><strong>Email:</strong> ${user.email}</p>
-                            <p><strong>Saldo atual:</strong> <span style="color: #ffd700; font-size: 18px;">R$ ${user.balance.toFixed(2)}</span></p>
-                            <p><strong>RTP Individual:</strong> ${user.rtp_individual !== null ? user.rtp_individual + '%' : '<span style="color: #aaa;">Usando RTP global</span>'}</p>
-                        </div>
-                        
-                        <h4 style="color: #ffd700; margin: 20px 0 10px;">💰 ALTERAR SALDO</h4>
-                        
-                        <!-- Definir saldo exato -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <input type="number" id="new-balance" class="bet-input" placeholder="Novo saldo (R$)" step="0.01" style="flex: 2; padding: 8px;">
-                            <button class="action-btn btn-confirm" onclick="setUserBalance(${user.id})">DEFINIR</button>
-                        </div>
-                        
-                        <!-- Adicionar saldo -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <input type="number" id="add-amount" class="bet-input" placeholder="Valor para adicionar (R$)" step="0.01" style="flex: 2; padding: 8px;">
-                            <button class="action-btn btn-confirm" onclick="addUserBalance(${user.id})">➕ ADICIONAR</button>
-                        </div>
-                        
-                        <!-- Remover saldo -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <input type="number" id="remove-amount" class="bet-input" placeholder="Valor para remover (R$)" step="0.01" style="flex: 2; padding: 8px;">
-                            <button class="action-btn btn-reject" onclick="removeUserBalance(${user.id})">➖ REMOVER</button>
-                        </div>
-                        
-                        <h4 style="color: #ffd700; margin: 20px 0 10px;">🎰 RTP INDIVIDUAL</h4>
-                        <p style="font-size: 12px; color: #aaa;">RTP = porcentagem de retorno ao jogador (1-100%)</p>
-                        
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <input type="number" id="rtp-value" class="bet-input" placeholder="RTP % (1-100)" min="1" max="100" step="1" style="flex: 2; padding: 8px;">
-                            <button class="action-btn btn-confirm" onclick="setUserRTP(${user.id})">DEFINIR RTP</button>
-                        </div>
-                        
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <button class="action-btn btn-reject" onclick="removeUserRTP(${user.id})" style="flex: 1;">❌ REMOVER RTP</button>
-                        </div>
-                        
-                        <p style="font-size: 11px; color: #666; text-align: center;">* RTP individual substitui o RTP global apenas para este usuário</p>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            } catch (error) {
-                alert('Erro ao carregar dados do usuário');
-            }
-        }
-
-        // Definir saldo exato
-        async function setUserBalance(userId) {
-            const newBalance = parseFloat(document.getElementById('new-balance').value);
-            if (isNaN(newBalance)) {
-                alert('Digite um valor válido');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/user/${userId}/balance/set`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ newBalance })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('✅ ' + data.message);
-                    document.querySelector('.modal').remove();
-                    loadUsers();
-                } else {
-                    alert('❌ ' + data.error);
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
-        }
-
-        // Adicionar saldo
-        async function addUserBalance(userId) {
-            const amount = parseFloat(document.getElementById('add-amount').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert('Digite um valor válido maior que zero');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/user/${userId}/balance/add`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ amount })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('✅ ' + data.message);
-                    document.querySelector('.modal').remove();
-                    loadUsers();
-                } else {
-                    alert('❌ ' + data.error);
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
-        }
-
-        // Remover saldo
-        async function removeUserBalance(userId) {
-            const amount = parseFloat(document.getElementById('remove-amount').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert('Digite um valor válido maior que zero');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/user/${userId}/balance/remove`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ amount })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('✅ ' + data.message);
-                    document.querySelector('.modal').remove();
-                    loadUsers();
-                } else {
-                    alert('❌ ' + data.error);
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
-        }
-
-        // Definir RTP individual
-        async function setUserRTP(userId) {
-            const rtpValue = parseFloat(document.getElementById('rtp-value').value);
-            if (isNaN(rtpValue) || rtpValue < 1 || rtpValue > 100) {
-                alert('Digite um valor entre 1 e 100');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/user/${userId}/rtp`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ rtpValue })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('✅ ' + data.message);
-                    document.querySelector('.modal').remove();
-                    loadUsers();
-                } else {
-                    alert('❌ ' + data.error);
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
-        }
-
-        // Remover RTP individual
-        async function removeUserRTP(userId) {
-            if (!confirm('Remover RTP individual? O usuário voltará a usar o RTP global.')) return;
-            
-            try {
-                const response = await fetch(`/api/admin/user/${userId}/rtp`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ rtpValue: null })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('✅ ' + data.message);
-                    document.querySelector('.modal').remove();
-                    loadUsers();
-                } else {
-                    alert('❌ ' + data.error);
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
-        }
-
-        // ===== FUNÇÕES DE ABA =====
+        // ===== NAVEGAÇÃO =====
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            if (tab === 'deposits') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('deposits-tab').classList.add('active');
-                loadDeposits();
-            } else if (tab === 'withdraws') {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('withdraws-tab').classList.add('active');
-                loadWithdraws();
-            } else if (tab === 'users') {
-                document.querySelectorAll('.tab')[2].classList.add('active');
-                document.getElementById('users-tab').classList.add('active');
-                loadUsers();
-            } else if (tab === 'history') {
-                document.querySelectorAll('.tab')[3].classList.add('active');
-                document.getElementById('history-tab').classList.add('active');
-                loadHistory();
-            } else if (tab === 'config') {
-                document.querySelectorAll('.tab')[4].classList.add('active');
-                document.getElementById('config-tab').classList.add('active');
-                loadConfig();
+            const tabIndex = {
+                'dashboard': 0,
+                'deposits': 1,
+                'withdraws': 2,
+                'users': 3,
+                'history': 4,
+                'config': 5
+            }[tab];
+            
+            document.querySelectorAll('.tab')[tabIndex].classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+            
+            switch(tab) {
+                case 'deposits': loadDeposits(); break;
+                case 'withdraws': loadWithdraws(); break;
+                case 'users': loadUsers(); break;
+                case 'history': loadHistory(); break;
+                case 'config': loadConfig(); break;
             }
         }
+
+        // ===== BUSCA DE USUÁRIOS =====
+        document.getElementById('user-search')?.addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#users-list tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        });
 
         // ===== LOGOUT =====
         function logout() {
@@ -1232,6 +1338,7 @@
         }
 
         // ===== INICIALIZAÇÃO =====
+        connectWebSocket();
         loadStats();
         loadDeposits();
     </script>
