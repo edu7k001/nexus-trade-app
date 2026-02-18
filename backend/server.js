@@ -1,17 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
-const QRCode = require('qrcode');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Configurações
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Conecta ao banco de dados SQLite
@@ -36,7 +36,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         amount REAL,
-        proof_image TEXT,
         status TEXT DEFAULT 'Pendente',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
@@ -77,54 +76,63 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
     });
 });
 
-// ===== ROTA DO QR CODE (CORRIGIDA) =====
-app.get('/api/pix-qrcode', async (req, res) => {
-    try {
-        db.get('SELECT pix_key FROM admin_config WHERE id = 1', async (err, row) => {
-            if (err) {
-                console.error('Erro ao buscar chave PIX:', err);
-                return res.status(500).json({ error: 'Erro ao acessar banco de dados' });
+// ===== ROTA DO QR CODE (USANDO A IMAGEM DA PASTA IMAGES) =====
+app.get('/api/pix-qrcode', (req, res) => {
+    // Verifica se a imagem existe
+    const imagePath = path.join(__dirname, '../frontend/images/pix-nexus.png');
+    
+    if (fs.existsSync(imagePath)) {
+        // Se a imagem existe, retorna o caminho
+        db.get('SELECT pix_key FROM admin_config WHERE id = 1', (err, row) => {
+            if (err || !row) {
+                return res.status(500).json({ error: 'Erro ao buscar chave PIX' });
             }
             
-            if (!row || !row.pix_key) {
-                return res.status(404).json({ error: 'Chave PIX não configurada' });
-            }
-            
-            // Gera o QR Code
-            const qrCodeDataUrl = await QRCode.toDataURL(row.pix_key, {
-                errorCorrectionLevel: 'H',
-                type: 'image/png',
-                quality: 0.92,
-                margin: 1,
-                color: {
-                    dark: '#000000',
-                    light: '#ffffff'
-                }
-            });
-            
-            console.log('✅ QR Code gerado para chave:', row.pix_key);
-            
+            // Retorna a imagem estática
             res.json({ 
                 success: true,
-                qrcode: qrCodeDataUrl, 
+                qrcode: '/images/pix-nexus.png', // Caminho da imagem
                 pixKey: row.pix_key,
-                message: 'QR Code gerado com sucesso!' 
+                message: 'QR Code carregado da pasta images!',
+                imageExists: true
             });
         });
-    } catch (error) {
-        console.error('Erro ao gerar QR Code:', error);
-        res.status(500).json({ error: 'Erro ao gerar QR Code' });
+    } else {
+        // Se a imagem não existe, avisa o usuário
+        res.status(404).json({ 
+            error: 'Imagem do QR Code não encontrada. Por favor, baixe o QR Code do https://geradordepix.com e salve como frontend/images/pix-nexus.png' 
+        });
     }
 });
 
 // ===== ROTAS DE AUTENTICAÇÃO =====
 
-// Registro
+// Página de cadastro
+app.get('/cadastro', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/cadastro.html'));
+});
+
+// Página de login
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/login.html'));
+});
+
+// Página do admin
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/admin.html'));
+});
+
+// Dashboard do usuário
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dashboard.html'));
+});
+
+// API de registro
 app.post('/api/register', async (req, res) => {
     const { name, email, password, pixKey } = req.body;
     
     if (!name || !email || !password) {
-        return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
     
     try {
@@ -137,36 +145,25 @@ app.post('/api/register', async (req, res) => {
                     if (err.message.includes('UNIQUE')) {
                         return res.status(400).json({ error: 'Email já cadastrado' });
                     }
-                    console.error('Erro no cadastro:', err);
                     return res.status(500).json({ error: 'Erro no cadastro' });
                 }
                 res.status(201).json({ 
                     id: this.lastID,
-                    message: 'Cadastro realizado com sucesso!' 
+                    message: 'Cadastro realizado! Faça login.' 
                 });
             }
         );
     } catch (error) {
-        console.error('Erro interno:', error);
         res.status(500).json({ error: 'Erro interno' });
     }
 });
 
-// Login
+// API de login
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email e senha obrigatórios' });
-    }
-    
     db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
-        if (err) {
-            console.error('Erro no login:', err);
-            return res.status(500).json({ error: 'Erro no servidor' });
-        }
-        
-        if (!user) {
+        if (err || !user) {
             return res.status(401).json({ error: 'Email ou senha inválidos' });
         }
         
@@ -175,34 +172,26 @@ app.post('/api/login', (req, res) => {
             return res.status(401).json({ error: 'Email ou senha inválidos' });
         }
         
-        // Não enviar a senha
         delete user.password;
         res.json({ 
             user,
-            message: 'Login realizado com sucesso' 
+            redirect: user.status === 'Admin' ? '/admin' : '/dashboard'
         });
     });
 });
 
 // ===== ROTAS DE DEPÓSITO =====
-
-// Solicitar depósito
 app.post('/api/request-deposit', (req, res) => {
-    const { userId, amount, proofImage } = req.body;
+    const { userId, amount } = req.body;
     
-    if (!userId || !amount) {
-        return res.status(400).json({ error: 'Dados incompletos' });
-    }
-    
-    db.run('INSERT INTO deposits (user_id, amount, proof_image) VALUES (?, ?, ?)',
-        [userId, amount, proofImage || ''],
+    db.run('INSERT INTO deposits (user_id, amount) VALUES (?, ?)',
+        [userId, amount],
         function(err) {
             if (err) {
-                console.error('Erro ao solicitar depósito:', err);
                 return res.status(500).json({ error: 'Erro ao solicitar depósito' });
             }
             res.json({ 
-                message: '✅ Depósito solicitado! Aguarde confirmação do admin.',
+                message: '✅ Depósito solicitado! Aguarde confirmação.',
                 depositId: this.lastID
             });
         }
@@ -210,8 +199,6 @@ app.post('/api/request-deposit', (req, res) => {
 });
 
 // ===== ROTAS DO ADMIN =====
-
-// Middleware de autenticação do admin
 const checkAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -224,14 +211,10 @@ const checkAdmin = (req, res, next) => {
         const [email, password] = credentials.split(':');
         
         db.get('SELECT * FROM users WHERE email = ? AND status = "Admin"', [email], async (err, admin) => {
-            if (err || !admin) {
-                return res.status(401).json({ error: 'Não autorizado' });
-            }
+            if (err || !admin) return res.status(401).json({ error: 'Não autorizado' });
             
             const validPassword = await bcrypt.compare(password, admin.password);
-            if (!validPassword) {
-                return res.status(401).json({ error: 'Não autorizado' });
-            }
+            if (!validPassword) return res.status(401).json({ error: 'Não autorizado' });
             
             req.admin = admin;
             next();
@@ -243,19 +226,14 @@ const checkAdmin = (req, res, next) => {
 
 // Listar depósitos pendentes
 app.get('/api/admin/deposits', checkAdmin, (req, res) => {
-    const sql = `
+    db.all(`
         SELECT d.*, u.name, u.email, u.pix_key 
         FROM deposits d 
         JOIN users u ON d.user_id = u.id 
         WHERE d.status = 'Pendente'
         ORDER BY d.created_at DESC
-    `;
-    
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            console.error('Erro ao buscar depósitos:', err);
-            return res.status(500).json({ error: 'Erro ao buscar depósitos' });
-        }
+    `, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar depósitos' });
         res.json(rows);
     });
 });
@@ -264,10 +242,6 @@ app.get('/api/admin/deposits', checkAdmin, (req, res) => {
 app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
     const { id } = req.params;
     const { amount } = req.body;
-    
-    if (!amount || amount <= 0) {
-        return res.status(400).json({ error: 'Valor inválido' });
-    }
     
     db.serialize(() => {
         db.run('BEGIN TRANSACTION');
@@ -278,58 +252,25 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
                 return res.status(404).json({ error: 'Depósito não encontrado' });
             }
             
-            db.run('UPDATE deposits SET status = "Confirmado" WHERE id = ?', [id], function(err) {
-                if (err) {
-                    db.run('ROLLBACK');
-                    return res.status(500).json({ error: 'Erro ao confirmar depósito' });
-                }
-                
-                db.run('UPDATE users SET balance = balance + ?, status = "Ativo" WHERE id = ?',
-                    [amount, deposit.user_id],
-                    function(err) {
-                        if (err) {
-                            db.run('ROLLBACK');
-                            return res.status(500).json({ error: 'Erro ao creditar' });
-                        }
-                        
-                        db.run('COMMIT');
-                        res.json({ 
-                            message: '✅ Depósito confirmado! Saldo adicionado.',
-                            amount
-                        });
-                    }
-                );
-            });
+            db.run('UPDATE deposits SET status = "Confirmado" WHERE id = ?', [id]);
+            db.run('UPDATE users SET balance = balance + ?, status = "Ativo" WHERE id = ?',
+                [amount, deposit.user_id]);
+            
+            db.run('COMMIT');
+            res.json({ message: 'Depósito confirmado!' });
         });
-    });
-});
-
-// Rejeitar depósito
-app.post('/api/admin/reject-deposit/:id', checkAdmin, (req, res) => {
-    const { id } = req.params;
-    
-    db.run('UPDATE deposits SET status = "Rejeitado" WHERE id = ?', [id], function(err) {
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao rejeitar depósito' });
-        }
-        res.json({ message: 'Depósito rejeitado' });
     });
 });
 
 // Listar saques pendentes
 app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
-    const sql = `
+    db.all(`
         SELECT wr.*, u.name, u.email, u.pix_key 
         FROM withdraw_requests wr 
         JOIN users u ON wr.user_id = u.id 
         WHERE wr.status = 'Pendente'
-        ORDER BY wr.created_at DESC
-    `;
-    
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao buscar saques' });
-        }
+    `, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar saques' });
         res.json(rows);
     });
 });
@@ -348,50 +289,21 @@ app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
             }
             
             db.run('UPDATE users SET balance = balance - ? WHERE id = ?',
-                [withdraw.amount, withdraw.user_id],
-                function(err) {
-                    if (err) {
-                        db.run('ROLLBACK');
-                        return res.status(500).json({ error: 'Erro ao debitar saldo' });
-                    }
-                    
-                    db.run('UPDATE withdraw_requests SET status = "Aprovado" WHERE id = ?', [id], function(err) {
-                        if (err) {
-                            db.run('ROLLBACK');
-                            return res.status(500).json({ error: 'Erro ao aprovar saque' });
-                        }
-                        
-                        db.run('COMMIT');
-                        res.json({ message: 'Saque aprovado com sucesso!' });
-                    });
-                }
-            );
+                [withdraw.amount, withdraw.user_id]);
+            db.run('UPDATE withdraw_requests SET status = "Aprovado" WHERE id = ?', [id]);
+            
+            db.run('COMMIT');
+            res.json({ message: 'Saque aprovado!' });
         });
     });
 });
 
-// Rejeitar saque
-app.post('/api/admin/withdraw/:id/reject', checkAdmin, (req, res) => {
-    const { id } = req.params;
-    
-    db.run('UPDATE withdraw_requests SET status = "Rejeitado" WHERE id = ?', [id], function(err) {
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao rejeitar saque' });
-        }
-        res.json({ message: 'Saque rejeitado!' });
-    });
-});
-
-// ===== ROTAS DO USUÁRIO =====
-
 // Buscar dados do usuário
 app.get('/api/user/:id', (req, res) => {
-    db.get('SELECT id, name, email, pix_key, balance, status, created_at FROM users WHERE id = ?',
+    db.get('SELECT id, name, email, pix_key, balance, status FROM users WHERE id = ?',
         [req.params.id],
         (err, user) => {
-            if (err || !user) {
-                return res.status(404).json({ error: 'Usuário não encontrado' });
-            }
+            if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
             res.json(user);
         }
     );
@@ -401,24 +313,11 @@ app.get('/api/user/:id', (req, res) => {
 app.post('/api/request-withdraw', (req, res) => {
     const { userId, amount } = req.body;
     
-    if (!userId || !amount) {
-        return res.status(400).json({ error: 'Dados incompletos' });
-    }
-    
     db.get('SELECT balance FROM users WHERE id = ?', [userId], (err, user) => {
-        if (err || !user) {
-            return res.status(404).json({ error: 'Usuário não encontrado' });
-        }
-        
-        if (user.balance < amount) {
-            return res.status(400).json({ error: 'Saldo insuficiente' });
-        }
+        if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
+        if (user.balance < amount) return res.status(400).json({ error: 'Saldo insuficiente' });
         
         db.get('SELECT min_withdraw FROM admin_config WHERE id = 1', (err, config) => {
-            if (err || !config) {
-                return res.status(500).json({ error: 'Erro de configuração' });
-            }
-            
             if (amount < config.min_withdraw) {
                 return res.status(400).json({ error: `Saque mínimo: R$${config.min_withdraw}` });
             }
@@ -426,31 +325,23 @@ app.post('/api/request-withdraw', (req, res) => {
             db.run('INSERT INTO withdraw_requests (user_id, amount) VALUES (?, ?)',
                 [userId, amount],
                 function(err) {
-                    if (err) {
-                        return res.status(500).json({ error: 'Erro ao solicitar saque' });
-                    }
-                    res.json({ 
-                        message: '✅ Solicitação de saque enviada! Aguarde aprovação.' 
-                    });
+                    if (err) return res.status(500).json({ error: 'Erro ao solicitar saque' });
+                    res.json({ message: 'Saque solicitado!' });
                 }
             );
         });
     });
 });
 
-// Rota de teste
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'API funcionando!', timestamp: new Date().toISOString() });
-});
-
-// Rota principal
+// Rota principal - redireciona para login
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.redirect('/login');
 });
 
-// Inicia o servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📱 Acesse: https://nexus-trade-app1.onrender.com`);
-    console.log(`💰 Teste o QR Code: https://nexus-trade-app1.onrender.com/api/pix-qrcode`);
+    console.log(`📱 Login: https://nexus-trade-app1.onrender.com/login`);
+    console.log(`👤 Cadastro: https://nexus-trade-app1.onrender.com/cadastro`);
+    console.log(`⚙️ Admin: https://nexus-trade-app1.onrender.com/admin`);
+    console.log(`🖼️ QR Code estático: /images/pix-nexus.png`);
 });
