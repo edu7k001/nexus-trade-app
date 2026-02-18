@@ -337,7 +337,186 @@ app.post('/api/request-withdraw', (req, res) => {
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
+// ===== ROTAS DE JOGOS =====
 
+// Rota para jogar slots
+app.post('/api/game/slot', (req, res) => {
+    const { userId, betAmount } = req.body;
+    
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        // Buscar saldo do usuário
+        db.get('SELECT balance, status FROM users WHERE id = ?', [userId], (err, user) => {
+            if (err || !user) {
+                db.run('ROLLBACK');
+                return res.status(404).json({ error: 'Usuário não encontrado' });
+            }
+            
+            if (user.status === 'Pendente') {
+                db.run('ROLLBACK');
+                return res.status(400).json({ error: 'Usuário precisa ativar conta' });
+            }
+            
+            if (user.balance < betAmount) {
+                db.run('ROLLBACK');
+                return res.status(400).json({ error: 'Saldo insuficiente' });
+            }
+            
+            // Gerar resultado
+            const symbols = ['🍒', '💎', '7️⃣', '⭐'];
+            const multipliers = [2, 5, 10, 20];
+            
+            const r1 = Math.floor(Math.random() * symbols.length);
+            const r2 = Math.floor(Math.random() * symbols.length);
+            const r3 = Math.floor(Math.random() * symbols.length);
+            
+            let winAmount = 0;
+            let message = '';
+            
+            if (r1 === r2 && r2 === r3) {
+                winAmount = betAmount * multipliers[r1];
+                message = `🎉 GRANDE VITÓRIA! +R$ ${winAmount.toFixed(2)}`;
+            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+                winAmount = betAmount * 0.5;
+                message = `👍 PEQUENA VITÓRIA! +R$ ${winAmount.toFixed(2)}`;
+            } else {
+                winAmount = 0;
+                message = `😢 PERDEU! -R$ ${betAmount.toFixed(2)}`;
+            }
+            
+            const newBalance = user.balance - betAmount + winAmount;
+            
+            // Atualizar saldo
+            db.run('UPDATE users SET balance = ?, total_bets = total_bets + ?, total_wins = total_wins + ? WHERE id = ?',
+                [newBalance, betAmount, winAmount, userId]);
+            
+            // Registrar histórico
+            db.run('INSERT INTO game_history (user_id, game, bet_amount, result, win_amount, multiplier) VALUES (?, ?, ?, ?, ?, ?)',
+                [userId, 'slot', betAmount, message, winAmount, winAmount / betAmount]);
+            
+            db.run('COMMIT');
+            
+            res.json({
+                success: true,
+                symbols: [symbols[r1], symbols[r2], symbols[r3]],
+                win: winAmount,
+                multiplier: winAmount / betAmount,
+                newBalance: newBalance,
+                message: message
+            });
+        });
+    });
+});
+
+// Rota para jogar dados
+app.post('/api/game/dice', (req, res) => {
+    const { userId, betAmount, betType } = req.body;
+    
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        db.get('SELECT balance, status FROM users WHERE id = ?', [userId], (err, user) => {
+            if (err || !user) {
+                db.run('ROLLBACK');
+                return res.status(404).json({ error: 'Usuário não encontrado' });
+            }
+            
+            if (user.status === 'Pendente') {
+                db.run('ROLLBACK');
+                return res.status(400).json({ error: 'Usuário precisa ativar conta' });
+            }
+            
+            if (user.balance < betAmount) {
+                db.run('ROLLBACK');
+                return res.status(400).json({ error: 'Saldo insuficiente' });
+            }
+            
+            // Gerar resultado
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            const sum = d1 + d2;
+            
+            let winAmount = 0;
+            let message = '';
+            
+            // Verificar vitória baseado no tipo de aposta
+            if (betType.type === 'sum' && sum === betType.value) {
+                winAmount = betAmount * 5;
+                message = `🎉 SOMA ${sum}! +R$ ${winAmount.toFixed(2)}`;
+            } else if (betType.type === 'double' && d1 === d2) {
+                winAmount = betAmount * 8;
+                message = `🎉 DUPLA DE ${d1}! +R$ ${winAmount.toFixed(2)}`;
+            } else if (betType.type === 'specific' && (d1 === betType.value || d2 === betType.value)) {
+                winAmount = betAmount * 6;
+                message = `🎉 SAIU ${betType.value}! +R$ ${winAmount.toFixed(2)}`;
+            } else {
+                winAmount = 0;
+                message = `😢 PERDEU! Soma: ${sum} -R$ ${betAmount.toFixed(2)}`;
+            }
+            
+            const newBalance = user.balance - betAmount + winAmount;
+            
+            db.run('UPDATE users SET balance = ?, total_bets = total_bets + ?, total_wins = total_wins + ? WHERE id = ?',
+                [newBalance, betAmount, winAmount, userId]);
+            
+            db.run('INSERT INTO game_history (user_id, game, bet_amount, result, win_amount, multiplier) VALUES (?, ?, ?, ?, ?, ?)',
+                [userId, 'dice', betAmount, message, winAmount, winAmount / betAmount]);
+            
+            db.run('COMMIT');
+            
+            res.json({
+                success: true,
+                dice: [d1, d2],
+                sum: sum,
+                win: winAmount,
+                multiplier: winAmount / betAmount,
+                newBalance: newBalance,
+                message: message
+            });
+        });
+    });
+});
+
+// Rota para aviãozinho
+app.post('/api/game/crash', (req, res) => {
+    const { userId, betAmount, cashoutMultiplier } = req.body;
+    
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        db.get('SELECT balance FROM users WHERE id = ?', [userId], (err, user) => {
+            if (err || !user) {
+                db.run('ROLLBACK');
+                return res.status(404).json({ error: 'Usuário não encontrado' });
+            }
+            
+            const winAmount = betAmount * cashoutMultiplier;
+            const newBalance = user.balance + winAmount;
+            
+            let message = '';
+            if (cashoutMultiplier > 0) {
+                message = `💰 RETIRADA! ${cashoutMultiplier.toFixed(2)}x +R$ ${winAmount.toFixed(2)}`;
+            } else {
+                message = `💥 CRASH! Perdeu R$ ${betAmount.toFixed(2)}`;
+            }
+            
+            db.run('UPDATE users SET balance = ?, total_bets = total_bets + ?, total_wins = total_wins + ? WHERE id = ?',
+                [newBalance, betAmount, winAmount, userId]);
+            
+            db.run('INSERT INTO game_history (user_id, game, bet_amount, result, win_amount, multiplier) VALUES (?, ?, ?, ?, ?, ?)',
+                [userId, 'crash', betAmount, message, winAmount, cashoutMultiplier]);
+            
+            db.run('COMMIT');
+            
+            res.json({
+                success: true,
+                newBalance: newBalance,
+                message: message
+            });
+        });
+    });
+});
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Login: https://nexus-trade-app1.onrender.com/login`);
