@@ -42,11 +42,18 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
         min_withdraw REAL
     )`, (err) => {
         if (!err) {
+            // SUA CHAVE PIX ALEATÓRIA ESTÁ CONFIGURADA AQUI! ✅
             db.run(`INSERT OR IGNORE INTO admin_config 
                 (id, pix_key, min_deposit, bonus_amount, min_withdraw) 
-                VALUES (1, 'SUA_CHAVE_PIX_AQUI', 50, 30, 150)`);
+                VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 50, 30, 150)`);
+            console.log('✅ Chave PIX configurada com sucesso!');
         }
     });
+});
+
+// Rota de teste para verificar se API está no ar
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'API funcionando perfeitamente!', status: 'online' });
 });
 
 // Rota principal - serve o frontend
@@ -54,15 +61,24 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Rota para gerar QR Code
+// Rota para gerar QR Code da chave PIX do admin
 app.get('/api/pix-qrcode', async (req, res) => {
     db.get('SELECT pix_key FROM admin_config WHERE id = 1', async (err, row) => {
-        if (err || !row || row.pix_key === 'SUA_CHAVE_PIX_AQUI') {
-            return res.status(500).json({ error: 'Configure a chave PIX no admin_config' });
+        if (err) {
+            return res.status(500).json({ error: 'Erro ao acessar banco de dados' });
         }
+        if (!row || !row.pix_key) {
+            return res.status(500).json({ error: 'Chave PIX não configurada' });
+        }
+        
         try {
+            // Gera QR Code válido com a chave PIX
             const qrCodeDataUrl = await QRCode.toDataURL(row.pix_key);
-            res.json({ qrcode: qrCodeDataUrl, pixKey: row.pix_key });
+            res.json({ 
+                qrcode: qrCodeDataUrl, 
+                pixKey: row.pix_key,
+                message: 'QR Code gerado com sucesso!' 
+            });
         } catch (err) {
             res.status(500).json({ error: 'Erro ao gerar QR Code' });
         }
@@ -111,6 +127,7 @@ app.post('/api/confirm-deposit', (req, res) => {
             return res.status(500).json({ error: 'Erro de configuração' });
         }
         
+        // Soma depósito mínimo + bônus (50 + 30 = 80)
         const totalBalance = config.min_deposit + config.bonus_amount;
         
         db.run('UPDATE users SET balance = balance + ?, status = "Ativo" WHERE pix_key = ?',
@@ -128,7 +145,7 @@ app.post('/api/confirm-deposit', (req, res) => {
     });
 });
 
-// Rota de aposta
+// Rota de aposta (simulada)
 app.post('/api/bet', (req, res) => {
     const { pixKey, amount } = req.body;
     
@@ -201,7 +218,7 @@ app.post('/api/request-withdraw', (req, res) => {
 });
 
 // --- ROTAS DO ADMIN ---
-const ADMIN_PASSWORD = 'nexus@admin2025'; // 🔐 MUDE ISSO PARA UMA SENHA FORTE!
+const ADMIN_PASSWORD = 'nexus@admin2025'; // 🔐 MUDE ESTA SENHA!
 
 // Middleware de autenticação
 const checkAuth = (req, res, next) => {
@@ -244,7 +261,7 @@ app.post('/api/admin/withdraw/:id/approve', checkAuth, (req, res) => {
     );
 });
 
-// Rejeitar saque (CORRIGIDO!)
+// Rejeitar saque
 app.post('/api/admin/withdraw/:id/reject', checkAuth, (req, res) => {
     const { id } = req.params;
     
@@ -263,4 +280,6 @@ app.post('/api/admin/withdraw/:id/reject', checkAuth, (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Acesse: http://localhost:${PORT}`);
+    console.log(`💰 Chave PIX configurada: 1c5c21fc-fcbc-4b28-b285-74156c727917`);
+    console.log(`💵 Depósito mínimo: R$50 | Bônus: R$30 | Saque mínimo: R$150`);
 });
