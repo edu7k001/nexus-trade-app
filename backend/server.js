@@ -517,6 +517,226 @@ app.post('/api/game/crash', (req, res) => {
         });
     });
 });
+// ===== ROTAS DO ADMIN =====
+
+// Middleware de autenticação do admin
+const checkAdmin = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Basic ')) {
+        return res.status(401).json({ error: 'Não autorizado' });
+    }
+    
+    try {
+        const base64Credentials = authHeader.split(' ')[1];
+        const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+        const [email, password] = credentials.split(':');
+        
+        db.get('SELECT * FROM users WHERE email = ? AND status = "Admin"', [email], async (err, admin) => {
+            if (err || !admin) return res.status(401).json({ error: 'Não autorizado' });
+            
+            const validPassword = await bcrypt.compare(password, admin.password);
+            if (!validPassword) return res.status(401).json({ error: 'Não autorizado' });
+            
+            req.admin = admin;
+            next();
+        });
+    } catch (error) {
+        return res.status(401).json({ error: 'Não autorizado' });
+    }
+};
+
+// Estatísticas do dashboard
+app.get('/api/admin/stats', checkAdmin, (req, res) => {
+    db.get(`
+        SELECT 
+            (SELECT COUNT(*) FROM users WHERE status != 'Admin') as total_users,
+            (SELECT SUM(balance) FROM users WHERE status != 'Admin') as total_balance,
+            (SELECT COUNT(*) FROM deposits WHERE status = 'Pendente') as pending_deposits,
+            (SELECT SUM(amount) FROM deposits WHERE status = 'Pendente') as pending_deposits_value,
+            (SELECT COUNT(*) FROM withdraw_requests WHERE status = 'Pendente') as pending_withdraws,
+            (SELECT SUM(amount) FROM withdraw_requests WHERE status = 'Pendente') as pending_withdraws_value
+    `, [], (err, stats) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar estatísticas' });
+        res.json(stats);
+    });
+});
+
+// Listar todos os usuários
+app.get('/api/admin/users', checkAdmin, (req, res) => {
+    db.all(`
+        SELECT id, name, email, balance, status, 
+               total_deposits, total_withdraws, total_bets, total_wins,
+               created_at 
+        FROM users 
+        WHERE status != 'Admin'
+        ORDER BY id DESC
+    `, [], (err, users) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar usuários' });
+        res.json(users);
+    });
+});
+
+// Listar depósitos pendentes
+app.get('/api/admin/deposits', checkAdmin, (req, res) => {
+    db.all(`
+        SELECT d.*, u.name, u.email, u.pix_key 
+        FROM deposits d 
+        JOIN users u ON d.user_id = u.id 
+        WHERE d.status = 'Pendente'
+        ORDER BY d.created_at DESC
+    `, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar depósitos' });
+        res.json(rows);
+    });
+});
+
+// Confirmar depósito
+app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    const { amount } = req.body;
+    
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        db.get('SELECT user_id FROM deposits WHERE id = ?', [id], (err, deposit) => {
+            if (err || !deposit) {
+                db.run('ROLLBACK');
+                return res.status(404).json({ error: 'Depósito não encontrado' });
+            }
+            
+            db.run('UPDATE deposits SET status = "Confirmado" WHERE id = ?', [id]);
+            
+            db.run('UPDATE users SET balance = balance + ?, total_deposits = total_deposits + ?, status = "Ativo" WHERE id = ?',
+                [amount, amount, deposit.user_id]);
+            
+            db.run('COMMIT');
+            res.json({ message: 'Depósito confirmado com sucesso!' });
+        });
+    });
+});
+
+// Rejeitar depósito
+app.post('/api/admin/reject-deposit/:id', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    
+    db.run('UPDATE deposits SET status = "Rejeitado" WHERE id = ?', [id], function(err) {
+        if (err) return res.status(500).json({ error: 'Erro ao rejeitar depósito' });
+        res.json({ message: 'Depósito rejeitado' });
+    });
+});
+
+// Listar saques pendentes
+app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
+    db.all(`
+        SELECT wr.*, u.name, u.email, u.pix_key 
+        FROM withdraw_requests wr 
+        JOIN users u ON wr.user_id = u.id 
+        WHERE wr.status = 'Pendente'
+        ORDER BY wr.created_at DESC
+    `, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar saques' });
+        res.json(rows);
+    });
+});
+
+// Aprovar saque
+app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        db.get('SELECT user_id, amount FROM withdraw_requests WHERE id = ?', [id], (err, withdraw) => {
+            if (err || !withdraw) {
+                db.run('ROLLBACK');
+                return res.status(404).json({ error: 'Saque não encontrado' });
+            }
+            
+            db.run('UPDATE users SET balance = balance - ?, total_withdraws = total_withdraws + ? WHERE id = ?',
+                [withdraw.amount, withdraw.amount, withdraw.user_id]);
+            
+            db.run('UPDATE withdraw_requests SET status = "Aprovado" WHERE id = ?', [id]);
+            
+            db.run('COMMIT');
+            res.json({ message: 'Saque aprovado com sucesso!' });
+        });
+    });
+});
+
+// Rejeitar saque
+app.post('/api/admin/withdraw/:id/reject', checkAdmin, (req, res) => {
+    const { id } = req.params;
+    
+    db.run('UPDATE withdraw_requests SET status = "Rejeitado" WHERE id = ?', [id], function(err) {
+        if (err) return res.status(500).json({ error: 'Erro ao rejeitar saque' });
+        res.json({ message: 'Saque rejeitado!' });
+    });
+});
+
+// Buscar histórico recente
+app.get('/api/admin/recent-history', checkAdmin, (req, res) => {
+    db.all(`
+        SELECT gh.*, u.name 
+        FROM game_history gh
+        JOIN users u ON gh.user_id = u.id
+        ORDER BY gh.created_at DESC
+        LIMIT 100
+    `, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar histórico' });
+        res.json(rows);
+    });
+});
+
+// Buscar configurações
+app.get('/api/admin/config', checkAdmin, (req, res) => {
+    db.get('SELECT * FROM admin_config WHERE id = 1', (err, config) => {
+        if (err) return res.status(500).json({ error: 'Erro ao buscar configurações' });
+        res.json(config);
+    });
+});
+
+// Atualizar configurações
+app.post('/api/admin/config', checkAdmin, (req, res) => {
+    const {
+        pix_key,
+        min_deposit,
+        bonus_amount,
+        min_withdraw,
+        slot_min_bet,
+        dice_min_bet,
+        slot_rtp,
+        dice_rtp,
+        crash_rtp,
+        slot_volatility,
+        dice_volatility,
+        crash_volatility
+    } = req.body;
+    
+    db.run(`
+        UPDATE admin_config SET
+            pix_key = ?,
+            min_deposit = ?,
+            bonus_amount = ?,
+            min_withdraw = ?,
+            slot_min_bet = ?,
+            dice_min_bet = ?,
+            slot_rtp = ?,
+            dice_rtp = ?,
+            crash_rtp = ?,
+            slot_volatility = ?,
+            dice_volatility = ?,
+            crash_volatility = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+    `,
+        [pix_key, min_deposit, bonus_amount, min_withdraw, slot_min_bet, dice_min_bet,
+         slot_rtp, dice_rtp, crash_rtp, slot_volatility, dice_volatility, crash_volatility],
+        function(err) {
+            if (err) return res.status(500).json({ error: 'Erro ao atualizar configurações' });
+            res.json({ message: 'Configurações atualizadas!' });
+        }
+    );
+});
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Login: https://nexus-trade-app1.onrender.com/login`);
