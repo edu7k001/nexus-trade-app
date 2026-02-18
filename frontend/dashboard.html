@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Trade - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .user-header {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .balance-box {
+            text-align: center;
+            background-color: #21262d;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .balance-value {
+            font-size: 32px;
+            color: #58a6ff;
+            font-weight: bold;
+        }
+        .section {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            color: #58a6ff;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+        .qr-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-image {
+            max-width: 250px;
+            border: 2px solid #30363d;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: white;
+        }
+        .deposit-info {
+            background-color: #21262d;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin: 15px 0;
+        }
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .bet-input {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-size: 16px;
+        }
+        .bet-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-up {
+            flex: 1;
+            padding: 15px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-down {
+            flex: 1;
+            padding: 15px;
+            background-color: #da3633;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .game-result {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .win {
+            color: #3fb950;
+        }
+        .lose {
+            color: #f85149;
+        }
+        .price-display {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #58a6ff;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #21262d;
+            border-radius: 8px;
+        }
+        .logout-btn {
+            padding: 8px 16px;
+            background-color: #f85149;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .withdraw-section {
+            text-align: center;
+        }
+        .btn-withdraw {
+            padding: 12px 24px;
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-pendente {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .status-ativo {
+            background-color: #238636;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-container">
+            <!-- Cabeçalho do usuário -->
+            <div class="user-header">
+                <div>
+                    <h2 id="user-name">Carregando...</h2>
+                    <span id="user-status" class="status-badge status-pendente">Pendente</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+
+            <!-- Saldo -->
+            <div class="balance-box">
+                <div style="font-size: 14px; color: #8b949e;">Saldo Disponível</div>
+                <div class="balance-value" id="user-balance">R$ 0,00</div>
+            </div>
+
+            <!-- Seção de Depósito (se status pendente) -->
+            <div id="deposit-section" class="section" style="display: none;">
+                <h3 class="section-title">Ative sua Conta</h3>
+                <p>Para começar a jogar, faça um depósito mínimo de <strong>R$ 50,00</strong> e ganhe <strong>R$ 30,00</strong> de bônus!</p>
+                
+                <div class="qr-container">
+                    <img id="qrcode-img" class="qr-image" src="" alt="QR Code PIX">
+                    <p id="pix-key" style="word-break: break-all; margin-top: 10px;"></p>
+                </div>
+
+                <div class="deposit-info">
+                    <p><strong>Como depositar:</strong></p>
+                    <ol style="margin-left: 20px;">
+                        <li>Abra o app do seu banco</li>
+                        <li>Escolha a opção PIX</li>
+                        <li>Leia o QR Code acima</li>
+                        <li>Digite o valor do depósito (mínimo R$ 50)</li>
+                        <li>Confirme o pagamento</li>
+                    </ol>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <input type="number" id="deposit-amount" class="bet-input" placeholder="Valor do depósito" min="50" step="5">
+                    <button id="btn-request-deposit" class="btn-up" style="width: auto;">Solicitar Depósito</button>
+                </div>
+                <div id="deposit-message" style="margin-top: 10px;"></div>
+            </div>
+
+            <!-- Seção do Jogo (se status ativo) -->
+            <div id="game-section" class="section" style="display: none;">
+                <h3 class="section-title">Mercado de Sinais</h3>
+                
+                <div class="price-display" id="current-price">
+                    R$ 100,00
+                </div>
+
+                <div class="bet-controls">
+                    <input type="number" id="bet-amount" class="bet-input" placeholder="Valor da aposta" min="5" step="5" value="10">
+                    
+                    <div class="bet-buttons">
+                        <button class="btn-up" onclick="bet('up')">▲ PARA CIMA</button>
+                        <button class="btn-down" onclick="bet('down')">▼ PARA BAIXO</button>
+                    </div>
+                </div>
+
+                <div id="bet-result" class="game-result"></div>
+            </div>
+
+            <!-- Seção de Saque -->
+            <div class="section withdraw-section">
+                <h3 class="section-title">Solicitar Saque</h3>
+                <p>Saque mínimo: <strong>R$ 150,00</strong></p>
+                <button id="btn-withdraw" class="btn-withdraw">SOLICITAR SAQUE</button>
+                <div id="withdraw-message" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar se está logado
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) {
+            window.location.href = '/login';
+        }
+
+        // Elementos do DOM
+        const userName = document.getElementById('user-name');
+        const userBalance = document.getElementById('user-balance');
+        const userStatus = document.getElementById('user-status');
+        const depositSection = document.getElementById('deposit-section');
+        const gameSection = document.getElementById('game-section');
+
+        // Dados do usuário
+        let userData = { ...user };
+        let price = 100;
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            try {
+                const response = await fetch(`/api/user/${user.id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    userData = data;
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar usuário:', error);
+            }
+        }
+
+        // Atualizar interface
+        function updateUI() {
+            userName.textContent = userData.name;
+            userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
+            
+            // Status badge
+            userStatus.textContent = userData.status === 'Ativo' ? 'Ativo' : 'Pendente';
+            userStatus.className = `status-badge ${userData.status === 'Ativo' ? 'status-ativo' : 'status-pendente'}`;
+            
+            // Mostrar seção correta
+            if (userData.status === 'Pendente') {
+                depositSection.style.display = 'block';
+                gameSection.style.display = 'none';
+                loadQrCode();
+            } else {
+                depositSection.style.display = 'none';
+                gameSection.style.display = 'block';
+            }
+        }
+
+        // Carregar QR Code
+        async function loadQrCode() {
+            try {
+                const response = await fetch('/api/pix-qrcode');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('qrcode-img').src = data.qrcode;
+                    document.getElementById('pix-key').textContent = `Chave PIX: ${data.pixKey}`;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar QR Code:', error);
+            }
+        }
+
+        // Solicitar depósito
+        document.getElementById('btn-request-deposit').addEventListener('click', async () => {
+            const amount = document.getElementById('deposit-amount').value;
+            
+            if (!amount || amount < 50) {
+                document.getElementById('deposit-message').innerHTML = '<p style="color: #f85149;">Valor mínimo: R$ 50</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/request-deposit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, amount: parseFloat(amount) })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('deposit-message').innerHTML = `<p style="color: #3fb950;">✅ ${data.message}</p>`;
+                    document.getElementById('deposit-amount').value = '';
+                } else {
+                    document.getElementById('deposit-message').innerHTML = `<p style="color: #f85149;">❌ ${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('deposit-message').innerHTML = '<p style="color: #f85149;">❌ Erro de conexão</p>';
+            }
+        });
+
+        // Apostar
+        window.bet = async (direction) => {
+            const amount = document.getElementById('bet-amount').value;
+            
+            if (!amount || amount < 5) {
+                document.getElementById('bet-result').innerHTML = '<p class="lose">Aposta mínima: R$ 5</p>';
+                return;
+            }
+            
+            if (amount > userData.balance) {
+                document.getElementById('bet-result').innerHTML = '<p class="lose">Saldo insuficiente!</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/bet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        pixKey: userData.pix_key || user.email,
+                        amount: parseFloat(amount)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    userData.balance = data.newBalance;
+                    userBalance.textContent = `R$ ${userData.balance.toFixed(2)}`;
+                    document.getElementById('bet-result').innerHTML = `<p class="lose">${data.message}</p>`;
+                } else {
+                    document.getElementById('bet-result').innerHTML = `<p class="lose">❌ ${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('bet-result').innerHTML = '<p class="lose">❌ Erro na aposta</p>';
+            }
+        };
+
+        // Solicitar saque
+        document.getElementById('btn-withdraw').addEventListener('click', async () => {
+            if (userData.balance < 150) {
+                document.getElementById('withdraw-message').innerHTML = '<p style="color: #f85149;">❌ Saldo mínimo para saque: R$ 150</p>';
+                return;
+            }
+            
+            if (!confirm(`Solicitar saque de R$ ${userData.balance.toFixed(2)}?`)) return;
+            
+            try {
+                const response = await fetch('/api/request-withdraw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, amount: userData.balance })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('withdraw-message').innerHTML = `<p style="color: #3fb950;">✅ ${data.message}</p>`;
+                } else {
+                    document.getElementById('withdraw-message').innerHTML = `<p style="color: #f85149;">❌ ${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('withdraw-message').innerHTML = '<p style="color: #f85149;">❌ Erro de conexão</p>';
+            }
+        });
+
+        // Animação do preço
+        setInterval(() => {
+            if (userData.status === 'Ativo') {
+                const variation = (Math.random() * 2 - 1).toFixed(2);
+                price = (price + parseFloat(variation)).toFixed(2);
+                document.getElementById('current-price').textContent = `R$ ${price}`;
+            }
+        }, 3000);
+
+        // Logout
+        window.logout = () => {
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        };
+
+        // Inicializar
+        loadUserData();
+    </script>
+</body>
+</html>

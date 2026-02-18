@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Trade - Painel Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #161b22;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        .admin-title {
+            color: #f85149;
+            margin: 0;
+        }
+        .logout-btn {
+            padding: 8px 16px;
+            background-color: #f85149;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: #58a6ff;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .item-card {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-approve {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-reject {
+            background-color: #da3633;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .amount-input {
+            width: 100px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1 class="admin-title">Painel Administrativo</h1>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+
+            <div class="tab-container">
+                <button class="tab active" onclick="showTab('deposits')">Depósitos Pendentes</button>
+                <button class="tab" onclick="showTab('withdraws')">Saques Pendentes</button>
+            </div>
+
+            <div id="deposits-tab" class="tab-content active">
+                <h2>Depósitos Pendentes</h2>
+                <div id="deposits-list">Carregando...</div>
+            </div>
+
+            <div id="withdraws-tab" class="tab-content">
+                <h2>Saques Pendentes</h2>
+                <div id="withdraws-list">Carregando...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar se está logado como admin
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id || user.status !== 'Admin') {
+            window.location.href = '/login';
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'deposits') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('deposits-tab').classList.add('active');
+                loadDeposits();
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('withdraws-tab').classList.add('active');
+                loadWithdraws();
+            }
+        }
+
+        async function loadDeposits() {
+            try {
+                const auth = btoa(`${user.email}:admin123`);
+                const response = await fetch('/api/admin/deposits', {
+                    headers: { 'Authorization': `Basic ${auth}` }
+                });
+                const deposits = await response.json();
+                
+                const list = document.getElementById('deposits-list');
+                
+                if (deposits.length === 0) {
+                    list.innerHTML = '<p>Nenhum depósito pendente</p>';
+                    return;
+                }
+                
+                list.innerHTML = deposits.map(d => `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <strong>${d.name}</strong>
+                            <span>${new Date(d.created_at).toLocaleString()}</span>
+                        </div>
+                        <p><strong>Email:</strong> ${d.email}</p>
+                        <p><strong>Chave PIX:</strong> ${d.pix_key || 'Não informada'}</p>
+                        <p><strong>Valor solicitado:</strong> R$ ${d.amount}</p>
+                        <div class="item-actions">
+                            <input type="number" id="amount-${d.id}" class="amount-input" placeholder="Valor a creditar" value="${d.amount}">
+                            <button class="btn-approve" onclick="confirmDeposit(${d.id})">Confirmar Depósito</button>
+                            <button class="btn-reject" onclick="rejectDeposit(${d.id})">Rejeitar</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('deposits-list').innerHTML = '<p>Erro ao carregar depósitos</p>';
+            }
+        }
+
+        async function loadWithdraws() {
+            try {
+                const auth = btoa(`${user.email}:admin123`);
+                const response = await fetch('/api/admin/withdraws', {
+                    headers: { 'Authorization': `Basic ${auth}` }
+                });
+                const withdraws = await response.json();
+                
+                const list = document.getElementById('withdraws-list');
+                
+                if (withdraws.length === 0) {
+                    list.innerHTML = '<p>Nenhum saque pendente</p>';
+                    return;
+                }
+                
+                list.innerHTML = withdraws.map(w => `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <strong>${w.name}</strong>
+                            <span>${new Date(w.created_at).toLocaleString()}</span>
+                        </div>
+                        <p><strong>Email:</strong> ${w.email}</p>
+                        <p><strong>Chave PIX:</strong> ${w.pix_key}</p>
+                        <p><strong>Valor do saque:</strong> R$ ${w.amount}</p>
+                        <div class="item-actions">
+                            <button class="btn-approve" onclick="approveWithdraw(${w.id})">Aprovar Saque</button>
+                            <button class="btn-reject" onclick="rejectWithdraw(${w.id})">Rejeitar</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('withdraws-list').innerHTML = '<p>Erro ao carregar saques</p>';
+            }
+        }
+
+        async function confirmDeposit(id) {
+            const amount = document.getElementById(`amount-${id}`).value;
+            if (!amount || amount <= 0) {
+                alert('Digite um valor válido');
+                return;
+            }
+            
+            try {
+                const auth = btoa(`${user.email}:admin123`);
+                const response = await fetch(`/api/admin/confirm-deposit/${id}`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${auth}`
+                    },
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+                
+                if (response.ok) {
+                    alert('Depósito confirmado!');
+                    loadDeposits();
+                } else {
+                    alert('Erro ao confirmar');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function rejectDeposit(id) {
+            if (!confirm('Rejeitar este depósito?')) return;
+            
+            try {
+                const auth = btoa(`${user.email}:admin123`);
+                const response = await fetch(`/api/admin/reject-deposit/${id}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Basic ${auth}` }
+                });
+                
+                if (response.ok) {
+                    alert('Depósito rejeitado!');
+                    loadDeposits();
+                } else {
+                    alert('Erro ao rejeitar');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function approveWithdraw(id) {
+            if (!confirm('Aprovar este saque?')) return;
+            
+            try {
+                const auth = btoa(`${user.email}:admin123`);
+                const response = await fetch(`/api/admin/withdraw/${id}/approve`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Basic ${auth}` }
+                });
+                
+                if (response.ok) {
+                    alert('Saque aprovado!');
+                    loadWithdraws();
+                } else {
+                    alert('Erro ao aprovar');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function rejectWithdraw(id) {
+            if (!confirm('Rejeitar este saque?')) return;
+            
+            try {
+                const auth = btoa(`${user.email}:admin123`);
+                const response = await fetch(`/api/admin/withdraw/${id}/reject`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Basic ${auth}` }
+                });
+                
+                if (response.ok) {
+                    alert('Saque rejeitado!');
+                    loadWithdraws();
+                } else {
+                    alert('Erro ao rejeitar');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        // Carregar depósitos ao iniciar
+        loadDeposits();
+    </script>
+</body>
+</html>
