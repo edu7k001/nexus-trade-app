@@ -943,6 +943,102 @@
             font-size: 24px;
         }
         
+        /* Seção de saque */
+        .withdraw-section {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .withdraw-title {
+            color: #ffd700;
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .withdraw-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .withdraw-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .withdraw-input-group label {
+            color: #ffd700;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .withdraw-input {
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,215,0,0.3);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .withdraw-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
+        }
+        
+        .withdraw-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+        
+        .withdraw-btn {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .withdraw-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.3);
+        }
+        
+        .withdraw-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .withdraw-info {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .withdraw-info strong {
+            color: #ffd700;
+        }
+        
         /* Histórico */
         .history-section {
             background: rgba(255,255,255,0.03);
@@ -1197,6 +1293,50 @@
                 </div>
             </div>
         </div>
+
+        <!-- Seção de Saque -->
+        <div class="withdraw-section">
+            <h3 class="withdraw-title">
+                <span>💸</span>
+                SOLICITAR SAQUE
+            </h3>
+            
+            <div class="withdraw-form" id="withdrawForm">
+                <div class="withdraw-input-group">
+                    <label>NOME COMPLETO</label>
+                    <input type="text" id="withdraw-name" class="withdraw-input" placeholder="Digite seu nome completo" required>
+                </div>
+                
+                <div class="withdraw-input-group">
+                    <label>CPF</label>
+                    <input type="text" id="withdraw-cpf" class="withdraw-input" placeholder="000.000.000-00" required>
+                </div>
+                
+                <div class="withdraw-input-group">
+                    <label>CHAVE PIX</label>
+                    <input type="text" id="withdraw-pix" class="withdraw-input" placeholder="CPF, E-mail, Telefone ou Chave aleatória" required>
+                </div>
+                
+                <div class="withdraw-input-group">
+                    <label>VALOR DO SAQUE</label>
+                    <input type="number" id="withdraw-amount" class="withdraw-input" min="50" step="10" placeholder="R$ 0,00" required>
+                </div>
+                
+                <button class="withdraw-btn" id="withdraw-btn" onclick="requestWithdraw()">
+                    💰 SOLICITAR SAQUE
+                </button>
+                
+                <div class="withdraw-info">
+                    <p>📌 <strong>Informações importantes:</strong></p>
+                    <p>• Saque mínimo: <strong>R$ 50,00</strong></p>
+                    <p>• O pagamento será processado em até <strong>24 horas</strong></p>
+                    <p>• O valor será enviado para a chave PIX informada</p>
+                    <p>• Certifique-se de que seus dados estão corretos</p>
+                </div>
+            </div>
+            
+            <div id="withdraw-message" style="margin-top: 20px;"></div>
+        </div>
         
         <!-- Histórico -->
         <div class="history-section">
@@ -1235,7 +1375,8 @@
         // Variáveis para pop-ups
         let lastKnownBalance = 0;
         let highestBalance = 0;
-        let showFirstTimePopup = !localStorage.getItem('firstDepositShown');
+        let hasDeposited = localStorage.getItem('hasDeposited') === 'true';
+        let showFirstTimePopup = !localStorage.getItem('firstDepositShown') && !hasDeposited;
         
         // Lista de nomes fictícios para notificações
         const fakeNames = [
@@ -1260,10 +1401,20 @@
                 
                 if (response.ok) {
                     userData = { ...userData, ...data };
+                    
+                    // Verificar se já depositou (saldo > 0 ou status Ativo)
+                    if (userData.balance > 0 || userData.status === 'Ativo') {
+                        hasDeposited = true;
+                        localStorage.setItem('hasDeposited', 'true');
+                    }
+                    
                     updateUI();
                     checkFirstTimePopup();
                     startLiveNotifications();
                     startOnlineCounter();
+                    
+                    // Preencher dados do usuário no formulário de saque
+                    document.getElementById('withdraw-name').value = userData.name || '';
                 }
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error);
@@ -1280,20 +1431,104 @@
             
             // Atualizar último saldo conhecido
             lastKnownBalance = userData.balance;
+            
+            // Atualizar maior saldo (só se for maior que o atual)
             if (userData.balance > highestBalance) {
                 highestBalance = userData.balance;
             }
             
-            // Verificar saldo para pop-ups
-            checkBalanceConditions();
+            // Verificar saldo para pop-ups (só se já depositou)
+            if (hasDeposited) {
+                checkBalanceConditions();
+            }
+        }
+        
+        // ===== FUNÇÃO DE SAQUE =====
+        async function requestWithdraw() {
+            const name = document.getElementById('withdraw-name').value.trim();
+            const cpf = document.getElementById('withdraw-cpf').value.trim();
+            const pixKey = document.getElementById('withdraw-pix').value.trim();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            
+            // Validações
+            if (!name || !cpf || !pixKey || !amount) {
+                showWithdrawMessage('❌ Preencha todos os campos!', 'error');
+                return;
+            }
+            
+            if (amount < 50) {
+                showWithdrawMessage('❌ Saque mínimo: R$ 50,00', 'error');
+                return;
+            }
+            
+            if (amount > userData.balance) {
+                showWithdrawMessage('❌ Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            // Validar CPF (simples)
+            const cpfClean = cpf.replace(/[^\d]/g, '');
+            if (cpfClean.length !== 11) {
+                showWithdrawMessage('❌ CPF inválido!', 'error');
+                return;
+            }
+            
+            // Desabilitar botão
+            const btn = document.getElementById('withdraw-btn');
+            btn.disabled = true;
+            btn.textContent = 'PROCESSANDO...';
+            
+            try {
+                const response = await fetch('/api/request-withdraw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userData.id,
+                        amount: amount,
+                        name: name,
+                        cpf: cpfClean,
+                        pixKey: pixKey
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showWithdrawMessage('✅ ' + data.message, 'success');
+                    
+                    // Limpar campos
+                    document.getElementById('withdraw-cpf').value = '';
+                    document.getElementById('withdraw-pix').value = '';
+                    document.getElementById('withdraw-amount').value = '';
+                    
+                    // Atualizar saldo
+                    userData.balance -= amount;
+                    updateUI();
+                    
+                    // Mostrar notificação de saque
+                    showNotification(`${userData.name} solicitou saque de R$ ${amount.toFixed(2)}`, 'withdraw', '💸');
+                } else {
+                    showWithdrawMessage('❌ ' + data.error, 'error');
+                }
+            } catch (error) {
+                showWithdrawMessage('❌ Erro de conexão', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💰 SOLICITAR SAQUE';
+            }
+        }
+        
+        function showWithdrawMessage(message, type) {
+            const msgDiv = document.getElementById('withdraw-message');
+            msgDiv.innerHTML = `<p style="color: ${type === 'success' ? '#28a745' : '#dc3545'}; text-align: center;">${message}</p>`;
+            setTimeout(() => {
+                msgDiv.innerHTML = '';
+            }, 5000);
         }
         
         // ===== NOTIFICAÇÕES AO VIVO =====
         function startLiveNotifications() {
-            // Primeira notificação após 5 segundos
             setTimeout(addRandomNotification, 5000);
-            
-            // Notificações a cada 30-60 segundos
             setInterval(addRandomNotification, 30000 + Math.random() * 30000);
         }
         
@@ -1303,8 +1538,8 @@
             
             let name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
             let amount = (Math.random() * 2000 + 100).toFixed(2);
-            let message = '';
             let icon = '';
+            let message = '';
             
             switch(type) {
                 case 'win':
@@ -1340,14 +1575,12 @@
             
             container.appendChild(notification);
             
-            // Remover após 5 segundos
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.remove();
                 }
             }, 5000);
             
-            // Limitar a 3 notificações simultâneas
             if (container.children.length > 3) {
                 container.removeChild(container.firstChild);
             }
@@ -1356,7 +1589,6 @@
         // ===== CONTADOR DE PESSOAS ONLINE =====
         function startOnlineCounter() {
             setInterval(() => {
-                // Simular variação de pessoas online
                 const base = 147;
                 const variation = Math.floor(Math.random() * 20) - 10;
                 const count = base + variation;
@@ -1366,7 +1598,7 @@
         
         // ===== POP-UPS DE DEPÓSITO =====
         function checkFirstTimePopup() {
-            if (showFirstTimePopup && userData.status === 'Pendente') {
+            if (showFirstTimePopup && !hasDeposited && userData.status === 'Pendente') {
                 setTimeout(() => {
                     showDepositPopup('first-time');
                 }, 2000);
@@ -1374,11 +1606,11 @@
         }
         
         function checkBalanceConditions() {
-            // CASO 1: Saldo zerado
+            if (!hasDeposited) return;
+            
             if (userData.balance <= 0) {
                 showDepositPopup('zero');
             }
-            // CASO 2: Saldo caiu 80%
             else if (highestBalance > 0) {
                 const percentLost = ((highestBalance - userData.balance) / highestBalance) * 100;
                 if (percentLost >= 80 && !localStorage.getItem('lowBalanceShown')) {
@@ -1389,8 +1621,8 @@
                     }, 300000);
                 }
             }
-            // CASO 3: Saldo baixo (botão flutuante)
-            else if (userData.balance < 20 && userData.balance > 0) {
+            
+            if (userData.balance < 20 && userData.balance > 0) {
                 document.getElementById('floating-deposit').classList.remove('hidden');
             } else {
                 document.getElementById('floating-deposit').classList.add('hidden');
@@ -1398,7 +1630,8 @@
         }
         
         function showDepositPopup(type) {
-            if (document.querySelector('.deposit-popup')) return;
+            const existingPopup = document.querySelector('.deposit-popup');
+            if (existingPopup) existingPopup.remove();
             
             const popup = document.createElement('div');
             popup.className = 'deposit-popup';
@@ -1478,8 +1711,13 @@
         
         // ===== JOGO 1: CAÇA-NÍQUEL =====
         async function playSlot() {
-            if (userData.status === 'Pendente') {
+            if (userData.status === 'Pendente' && !hasDeposited) {
                 showDepositPopup('first-time');
+                return;
+            }
+            
+            if (userData.balance <= 0) {
+                showDepositPopup('zero');
                 return;
             }
             
@@ -1531,8 +1769,13 @@
         
         // ===== JOGO 2: DADOS =====
         async function playDice() {
-            if (userData.status === 'Pendente') {
+            if (userData.status === 'Pendente' && !hasDeposited) {
                 showDepositPopup('first-time');
+                return;
+            }
+            
+            if (userData.balance <= 0) {
+                showDepositPopup('zero');
                 return;
             }
             
@@ -1592,8 +1835,13 @@
         
         // ===== JOGO 3: AVIÃOZINHO =====
         async function startCrash() {
-            if (userData.status === 'Pendente') {
+            if (userData.status === 'Pendente' && !hasDeposited) {
                 showDepositPopup('first-time');
+                return;
+            }
+            
+            if (userData.balance <= 0) {
+                showDepositPopup('zero');
                 return;
             }
             
@@ -1722,6 +1970,11 @@
                 alert('Erro de conexão');
             }
         };
+        
+        function markAsDeposited() {
+            hasDeposited = true;
+            localStorage.setItem('hasDeposited', 'true');
+        }
         
         window.closeModal = function() {
             document.getElementById('qr-modal').style.display = 'none';
