@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // CONFIGURAÇÃO - URL DO RENDER (CORRIGIDA!)
-    const API_URL = 'https://nexus-trade-app.onrender.com/api';
+    // CONFIGURAÇÃO - URL CORRETA DO RENDER (COM O "1" NO FINAL!)
+    const API_URL = 'https://nexus-trade-app1.onrender.com/api';
     
     // Variáveis globais
     let userData = { name: '', pix: '', balance: 0, status: 'Pendente' };
@@ -250,12 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3000);
 });
 
-// Função global para admin
+// Função global para admin (CORRIGIDA COM A URL CERTA!)
 async function handleWithdraw(id, action) {
     const senha = prompt('Confirme a senha de admin:');
     if (!senha) return;
     
-    const API_URL = 'https://nexus-trade-app.onrender.com/api';
+    const API_URL = 'https://nexus-trade-app1.onrender.com/api';
     
     try {
         const response = await fetch(`${API_URL}/admin/withdraw/${id}/${action}`, {
