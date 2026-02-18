@@ -236,6 +236,10 @@
             color: white;
         }
 
+        .btn-view:hover {
+            background: #138496;
+        }
+
         /* Formulários */
         .config-form {
             background: rgba(255,255,255,0.05);
@@ -318,6 +322,8 @@
             border: 2px solid #ffd700;
             max-width: 500px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-close {
@@ -336,11 +342,30 @@
             margin-bottom: 20px;
         }
 
+        .bet-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ffd700;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
         /* Loading */
         .loading {
             text-align: center;
             padding: 40px;
             color: #ffd700;
+        }
+
+        /* Mensagens */
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
         }
 
         /* Responsividade */
@@ -595,6 +620,7 @@
         let adminData = JSON.parse(localStorage.getItem('user') || '{}');
         let currentAction = null;
         let currentId = null;
+        let currentAmount = null;
 
         // Verificar login
         if (!adminData.id || adminData.status !== 'Admin') {
@@ -604,11 +630,12 @@
         document.getElementById('admin-name').textContent = adminData.name;
 
         // ===== FUNÇÕES DE MODAL =====
-        function showModal(title, message, action, id) {
+        function showModal(title, message, action, id, amount = null) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
             currentAction = action;
             currentId = id;
+            currentAmount = amount;
             document.getElementById('confirm-modal').style.display = 'block';
         }
 
@@ -616,6 +643,7 @@
             document.getElementById('confirm-modal').style.display = 'none';
             currentAction = null;
             currentId = null;
+            currentAmount = null;
         }
 
         async function modalConfirm() {
@@ -681,7 +709,7 @@
                         <td>${new Date(d.created_at).toLocaleString()}</td>
                         <td><span class="status-badge status-pendente">PENDENTE</span></td>
                         <td>
-                            <button class="action-btn btn-confirm" onclick="showModal('Confirmar Depósito', 'Confirmar depósito de R$ ${d.amount.toFixed(2)} para ${d.name}?', 'confirm-deposit', ${d.id})">✅ CONFIRMAR</button>
+                            <button class="action-btn btn-confirm" onclick="showModal('Confirmar Depósito', 'Confirmar depósito de R$ ${d.amount.toFixed(2)} para ${d.name}? Digite o valor a creditar (com bônus):', 'confirm-deposit', ${d.id})">✅ CONFIRMAR</button>
                             <button class="action-btn btn-reject" onclick="showModal('Rejeitar Depósito', 'Rejeitar depósito de ${d.name}?', 'reject-deposit', ${d.id})">❌ REJEITAR</button>
                         </td>
                     </tr>
@@ -835,7 +863,7 @@
                         <td>R$ ${(u.total_bets || 0).toFixed(2)}</td>
                         <td>R$ ${(u.total_wins || 0).toFixed(2)}</td>
                         <td>
-                            <button class="action-btn btn-view" onclick="viewUserStats(${u.id})">📊 VER</button>
+                            <button class="action-btn btn-view" onclick="showUserModal(${u.id})">✏️ EDITAR</button>
                         </td>
                     </tr>
                 `).join('');
@@ -944,23 +972,257 @@
             }
         }
 
+        // ===== FUNÇÕES DE EDITAR USUÁRIO =====
+        async function showUserModal(userId) {
+            try {
+                const response = await fetch(`/api/admin/user/${userId}`, {
+                    headers: { 'Authorization': getAuthHeader() }
+                });
+                const user = await response.json();
+                
+                if (!response.ok) {
+                    alert('Erro ao carregar usuário');
+                    return;
+                }
+                
+                // Criar modal
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'block';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+                        <h3 class="modal-title">✏️ EDITAR USUÁRIO: ${user.name}</h3>
+                        
+                        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            <p><strong>Saldo atual:</strong> <span style="color: #ffd700; font-size: 18px;">R$ ${user.balance.toFixed(2)}</span></p>
+                            <p><strong>RTP Individual:</strong> ${user.rtp_individual !== null ? user.rtp_individual + '%' : '<span style="color: #aaa;">Usando RTP global</span>'}</p>
+                        </div>
+                        
+                        <h4 style="color: #ffd700; margin: 20px 0 10px;">💰 ALTERAR SALDO</h4>
+                        
+                        <!-- Definir saldo exato -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="number" id="new-balance" class="bet-input" placeholder="Novo saldo (R$)" step="0.01" style="flex: 2; padding: 8px;">
+                            <button class="action-btn btn-confirm" onclick="setUserBalance(${user.id})">DEFINIR</button>
+                        </div>
+                        
+                        <!-- Adicionar saldo -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="number" id="add-amount" class="bet-input" placeholder="Valor para adicionar (R$)" step="0.01" style="flex: 2; padding: 8px;">
+                            <button class="action-btn btn-confirm" onclick="addUserBalance(${user.id})">➕ ADICIONAR</button>
+                        </div>
+                        
+                        <!-- Remover saldo -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <input type="number" id="remove-amount" class="bet-input" placeholder="Valor para remover (R$)" step="0.01" style="flex: 2; padding: 8px;">
+                            <button class="action-btn btn-reject" onclick="removeUserBalance(${user.id})">➖ REMOVER</button>
+                        </div>
+                        
+                        <h4 style="color: #ffd700; margin: 20px 0 10px;">🎰 RTP INDIVIDUAL</h4>
+                        <p style="font-size: 12px; color: #aaa;">RTP = porcentagem de retorno ao jogador (1-100%)</p>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="number" id="rtp-value" class="bet-input" placeholder="RTP % (1-100)" min="1" max="100" step="1" style="flex: 2; padding: 8px;">
+                            <button class="action-btn btn-confirm" onclick="setUserRTP(${user.id})">DEFINIR RTP</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button class="action-btn btn-reject" onclick="removeUserRTP(${user.id})" style="flex: 1;">❌ REMOVER RTP</button>
+                        </div>
+                        
+                        <p style="font-size: 11px; color: #666; text-align: center;">* RTP individual substitui o RTP global apenas para este usuário</p>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } catch (error) {
+                alert('Erro ao carregar dados do usuário');
+            }
+        }
+
+        // Definir saldo exato
+        async function setUserBalance(userId) {
+            const newBalance = parseFloat(document.getElementById('new-balance').value);
+            if (isNaN(newBalance)) {
+                alert('Digite um valor válido');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/balance/set`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ newBalance })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ ' + data.message);
+                    document.querySelector('.modal').remove();
+                    loadUsers();
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        // Adicionar saldo
+        async function addUserBalance(userId) {
+            const amount = parseFloat(document.getElementById('add-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Digite um valor válido maior que zero');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/balance/add`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ ' + data.message);
+                    document.querySelector('.modal').remove();
+                    loadUsers();
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        // Remover saldo
+        async function removeUserBalance(userId) {
+            const amount = parseFloat(document.getElementById('remove-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Digite um valor válido maior que zero');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/balance/remove`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ ' + data.message);
+                    document.querySelector('.modal').remove();
+                    loadUsers();
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        // Definir RTP individual
+        async function setUserRTP(userId) {
+            const rtpValue = parseFloat(document.getElementById('rtp-value').value);
+            if (isNaN(rtpValue) || rtpValue < 1 || rtpValue > 100) {
+                alert('Digite um valor entre 1 e 100');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/rtp`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ rtpValue })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ ' + data.message);
+                    document.querySelector('.modal').remove();
+                    loadUsers();
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        // Remover RTP individual
+        async function removeUserRTP(userId) {
+            if (!confirm('Remover RTP individual? O usuário voltará a usar o RTP global.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/rtp`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ rtpValue: null })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ ' + data.message);
+                    document.querySelector('.modal').remove();
+                    loadUsers();
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
         // ===== FUNÇÕES DE ABA =====
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            document.querySelectorAll('.tab')[tab === 'deposits' ? 0 : 
-                                             tab === 'withdraws' ? 1 : 
-                                             tab === 'users' ? 2 : 
-                                             tab === 'history' ? 3 : 4].classList.add('active');
-            document.getElementById(tab + '-tab').classList.add('active');
-            
-            // Carregar dados da aba
-            if (tab === 'deposits') loadDeposits();
-            else if (tab === 'withdraws') loadWithdraws();
-            else if (tab === 'users') loadUsers();
-            else if (tab === 'history') loadHistory();
-            else if (tab === 'config') loadConfig();
+            if (tab === 'deposits') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('deposits-tab').classList.add('active');
+                loadDeposits();
+            } else if (tab === 'withdraws') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('withdraws-tab').classList.add('active');
+                loadWithdraws();
+            } else if (tab === 'users') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('users-tab').classList.add('active');
+                loadUsers();
+            } else if (tab === 'history') {
+                document.querySelectorAll('.tab')[3].classList.add('active');
+                document.getElementById('history-tab').classList.add('active');
+                loadHistory();
+            } else if (tab === 'config') {
+                document.querySelectorAll('.tab')[4].classList.add('active');
+                document.getElementById('config-tab').classList.add('active');
+                loadConfig();
+            }
         }
 
         // ===== LOGOUT =====
@@ -971,7 +1233,7 @@
 
         // ===== INICIALIZAÇÃO =====
         loadStats();
-        loadDeposits(); // Carrega a primeira aba
+        loadDeposits();
     </script>
 </body>
 </html>
