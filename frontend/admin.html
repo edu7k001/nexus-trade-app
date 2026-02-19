@@ -1230,17 +1230,17 @@
                 
                 if (response.ok) {
                     document.getElementById('pix_key').value = config.pix_key || '';
-                    document.getElementById('min_deposit').value = config.min_deposit || 50;
+                    document.getElementById('min_deposit').value = config.min_deposit || 20;
                     document.getElementById('bonus_amount').value = config.bonus_amount || 30;
                     document.getElementById('min_withdraw').value = config.min_withdraw || 50;
                     document.getElementById('max_withdraw').value = config.max_withdraw || 5000;
                     document.getElementById('withdraw_fee').value = config.withdraw_fee || 0;
-                    document.getElementById('slot_min_bet').value = config.slot_min_bet || 5;
-                    document.getElementById('dice_min_bet').value = config.dice_min_bet || 5;
-                    document.getElementById('crash_min_bet').value = config.crash_min_bet || 5;
-                    document.getElementById('slot_rtp').value = config.slot_rtp || 95;
-                    document.getElementById('dice_rtp').value = config.dice_rtp || 95;
-                    document.getElementById('crash_rtp').value = config.crash_rtp || 95;
+                    document.getElementById('slot_min_bet').value = config.slot_min_bet || 0,50;
+                    document.getElementById('dice_min_bet').value = config.dice_min_bet || 0,5;
+                    document.getElementById('crash_min_bet').value = config.crash_min_bet || 1;
+                    document.getElementById('slot_rtp').value = config.slot_rtp || 45;
+                    document.getElementById('dice_rtp').value = config.dice_rtp || 45;
+                    document.getElementById('crash_rtp').value = config.crash_rtp || 45;
                     document.getElementById('slot_volatility').value = config.slot_volatility || 'medium';
                     document.getElementById('dice_volatility').value = config.dice_volatility || 'medium';
                     document.getElementById('crash_volatility').value = config.crash_volatility || 'medium';

@@ -179,7 +179,7 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
     db.run(`CREATE TABLE IF NOT EXISTS admin_config (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         pix_key TEXT,
-        min_deposit REAL DEFAULT 50,
+        min_deposit REAL DEFAULT 20,
         bonus_amount REAL DEFAULT 30,
         min_withdraw REAL DEFAULT 50,
         max_withdraw REAL DEFAULT 5000,
@@ -202,7 +202,7 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
                 if (!row) {
                     db.run(`INSERT INTO admin_config 
                         (id, pix_key, min_deposit, bonus_amount, min_withdraw) 
-                        VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 50, 30, 50)`);
+                        VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 20, 30, 150)`);
                 }
             });
             
