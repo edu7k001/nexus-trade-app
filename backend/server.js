@@ -13,7 +13,7 @@ const wss = new WebSocket.Server({ server });
 
 const PORT = process.env.PORT || 3001;
 
-// Armazenar conexões WebSocket
+// Armazenar conexões WebSocket (userId -> WebSocket)
 const clients = new Map();
 
 // WebSocket para tempo real
@@ -61,123 +61,127 @@ function sendToAllAdmins(type, data) {
     }
 }
 
-// Configurações
+// Configurações do Express
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Banco de dados
+// Banco de dados SQLite (com serialize para garantir ordem)
 const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) return console.error('Erro no banco:', err.message);
     console.log('✅ Conectado ao DB SQLite.');
 
-    // Criação das tabelas
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT UNIQUE,
-        password TEXT,
-        pix_key TEXT,
-        cpf TEXT,
-        phone TEXT,
-        balance REAL DEFAULT 0,
-        status TEXT DEFAULT 'Pendente',
-        total_deposits REAL DEFAULT 0,
-        total_withdraws REAL DEFAULT 0,
-        total_bets REAL DEFAULT 0,
-        total_wins REAL DEFAULT 0,
-        rtp_individual REAL DEFAULT NULL,
-        last_login DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+    db.serialize(() => {
+        // Criação das tabelas
+        db.run(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT UNIQUE,
+            password TEXT,
+            pix_key TEXT,
+            cpf TEXT,
+            phone TEXT,
+            balance REAL DEFAULT 0,
+            status TEXT DEFAULT 'Pendente',
+            total_deposits REAL DEFAULT 0,
+            total_withdraws REAL DEFAULT 0,
+            total_bets REAL DEFAULT 0,
+            total_wins REAL DEFAULT 0,
+            rtp_individual REAL DEFAULT NULL,
+            last_login DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS game_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        game TEXT,
-        bet_amount REAL,
-        result TEXT,
-        win_amount REAL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        db.run(`CREATE TABLE IF NOT EXISTS game_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            game TEXT,
+            bet_amount REAL,
+            result TEXT,
+            win_amount REAL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS deposits (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        amount REAL,
-        status TEXT DEFAULT 'Pendente',
-        confirmed_by INTEGER,
-        confirmed_at DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        db.run(`CREATE TABLE IF NOT EXISTS deposits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            amount REAL,
+            status TEXT DEFAULT 'Pendente',
+            confirmed_by INTEGER,
+            confirmed_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS withdraw_requests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        name TEXT,
-        cpf TEXT,
-        pix_key TEXT,
-        amount REAL,
-        status TEXT DEFAULT 'Pendente',
-        processed_by INTEGER,
-        processed_at DATETIME,
-        notes TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        db.run(`CREATE TABLE IF NOT EXISTS withdraw_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            name TEXT,
+            cpf TEXT,
+            pix_key TEXT,
+            amount REAL,
+            status TEXT DEFAULT 'Pendente',
+            processed_by INTEGER,
+            processed_at DATETIME,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        type TEXT,
-        amount REAL,
-        balance_before REAL,
-        balance_after REAL,
-        reference_id INTEGER,
-        description TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        db.run(`CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            type TEXT,
+            amount REAL,
+            balance_before REAL,
+            balance_after REAL,
+            reference_id INTEGER,
+            description TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS house_stats (
-        id INTEGER PRIMARY KEY CHECK (id = 1),
-        total_bets REAL DEFAULT 0,
-        total_paid REAL DEFAULT 0,
-        total_users INTEGER DEFAULT 0,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        db.run(`CREATE TABLE IF NOT EXISTS house_stats (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            total_bets REAL DEFAULT 0,
+            total_paid REAL DEFAULT 0,
+            total_users INTEGER DEFAULT 0,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS admin_config (
-        id INTEGER PRIMARY KEY CHECK (id = 1),
-        pix_key TEXT,
-        min_deposit REAL DEFAULT 20,
-        bonus_amount REAL DEFAULT 30,
-        min_withdraw REAL DEFAULT 150,
-        max_withdraw REAL DEFAULT 5000,
-        withdraw_fee REAL DEFAULT 0,
-        slot_min_bet REAL DEFAULT 5,
-        dice_min_bet REAL DEFAULT 5,
-        crash_min_bet REAL DEFAULT 5,
-        slot_rtp REAL DEFAULT 95,
-        dice_rtp REAL DEFAULT 95,
-        crash_rtp REAL DEFAULT 95,
-        slot_volatility TEXT DEFAULT 'medium',
-        dice_volatility TEXT DEFAULT 'medium',
-        crash_volatility TEXT DEFAULT 'medium',
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`, (err) => {
-        if (!err) {
-            db.get('SELECT * FROM admin_config WHERE id = 1', (err, row) => {
-                if (!row) {
-                    db.run(`INSERT INTO admin_config (id, pix_key, min_deposit, bonus_amount, min_withdraw) 
-                            VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 20, 30, 150)`);
-                }
-            });
+        db.run(`CREATE TABLE IF NOT EXISTS admin_config (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            pix_key TEXT,
+            min_deposit REAL DEFAULT 20,
+            bonus_amount REAL DEFAULT 30,
+            min_withdraw REAL DEFAULT 150,
+            max_withdraw REAL DEFAULT 5000,
+            withdraw_fee REAL DEFAULT 0,
+            slot_min_bet REAL DEFAULT 5,
+            dice_min_bet REAL DEFAULT 5,
+            crash_min_bet REAL DEFAULT 5,
+            slot_rtp REAL DEFAULT 95,
+            dice_rtp REAL DEFAULT 95,
+            crash_rtp REAL DEFAULT 95,
+            slot_volatility TEXT DEFAULT 'medium',
+            dice_volatility TEXT DEFAULT 'medium',
+            crash_volatility TEXT DEFAULT 'medium',
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-            db.run(`INSERT OR IGNORE INTO house_stats (id, total_bets, total_paid) VALUES (1, 0, 0)`);
+        // Inserções iniciais
+        db.get('SELECT * FROM admin_config WHERE id = 1', (err, row) => {
+            if (!row) {
+                db.run(`INSERT INTO admin_config 
+                    (id, pix_key, min_deposit, bonus_amount, min_withdraw) 
+                    VALUES (1, '1c5c21fc-fcbc-4b28-b285-74156c727917', 20, 30, 150)`);
+            }
+        });
 
-            const adminPass = bcrypt.hashSync('admin123', 10);
-            db.run(`INSERT OR IGNORE INTO users (name, email, password, status) 
-                    VALUES ('Administrador', 'admin@nexus.com', ?, 'Admin')`, [adminPass]);
-        }
+        db.run(`INSERT OR IGNORE INTO house_stats (id, total_bets, total_paid) VALUES (1, 0, 0)`);
+
+        const adminPass = bcrypt.hashSync('admin123', 10);
+        db.run(`INSERT OR IGNORE INTO users (name, email, password, status) 
+                VALUES ('Administrador', 'admin@nexus.com', ?, 'Admin')`, [adminPass]);
+
+        console.log('✅ Banco de dados inicializado com sucesso.');
     });
 });
 
@@ -409,6 +413,7 @@ const checkAdmin = (req, res, next) => {
     }
 };
 
+// Estatísticas
 app.get('/api/admin/stats', checkAdmin, (req, res) => {
     db.get(`
         SELECT
@@ -429,6 +434,7 @@ app.get('/api/admin/stats', checkAdmin, (req, res) => {
     });
 });
 
+// Listar usuários
 app.get('/api/admin/users', checkAdmin, (req, res) => {
     db.all(`SELECT id, name, email, pix_key, cpf, phone, balance, status,
                    total_deposits, total_withdraws, total_bets, total_wins, rtp_individual
@@ -438,6 +444,7 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
     });
 });
 
+// Buscar usuário por ID
 app.get('/api/admin/user/:id', checkAdmin, (req, res) => {
     db.get(`SELECT * FROM users WHERE id = ?`, [req.params.id], (err, user) => {
         if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -446,6 +453,62 @@ app.get('/api/admin/user/:id', checkAdmin, (req, res) => {
     });
 });
 
+// ===== ROTA DE ATUALIZAÇÃO DE USUÁRIO (CORRIGIDA E COM LOGS) =====
+app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
+    console.log('🚀 Rota de update foi chamada!');
+    const { id } = req.params;
+    const updates = req.body;
+    console.log('📥 Dados recebidos:', { id, updates });
+
+    // Lista de colunas permitidas para atualização
+    const allowedFields = ['name', 'email', 'cpf', 'phone', 'pix_key', 'balance', 'status', 'rtp_individual'];
+    
+    const fields = [];
+    const values = [];
+
+    Object.keys(updates).forEach(key => {
+        if (allowedFields.includes(key)) {
+            fields.push(`${key} = ?`);
+            values.push(updates[key]);
+        }
+    });
+
+    if (fields.length === 0) {
+        console.log('❌ Nenhum campo válido enviado');
+        return res.status(400).json({ error: 'Nenhum campo válido para atualizar' });
+    }
+
+    // Adiciona o ID no final dos valores
+    values.push(id);
+
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+    console.log('📝 SQL:', sql);
+    console.log('📝 Valores:', values);
+
+    db.run(sql, values, function(err) {
+        if (err) {
+            console.error('❌ Erro ao atualizar usuário:', err.message);
+            if (err.message.includes('UNIQUE')) {
+                return res.status(400).json({ error: 'E-mail já está em uso por outro usuário' });
+            }
+            return res.status(500).json({ error: 'Erro ao atualizar usuário' });
+        }
+
+        if (this.changes === 0) {
+            console.log('❌ Usuário não encontrado (ID inválido)');
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        console.log('✅ Usuário atualizado com sucesso. Linhas afetadas:', this.changes);
+
+        // Notifica o usuário em tempo real
+        sendRealTimeUpdate(id, 'profile_update', updates);
+
+        res.json({ success: true, message: 'Usuário atualizado com sucesso!' });
+    });
+});
+
+// Depósitos pendentes
 app.get('/api/admin/deposits', checkAdmin, (req, res) => {
     db.all(`SELECT d.*, u.name, u.email FROM deposits d
             JOIN users u ON d.user_id = u.id
@@ -455,7 +518,7 @@ app.get('/api/admin/deposits', checkAdmin, (req, res) => {
     });
 });
 
-// ===== CONFIRMAÇÃO DE DEPÓSITO (CORRIGIDA E ROBUSTA) =====
+// Confirmar depósito
 app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
     const { id } = req.params;
     const { amount } = req.body;
@@ -507,7 +570,7 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
                                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
                             [deposit.user_id, 'deposit', valor, balanceBefore, balanceAfter, id, 'Depósito confirmado'],
                             (err) => {
-                                if (err) console.error('Erro ao registrar transação:', err); // Não crítico
+                                if (err) console.error('Erro ao registrar transação:', err);
                             });
 
                         db.run('COMMIT', (err) => {
@@ -516,7 +579,6 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
                                 return res.status(500).json({ error: 'Erro ao finalizar transação' });
                             }
 
-                            // Notificações
                             sendRealTimeUpdate(deposit.user_id, 'deposit_confirmed', {
                                 amount: valor, newBalance: balanceAfter
                             });
@@ -530,6 +592,7 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
     });
 });
 
+// Rejeitar depósito
 app.post('/api/admin/reject-deposit/:id', checkAdmin, (req, res) => {
     db.run('UPDATE deposits SET status = "Rejeitado" WHERE id = ?', [req.params.id], function (err) {
         if (err) return res.status(500).json({ error: 'Erro ao rejeitar' });
@@ -537,6 +600,7 @@ app.post('/api/admin/reject-deposit/:id', checkAdmin, (req, res) => {
     });
 });
 
+// Saques pendentes
 app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
     db.all(`SELECT w.*, u.name as user_name, u.email FROM withdraw_requests w
             JOIN users u ON w.user_id = u.id
@@ -546,6 +610,7 @@ app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
     });
 });
 
+// Aprovar saque
 app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
     const { id } = req.params;
 
@@ -596,6 +661,7 @@ app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
     });
 });
 
+// Rejeitar saque
 app.post('/api/admin/withdraw/:id/reject', checkAdmin, (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
@@ -614,6 +680,7 @@ app.post('/api/admin/withdraw/:id/reject', checkAdmin, (req, res) => {
         });
 });
 
+// Histórico recente
 app.get('/api/admin/recent-history', checkAdmin, (req, res) => {
     db.all(`SELECT gh.*, u.name FROM game_history gh
             JOIN users u ON gh.user_id = u.id
@@ -623,6 +690,7 @@ app.get('/api/admin/recent-history', checkAdmin, (req, res) => {
     });
 });
 
+// Configurações
 app.get('/api/admin/config', checkAdmin, (req, res) => {
     db.get('SELECT * FROM admin_config WHERE id = 1', (err, config) => {
         if (err) return res.status(500).json({ error: 'Erro ao buscar configurações' });
@@ -630,6 +698,7 @@ app.get('/api/admin/config', checkAdmin, (req, res) => {
     });
 });
 
+// Salvar configurações
 app.post('/api/admin/config', checkAdmin, (req, res) => {
     const {
         pix_key, min_deposit, bonus_amount, min_withdraw, max_withdraw,
@@ -665,7 +734,7 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
         });
 });
 
-// ===== ROTAS DO USUÁRIO =====
+// Dados do usuário
 app.get('/api/user/:id', (req, res) => {
     db.get(`SELECT id, name, email, pix_key, cpf, phone, balance, status,
                    total_deposits, total_withdraws, total_bets, total_wins
