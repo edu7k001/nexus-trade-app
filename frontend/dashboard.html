@@ -153,6 +153,104 @@
             50% { opacity:0.5; transform:scale(1.2); }
         }
 
+        /* Mesa do Crupiê Virtual */
+        .dealer-table {
+            background: linear-gradient(135deg, #1a4d2e, #0f3b22);
+            border: 3px solid var(--primary-color);
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-around;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .dealer-avatar {
+            position: relative;
+            text-align: center;
+            flex: 0 0 150px;
+        }
+
+        .dealer-avatar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            background: #0d2819;
+            object-fit: cover;
+        }
+
+        .dealer-speech {
+            position: absolute;
+            top: -20px;
+            left: 130px;
+            background: white;
+            color: black;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 2px solid var(--primary-color);
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .dealer-speech::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid white;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--primary-color);
+            border-radius: 50px;
+            padding: 8px 20px;
+            min-width: 120px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-top: 5px;
+        }
+
         /* Seletor de jogos */
         .game-selector {
             display: flex;
@@ -703,7 +801,7 @@
 
         .hidden { display: none; }
 
-        /* Modal QR Code */
+        /* Modal QR Code (com botões de depósito) */
         .modal {
             display: none;
             position: fixed;
@@ -726,8 +824,10 @@
             border-radius: 30px;
             border: 2px solid var(--primary-color);
             text-align: center;
-            max-width: 400px;
+            max-width: 450px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .qr-image {
@@ -736,6 +836,45 @@
             background: white;
             padding: 10px;
             border-radius: 10px;
+        }
+
+        /* Botões de valor rápido */
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-amount-btn {
+            padding: 12px;
+            background: rgba(255,215,0,0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .quick-amount-btn:hover {
+            background: var(--primary-color);
+            color: #000;
+        }
+
+        .custom-amount-btn {
+            grid-column: span 3;
+            padding: 12px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .custom-amount-container {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -766,6 +905,36 @@
                 <div class="balance-value" id="user-balance">R$ 0,00</div>
             </div>
             <button class="logout-btn" onclick="logout()">SAIR</button>
+        </div>
+
+        <!-- Mesa do Crupiê Virtual -->
+        <div class="dealer-table">
+            <div class="dealer-avatar">
+                <img src="https://via.placeholder.com/150/ffd700/000000?text=CRUPIÊ" alt="Crupiê" id="dealer-img">
+                <div class="dealer-speech" id="dealer-speech">Bem-vindo à mesa!</div>
+            </div>
+            <div class="game-stats">
+                <div class="stat-card">
+                    <span class="stat-label">🎰 SLOT</span>
+                    <span class="stat-value" id="stat-slot">🍒 🍒 🍒</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">🎲 DADOS</span>
+                    <span class="stat-value" id="stat-dice">⚀ ⚁</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">✈️ AVIÃO</span>
+                    <span class="stat-value" id="stat-crash">1.00x</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">🎡 ROLETA</span>
+                    <span class="stat-value" id="stat-roulette">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">🃏 BLACKJACK</span>
+                    <span class="stat-value" id="stat-blackjack">?</span>
+                </div>
+            </div>
         </div>
 
         <!-- Seletor de jogos -->
@@ -962,14 +1131,37 @@
         <span>💰</span> DEPOSITAR
     </div>
 
-    <!-- Modal QR Code -->
+    <!-- Modal QR Code (com botões de depósito rápido) -->
     <div id="qr-modal" class="modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModal()">×</button>
-            <h3>DEPÓSITO PIX</h3>
+            <h3 style="color: var(--primary-color); margin-bottom: 20px;">💰 DEPÓSITO PIX</h3>
+            
+            <!-- Botões de valores rápidos -->
+            <div class="quick-amounts">
+                <button class="quick-amount-btn" onclick="setDepositAmount(20)">R$ 20</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(30)">R$ 30</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(50)">R$ 50</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(100)">R$ 100</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(200)">R$ 200</button>
+                <button class="custom-amount-btn" onclick="setCustomAmount()">OUTRO VALOR</button>
+            </div>
+            
+            <!-- Input para valor personalizado (inicialmente oculto) -->
+            <div id="custom-amount-container" class="custom-amount-container" style="display: none;">
+                <input type="number" id="custom-amount" class="bet-input" placeholder="Digite o valor" min="20" step="5" style="width: 100%;">
+            </div>
+            
+            <!-- QR Code e informações -->
             <img id="qr-code-img" class="qr-image" src="" alt="QR Code">
-            <p id="pix-key-display" style="word-break:break-all;"></p>
-            <button class="copy-btn" onclick="copyPixKey()">COPIAR CHAVE</button>
+            <p id="pix-key-display" style="word-break: break-all; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin: 15px 0;"></p>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="copy-btn" onclick="copyPixKey()" style="flex: 1;">📋 COPIAR CHAVE</button>
+                <button class="copy-btn" onclick="confirmDepositRequest()" style="flex: 1; background: var(--success-color);">✅ JÁ DEPOSITEI</button>
+            </div>
+            
+            <p style="margin-top: 15px; font-size: 12px; color: #aaa;">Após o depósito, clique em "JÁ DEPOSITEI" para notificar o admin</p>
         </div>
     </div>
 
@@ -988,8 +1180,34 @@
         let hasDeposited = localStorage.getItem('hasDeposited') === 'true';
         let showFirstTimePopup = !localStorage.getItem('firstDepositShown') && !hasDeposited;
 
+        // Variáveis para depósito
+        let selectedDepositAmount = null;
+
         // Nomes para notificações
         const fakeNames = ['João','Maria','Carlos','Ana','Pedro','Paula','Lucas','Fernanda','Rafael','Juliana'];
+
+        // Frases do crupiê
+        const dealerPhrases = [
+            "Boa sorte!",
+            "Quem será o próximo vencedor?",
+            "A roleta está girando...",
+            "O avião vai decolar!",
+            "Mais um giro!",
+            "Grande prêmio espera por você!",
+            "Os dados estão quentes hoje!",
+            "Blackjack! 21!",
+            "Que tal uma aposta?",
+            "A sorte está lançada!"
+        ];
+
+        // Últimos resultados
+        let lastResults = {
+            slot: ['🍒','🍒','🍒'],
+            dice: ['⚀','⚁'],
+            crash: '1.00x',
+            roulette: '0',
+            blackjack: '?'
+        };
 
         // ========== WEBSOCKET ==========
         function connectWebSocket() {
@@ -1058,6 +1276,39 @@
             document.getElementById('user-avatar').textContent = (userData.name || '👤').charAt(0);
             if (userData.balance > highestBalance) highestBalance = userData.balance;
             if (hasDeposited) checkBalanceConditions();
+        }
+
+        // ========== CRUPIÊ VIRTUAL ==========
+        // Iniciar falas do crupiê
+        setInterval(() => {
+            const randomIndex = Math.floor(Math.random() * dealerPhrases.length);
+            document.getElementById('dealer-speech').textContent = dealerPhrases[randomIndex];
+        }, 8000);
+
+        // Função para atualizar estatísticas
+        function updateGameStats(game, value) {
+            switch(game) {
+                case 'slot':
+                    lastResults.slot = value;
+                    document.getElementById('stat-slot').textContent = value.join(' ');
+                    break;
+                case 'dice':
+                    lastResults.dice = value;
+                    document.getElementById('stat-dice').textContent = value.join(' ');
+                    break;
+                case 'crash':
+                    lastResults.crash = value;
+                    document.getElementById('stat-crash').textContent = value;
+                    break;
+                case 'roulette':
+                    lastResults.roulette = value;
+                    document.getElementById('stat-roulette').textContent = value;
+                    break;
+                case 'blackjack':
+                    lastResults.blackjack = value;
+                    document.getElementById('stat-blackjack').textContent = value;
+                    break;
+            }
         }
 
         // ========== NOTIFICAÇÕES E CONTADOR ==========
@@ -1189,6 +1440,7 @@
                         resDiv.classList.add(data.win>0?'win':'lose');
                         resDiv.innerHTML = data.message;
                         addToHistory(data.message);
+                        updateGameStats('slot', data.symbols);
                     }, 1000);
                 } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
@@ -1225,8 +1477,10 @@
                         document.getElementById('dice1').classList.remove('rolling');
                         document.getElementById('dice2').classList.remove('rolling');
                         const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
-                        document.getElementById('dice1').textContent = faces[data.dice[0]-1];
-                        document.getElementById('dice2').textContent = faces[data.dice[1]-1];
+                        const d1sym = faces[data.dice[0]-1];
+                        const d2sym = faces[data.dice[1]-1];
+                        document.getElementById('dice1').textContent = d1sym;
+                        document.getElementById('dice2').textContent = d2sym;
                         userData.balance = data.newBalance;
                         updateUI();
                         const resDiv = document.getElementById('dice-result');
@@ -1234,6 +1488,7 @@
                         resDiv.classList.add(data.win>0?'win':'lose');
                         resDiv.innerHTML = data.message;
                         addToHistory(data.message);
+                        updateGameStats('dice', [d1sym, d2sym]);
                     }, 800);
                 } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
@@ -1249,7 +1504,6 @@
             if (bet > userData.balance) { showDepositPopup('zero'); return; }
             if (bet < 5) { alert('Aposta mínima: R$5'); return; }
 
-            // Deduzir a aposta localmente
             userData.balance -= bet;
             updateUI();
             crashBetAmount = bet;
@@ -1287,6 +1541,7 @@
             resDiv.classList.add('lose');
             resDiv.innerHTML = `💥 Perdeu R$ ${crashBetAmount.toFixed(2)}`;
             addToHistory(`Avião: perdeu R$ ${crashBetAmount.toFixed(2)}`);
+            updateGameStats('crash', crashMultiplier.toFixed(2) + 'x');
         }
 
         async function cashout() {
@@ -1313,6 +1568,7 @@
             resDiv.classList.add('win');
             resDiv.innerHTML = `💰 Retirada! ${crashMultiplier.toFixed(2)}x +R$ ${(win-crashBetAmount).toFixed(2)}`;
             addToHistory(`Avião: ganhou R$ ${(win-crashBetAmount).toFixed(2)}`);
+            updateGameStats('crash', crashMultiplier.toFixed(2) + 'x');
         }
 
         // Roleta
@@ -1353,6 +1609,7 @@
                     resDiv.classList.add(data.win>0?'win':'lose');
                     resDiv.innerHTML = data.message;
                     addToHistory(data.message);
+                    updateGameStats('roulette', data.result);
                 } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
                 }
@@ -1378,6 +1635,7 @@
                     document.getElementById('blackjack-player-hand').innerHTML = data.playerCards.map(c => `<div class="blackjack-card">${c}</div>`).join('');
                     document.getElementById('blackjack-dealer-hand').innerHTML = `<div class="blackjack-card">${data.dealerCard}</div><div class="blackjack-card">?</div>`;
                     document.getElementById('blackjack-result').classList.add('hidden');
+                    updateGameStats('blackjack', data.playerSum);
                 } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
                 }
@@ -1459,8 +1717,11 @@
             while (list.children.length > 10) list.removeChild(list.lastChild);
         }
 
-        // ========== DEPÓSITO ==========
+        // ========== DEPÓSITO (com botões rápidos) ==========
         window.showDepositModal = async function() {
+            selectedDepositAmount = null;
+            document.getElementById('custom-amount-container').style.display = 'none';
+            document.getElementById('custom-amount').value = '';
             document.getElementById('qr-modal').style.display = 'block';
             try {
                 const res = await fetch('/api/pix-qrcode');
@@ -1471,6 +1732,49 @@
                 } else alert('Erro ao carregar QR Code');
             } catch(e) { alert('Erro de conexão'); }
         };
+
+        function setDepositAmount(amount) {
+            selectedDepositAmount = amount;
+            document.getElementById('custom-amount-container').style.display = 'none';
+            alert(`Valor de R$ ${amount} selecionado! Copie a chave PIX e faça o pagamento.`);
+        }
+
+        function setCustomAmount() {
+            document.getElementById('custom-amount-container').style.display = 'block';
+            selectedDepositAmount = null;
+        }
+
+        async function confirmDepositRequest() {
+            if (!userData) {
+                alert('Usuário não logado');
+                return;
+            }
+            let amount = selectedDepositAmount;
+            if (!amount) {
+                amount = parseFloat(document.getElementById('custom-amount')?.value);
+                if (!amount || amount < 20) {
+                    alert('❌ Digite um valor válido (mínimo R$ 20)');
+                    return;
+                }
+            }
+            try {
+                const response = await fetch('/api/request-deposit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.id, amount })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('✅ ' + data.message);
+                    closeModal();
+                } else {
+                    alert('❌ ' + (data.error || 'Erro ao solicitar depósito'));
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
         window.closeModal = () => document.getElementById('qr-modal').style.display = 'none';
         window.copyPixKey = () => {
             navigator.clipboard.writeText(document.getElementById('pix-key-display').textContent);
