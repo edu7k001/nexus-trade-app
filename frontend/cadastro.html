@@ -4,121 +4,253 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Trade - Cadastro</title>
-    <link rel="stylesheet" href="style.css">
     <style>
-        .auth-container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 30px;
-            background-color: #161b22;
-            border-radius: 10px;
-            border: 1px solid #30363d;
+        :root {
+            --primary-color: #ffd700;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --dark-bg: #0a0b0e;
+            --card-bg: rgba(255,255,255,0.05);
         }
-        .auth-title {
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f2e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            color: var(--primary-color);
             text-align: center;
-            color: #58a6ff;
             margin-bottom: 30px;
+            font-size: 28px;
         }
-        .auth-form input {
-            width: 100%;
-            padding: 12px;
+
+        .form-group {
             margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #30363d;
-            background-color: #0d1117;
-            color: #c9d1d9;
         }
-        .auth-form button {
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 50px;
+            border: 1px solid var(--primary-color);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(255,215,0,0.3);
+        }
+
+        button {
             width: 100%;
             padding: 12px;
-            background-color: #238636;
-            color: white;
+            background: linear-gradient(135deg, var(--primary-color), #ffa500);
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 50px;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
         }
-        .auth-form button:hover {
-            background-color: #2ea043;
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255,215,0,0.3);
         }
-        .auth-links {
+
+        .login-link {
             text-align: center;
             margin-top: 20px;
+            color: #aaa;
         }
-        .auth-links a {
-            color: #58a6ff;
+
+        .login-link a {
+            color: var(--primary-color);
             text-decoration: none;
+            font-weight: 600;
         }
-        .auth-links a:hover {
+
+        .login-link a:hover {
             text-decoration: underline;
         }
-        .error-message {
-            color: #f85149;
+
+        .message {
+            margin-top: 15px;
             text-align: center;
-            margin-top: 10px;
+            font-weight: 500;
         }
-        .success-message {
-            color: #3fb950;
+
+        .logo {
             text-align: center;
-            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-height: 60px;
+        }
+
+        .ref-info {
+            background: rgba(255,215,0,0.1);
+            border: 1px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--primary-color);
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="auth-container">
-            <h1 class="auth-title">Criar Conta</h1>
-            
-            <form class="auth-form" id="registerForm">
-                <input type="text" id="name" placeholder="Nome completo" required>
-                <input type="email" id="email" placeholder="E-mail" required>
-                <input type="password" id="password" placeholder="Senha" required>
-                <input type="text" id="pixKey" placeholder="Chave PIX (opcional)">
-                
-                <button type="submit">CADASTRAR</button>
-            </form>
-            
-            <div id="message"></div>
-            
-            <div class="auth-links">
-                <p>Já tem uma conta? <a href="/login">Faça login</a></p>
-            </div>
+    <div class="register-container">
+        <div class="logo">
+            <img src="/images/logo.png" alt="Nexus Trade" onerror="this.style.display='none'">
+        </div>
+        <h2>📝 CRIAR CONTA</h2>
+        
+        <!-- Área de informação de afiliado (aparece se houver código na URL) -->
+        <div id="ref-info" class="ref-info" style="display: none;"></div>
+
+        <div class="form-group">
+            <input type="text" id="name" placeholder="Nome completo" autocomplete="name">
+        </div>
+        
+        <div class="form-group">
+            <input type="email" id="email" placeholder="E-mail" autocomplete="email">
+        </div>
+        
+        <div class="form-group">
+            <input type="password" id="password" placeholder="Senha" autocomplete="new-password">
+        </div>
+        
+        <div class="form-group">
+            <input type="text" id="cpf" placeholder="CPF (opcional)" autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+            <input type="text" id="phone" placeholder="Telefone (opcional)" autocomplete="tel">
+        </div>
+        
+        <div class="form-group">
+            <input type="text" id="pixKey" placeholder="Chave PIX (opcional)" autocomplete="off">
+        </div>
+        
+        <!-- Campo oculto para o código de afiliado -->
+        <input type="hidden" id="ref" value="">
+        
+        <button onclick="register()">CADASTRAR</button>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="login-link">
+            Já tem conta? <a href="/login">Faça login</a>
         </div>
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const pixKey = document.getElementById('pixKey').value;
-            
-            const messageDiv = document.getElementById('message');
-            
+        // Capturar código de afiliado da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        if (refCode) {
+            document.getElementById('ref').value = refCode;
+            // Mostrar informação visual
+            const refInfo = document.getElementById('ref-info');
+            refInfo.style.display = 'block';
+            refInfo.innerHTML = `🔗 Você está sendo indicado por um afiliado! Código: <strong>${refCode}</strong>`;
+        }
+
+        async function register() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const cpf = document.getElementById('cpf').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const pixKey = document.getElementById('pixKey').value.trim();
+            const ref = document.getElementById('ref').value;
+            const msgDiv = document.getElementById('message');
+
+            // Validações básicas
+            if (!name || !email || !password) {
+                msgDiv.innerHTML = '<span style="color: var(--danger-color);">Nome, e-mail e senha são obrigatórios</span>';
+                return;
+            }
+
+            // Validação simples de email
+            if (!email.includes('@') || !email.includes('.')) {
+                msgDiv.innerHTML = '<span style="color: var(--danger-color);">E-mail inválido</span>';
+                return;
+            }
+
+            if (password.length < 6) {
+                msgDiv.innerHTML = '<span style="color: var(--danger-color);">Senha deve ter pelo menos 6 caracteres</span>';
+                return;
+            }
+
+            // Validação de CPF (se preenchido, deve ter 11 dígitos)
+            if (cpf) {
+                const cpfClean = cpf.replace(/\D/g, '');
+                if (cpfClean.length !== 11) {
+                    msgDiv.innerHTML = '<span style="color: var(--danger-color);">CPF deve ter 11 dígitos ou deixar vazio</span>';
+                    return;
+                }
+            }
+
+            // Validação de telefone (se preenchido, deve ter 10 ou 11 dígitos)
+            if (phone) {
+                const phoneClean = phone.replace(/\D/g, '');
+                if (phoneClean.length < 10 || phoneClean.length > 11) {
+                    msgDiv.innerHTML = '<span style="color: var(--danger-color);">Telefone deve ter 10 ou 11 dígitos ou deixar vazio</span>';
+                    return;
+                }
+            }
+
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password, pixKey })
+                    body: JSON.stringify({ name, email, password, cpf, phone, pixKey, ref })
                 });
-                
                 const data = await response.json();
-                
+
                 if (response.ok) {
-                    messageDiv.innerHTML = `<p class="success-message">✅ ${data.message}</p>`;
+                    msgDiv.innerHTML = '<span style="color: var(--success-color);">✅ Cadastro realizado! Redirecionando para login...</span>';
                     setTimeout(() => {
                         window.location.href = '/login';
                     }, 2000);
                 } else {
-                    messageDiv.innerHTML = `<p class="error-message">❌ ${data.error}</p>`;
+                    msgDiv.innerHTML = `<span style="color: var(--danger-color);">❌ ${data.error || 'Erro no cadastro'}</span>`;
                 }
             } catch (error) {
-                messageDiv.innerHTML = `<p class="error-message">❌ Erro de conexão</p>`;
+                msgDiv.innerHTML = '<span style="color: var(--danger-color);">❌ Erro de conexão</span>';
             }
-        });
+        }
     </script>
 </body>
 </html>

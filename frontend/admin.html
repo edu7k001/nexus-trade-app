@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Trade - Painel Administrativo</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
-        
+        :root {
+            --primary-color: #ffd700;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --dark-bg: #0a0b0e;
+            --card-bg: rgba(255,255,255,0.03);
+            --text-color: #fff;
+            --text-secondary: #aaa;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,8 +23,8 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0a0b0e 0%, #1a1f2e 100%);
-            color: #fff;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f2e 100%);
+            color: var(--text-color);
             min-height: 100vh;
         }
 
@@ -30,7 +38,7 @@
         .admin-header {
             background: rgba(255,255,255,0.05);
             backdrop-filter: blur(10px);
-            border: 1px solid #ffd700;
+            border: 1px solid var(--primary-color);
             border-radius: 20px;
             padding: 20px 30px;
             margin-bottom: 30px;
@@ -41,7 +49,7 @@
         }
 
         .admin-title {
-            color: #ffd700;
+            color: var(--primary-color);
             font-size: 28px;
             font-weight: 700;
             display: flex;
@@ -50,7 +58,7 @@
         }
 
         .admin-title span {
-            background: #ffd700;
+            background: var(--primary-color);
             color: #000;
             padding: 8px 15px;
             border-radius: 50px;
@@ -59,7 +67,7 @@
 
         .logout-btn {
             background: rgba(255,255,255,0.1);
-            border: 1px solid #ffd700;
+            border: 1px solid var(--primary-color);
             color: white;
             padding: 12px 30px;
             border-radius: 50px;
@@ -69,8 +77,8 @@
         }
 
         .logout-btn:hover {
-            background: #dc3545;
-            border-color: #dc3545;
+            background: var(--danger-color);
+            border-color: var(--danger-color);
             transform: translateY(-2px);
         }
 
@@ -83,7 +91,7 @@
         }
 
         .stat-card {
-            background: rgba(255,255,255,0.05);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,215,0,0.2);
             border-radius: 15px;
@@ -93,41 +101,27 @@
             overflow: hidden;
         }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
-            animation: shine 3s infinite;
-        }
-
         .stat-card:hover {
             transform: translateY(-5px);
-            border-color: #ffd700;
+            border-color: var(--primary-color);
             box-shadow: 0 10px 30px rgba(255,215,0,0.2);
         }
 
         .stat-title {
-            color: #aaa;
+            color: var(--text-secondary);
             font-size: 14px;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .stat-value {
             font-size: 32px;
             font-weight: 700;
-            color: #ffd700;
+            color: var(--primary-color);
         }
 
         .stat-sub {
             font-size: 12px;
-            color: #28a745;
+            color: var(--success-color);
             margin-top: 5px;
         }
 
@@ -141,7 +135,7 @@
 
         .tab {
             padding: 15px 30px;
-            background: rgba(255,255,255,0.05);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,215,0,0.2);
             border-radius: 50px;
@@ -154,22 +148,18 @@
         }
 
         .tab:hover {
-            border-color: #ffd700;
+            border-color: var(--primary-color);
             transform: translateY(-2px);
         }
 
         .tab.active {
-            background: linear-gradient(135deg, #ffd700, #ffa500);
-            border-color: #ffd700;
-            color: #000;
-        }
-
-        .tab.active i {
+            background: linear-gradient(135deg, var(--primary-color), #ffa500);
+            border-color: var(--primary-color);
             color: #000;
         }
 
         .badge {
-            background: #dc3545;
+            background: var(--danger-color);
             color: white;
             padding: 3px 8px;
             border-radius: 50px;
@@ -188,7 +178,7 @@
 
         /* Tabelas */
         .table-container {
-            background: rgba(255,255,255,0.03);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,215,0,0.2);
             border-radius: 20px;
@@ -204,8 +194,8 @@
         th {
             text-align: left;
             padding: 15px 10px;
-            color: #ffd700;
-            border-bottom: 2px solid #ffd700;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
             font-weight: 600;
         }
 
@@ -231,18 +221,19 @@
             color: white;
         }
 
-        .status-confirmado {
-            background: #28a745;
+        .status-confirmado,
+        .status-ativo {
+            background: var(--success-color);
             color: white;
         }
 
         .status-rejeitado {
-            background: #dc3545;
+            background: var(--danger-color);
             color: white;
         }
 
         .status-admin {
-            background: #ffd700;
+            background: var(--primary-color);
             color: #000;
         }
 
@@ -259,7 +250,7 @@
         }
 
         .btn-confirm {
-            background: #28a745;
+            background: var(--success-color);
             color: white;
         }
 
@@ -270,7 +261,7 @@
         }
 
         .btn-reject {
-            background: #dc3545;
+            background: var(--danger-color);
             color: white;
         }
 
@@ -287,76 +278,6 @@
 
         .btn-view:hover {
             background: #138496;
-        }
-
-        .btn-edit {
-            background: #ffd700;
-            color: #000;
-        }
-
-        /* Formulários */
-        .config-form {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,215,0,0.2);
-            border-radius: 20px;
-            padding: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #ffd700;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255,215,0,0.2);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .save-btn {
-            background: linear-gradient(135deg, #ffd700, #ffa500);
-            color: #000;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-
-        .save-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255,215,0,0.3);
         }
 
         /* Modal */
@@ -380,8 +301,8 @@
             background: linear-gradient(135deg, #1a1f2f, #0b0f1a);
             padding: 40px;
             border-radius: 30px;
-            border: 2px solid #ffd700;
-            max-width: 600px;
+            border: 2px solid var(--primary-color);
+            max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
@@ -393,22 +314,47 @@
             right: 20px;
             background: none;
             border: none;
-            color: #ffd700;
+            color: var(--primary-color);
             font-size: 24px;
             cursor: pointer;
         }
 
         .modal-title {
-            color: #ffd700;
+            color: var(--primary-color);
             font-size: 24px;
             margin-bottom: 30px;
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #ffd700;
+        .bet-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid var(--primary-color);
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, var(--primary-color), #ffa500);
+            color: #000;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
         }
 
         /* Notificações em tempo real */
@@ -418,8 +364,8 @@
             right: 20px;
             background: rgba(26,31,47,0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid #ffd700;
-            border-left: 4px solid #ffd700;
+            border: 1px solid var(--primary-color);
+            border-left: 4px solid var(--primary-color);
             border-radius: 10px;
             padding: 15px 20px;
             color: white;
@@ -428,40 +374,9 @@
             max-width: 350px;
         }
 
-        .live-notification.success {
-            border-left-color: #28a745;
-        }
-
-        .live-notification.warning {
-            border-left-color: #fd7e14;
-        }
-
-        .live-notification.error {
-            border-left-color: #dc3545;
-        }
-
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .tabs {
-                flex-direction: column;
-            }
-            
-            .tab {
-                width: 100%;
-            }
         }
     </style>
 </head>
@@ -473,9 +388,7 @@
                 👑 NEXUS TRADE ADMIN
                 <span id="admin-name">Carregando...</span>
             </div>
-            <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> SAIR
-            </button>
+            <button class="logout-btn" onclick="logout()">SAIR</button>
         </div>
 
         <!-- Cards de estatísticas -->
@@ -510,53 +423,17 @@
 
         <!-- Abas -->
         <div class="tabs">
-            <div class="tab active" onclick="showTab('dashboard')">
-                <i class="fas fa-chart-line"></i> DASHBOARD
-            </div>
-            <div class="tab" onclick="showTab('deposits')">
-                <i class="fas fa-arrow-down"></i> DEPÓSITOS
-                <span class="badge" id="deposits-badge">0</span>
-            </div>
-            <div class="tab" onclick="showTab('withdraws')">
-                <i class="fas fa-arrow-up"></i> SAQUES
-                <span class="badge" id="withdraws-badge">0</span>
-            </div>
-            <div class="tab" onclick="showTab('users')">
-                <i class="fas fa-users"></i> USUÁRIOS
-            </div>
-            <div class="tab" onclick="showTab('history')">
-                <i class="fas fa-history"></i> HISTÓRICO
-            </div>
-            <div class="tab" onclick="showTab('config')">
-                <i class="fas fa-cog"></i> CONFIGURAÇÕES
-            </div>
-        </div>
-
-        <!-- Aba: Dashboard -->
-        <div id="dashboard-tab" class="tab-content active">
-            <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">📊 RESUMO DO SISTEMA</h3>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px;">
-                        <h4 style="color: #ffd700; margin-bottom: 15px;">🏦 FINANCEIRO</h4>
-                        <p>Total Depositado: <strong id="total-deposits">R$ 0</strong></p>
-                        <p>Total Sacado: <strong id="total-withdraws">R$ 0</strong></p>
-                        <p>Lucro da Casa: <strong id="house-profit">R$ 0</strong></p>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px;">
-                        <h4 style="color: #ffd700; margin-bottom: 15px;">👥 USUÁRIOS</h4>
-                        <p>Usuários Ativos: <strong id="active-users">0</strong></p>
-                        <p>Novos Hoje: <strong>0</strong></p>
-                        <p>Online Agora: <strong id="online-now">0</strong></p>
-                    </div>
-                </div>
-            </div>
+            <div class="tab active" onclick="showTab('deposits')">💰 DEPÓSITOS <span class="badge" id="deposits-badge">0</span></div>
+            <div class="tab" onclick="showTab('withdraws')">💸 SAQUES <span class="badge" id="withdraws-badge">0</span></div>
+            <div class="tab" onclick="showTab('users')">👥 USUÁRIOS</div>
+            <div class="tab" onclick="showTab('history')">📊 HISTÓRICO</div>
+            <div class="tab" onclick="showTab('config')">⚙️ CONFIGURAÇÕES</div>
         </div>
 
         <!-- Aba: Depósitos -->
-        <div id="deposits-tab" class="tab-content">
+        <div id="deposits-tab" class="tab-content active">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">💰 DEPÓSITOS PENDENTES</h3>
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;">DEPÓSITOS PENDENTES</h3>
                 <table>
                     <thead>
                         <tr>
@@ -579,7 +456,7 @@
         <!-- Aba: Saques -->
         <div id="withdraws-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">💸 SAQUES PENDENTES</h3>
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;">SAQUES PENDENTES</h3>
                 <table>
                     <thead>
                         <tr>
@@ -589,14 +466,13 @@
                             <th>CPF</th>
                             <th>CHAVE PIX</th>
                             <th>VALOR</th>
-                            <th>LÍQUIDO</th>
                             <th>DATA</th>
                             <th>STATUS</th>
                             <th>AÇÕES</th>
                         </tr>
                     </thead>
                     <tbody id="withdraws-list">
-                        <tr><td colspan="10" style="text-align: center;">Carregando...</td></tr>
+                        <tr><td colspan="9" style="text-align: center;">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -605,11 +481,8 @@
         <!-- Aba: Usuários -->
         <div id="users-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">👥 TODOS OS USUÁRIOS</h3>
-                <div style="margin-bottom: 20px;">
-                    <input type="text" id="user-search" placeholder="🔍 Buscar por nome ou email..." 
-                           style="padding: 10px; width: 300px; background: rgba(255,255,255,0.05); border: 1px solid #ffd700; border-radius: 50px; color: white;">
-                </div>
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;">TODOS OS USUÁRIOS</h3>
+                <input type="text" id="user-search" placeholder="🔍 Buscar por nome ou email..." style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid var(--primary-color); background: rgba(255,255,255,0.1); color: white;">
                 <table>
                     <thead>
                         <tr>
@@ -623,11 +496,13 @@
                             <th>SAQUES</th>
                             <th>APOSTAS</th>
                             <th>VITÓRIAS</th>
+                            <th>RTP</th>
+                            <th>COMISSÃO</th>
                             <th>AÇÕES</th>
                         </tr>
                     </thead>
                     <tbody id="users-list">
-                        <tr><td colspan="11" style="text-align: center;">Carregando...</td></tr>
+                        <tr><td colspan="13" style="text-align: center;">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -636,7 +511,7 @@
         <!-- Aba: Histórico -->
         <div id="history-tab" class="tab-content">
             <div class="table-container">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">📋 HISTÓRICO DE JOGADAS</h3>
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;">HISTÓRICO DE JOGADAS</h3>
                 <table>
                     <thead>
                         <tr>
@@ -645,13 +520,12 @@
                             <th>JOGO</th>
                             <th>APOSTA</th>
                             <th>GANHO</th>
-                            <th>MULTIPLICADOR</th>
                             <th>RESULTADO</th>
                             <th>DATA</th>
                         </tr>
                     </thead>
                     <tbody id="history-list">
-                        <tr><td colspan="8" style="text-align: center;">Carregando...</td></tr>
+                        <tr><td colspan="7" style="text-align: center;">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -659,98 +533,140 @@
 
         <!-- Aba: Configurações -->
         <div id="config-tab" class="tab-content">
-            <div class="config-form">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">⚙️ CONFIGURAÇÕES DO SISTEMA</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>CHAVE PIX (Admin)</label>
-                        <input type="text" id="pix_key" placeholder="Chave PIX para recebimentos">
+            <div class="table-container">
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;">CONFIGURAÇÕES DO SISTEMA</h3>
+                <form id="config-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <!-- Coluna 1 -->
+                    <div>
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">💰 PIX e Depósitos</h4>
+                        <div class="form-group">
+                            <label>CHAVE PIX (Admin)</label>
+                            <input type="text" id="pix_key" class="bet-input">
+                        </div>
+                        <div class="form-group">
+                            <label>DEPÓSITO MÍNIMO (R$)</label>
+                            <input type="number" id="min_deposit" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>BÔNUS DEPÓSITO (R$)</label>
+                            <input type="number" id="bonus_amount" class="bet-input" step="0.01">
+                        </div>
+                        <h4 style="color: var(--primary-color); margin: 20px 0 15px;">💸 Saques</h4>
+                        <div class="form-group">
+                            <label>SAQUE MÍNIMO (R$)</label>
+                            <input type="number" id="min_withdraw" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>SAQUE MÁXIMO (R$)</label>
+                            <input type="number" id="max_withdraw" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>TAXA DE SAQUE (%)</label>
+                            <input type="number" id="withdraw_fee" class="bet-input" step="0.1">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>DEPÓSITO MÍNIMO (R$)</label>
-                        <input type="number" id="min_deposit" min="1" step="1">
-                    </div>
-                    <div class="form-group">
-                        <label>BÔNUS DEPÓSITO (R$)</label>
-                        <input type="number" id="bonus_amount" min="0" step="1">
-                    </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>SAQUE MÍNIMO (R$)</label>
-                        <input type="number" id="min_withdraw" min="1" step="1">
+                    <!-- Coluna 2 -->
+                    <div>
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">🎰 Limites de Apostas</h4>
+                        <div class="form-group">
+                            <label>APOSTA MÍNIMA SLOTS (R$)</label>
+                            <input type="number" id="slot_min_bet" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>APOSTA MÍNIMA DADOS (R$)</label>
+                            <input type="number" id="dice_min_bet" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>APOSTA MÍNIMA AVIÃO (R$)</label>
+                            <input type="number" id="crash_min_bet" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>APOSTA MÍNIMA ROLETA (R$)</label>
+                            <input type="number" id="roulette_min_bet" class="bet-input" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>APOSTA MÍNIMA BLACKJACK (R$)</label>
+                            <input type="number" id="blackjack_min_bet" class="bet-input" step="0.01">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>SAQUE MÁXIMO (R$)</label>
-                        <input type="number" id="max_withdraw" min="1" step="1">
-                    </div>
-                    <div class="form-group">
-                        <label>TAXA DE SAQUE (%)</label>
-                        <input type="number" id="withdraw_fee" min="0" max="100" step="0.1">
-                    </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>APOSTA MÍNIMA SLOTS (R$)</label>
-                        <input type="number" id="slot_min_bet" min="1" step="1">
+                    <!-- Coluna 3 -->
+                    <div>
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">🎲 RTP (%)</h4>
+                        <div class="form-group">
+                            <label>RTP SLOTS</label>
+                            <input type="number" id="slot_rtp" class="bet-input" min="1" max="100" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>RTP DADOS</label>
+                            <input type="number" id="dice_rtp" class="bet-input" min="1" max="100" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>RTP AVIÃO</label>
+                            <input type="number" id="crash_rtp" class="bet-input" min="1" max="100" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>RTP ROLETA</label>
+                            <input type="number" id="roulette_rtp" class="bet-input" min="1" max="100" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>RTP BLACKJACK</label>
+                            <input type="number" id="blackjack_rtp" class="bet-input" min="1" max="100" step="1">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>APOSTA MÍNIMA DADOS (R$)</label>
-                        <input type="number" id="dice_min_bet" min="1" step="1">
-                    </div>
-                    <div class="form-group">
-                        <label>APOSTA MÍNIMA AVIÃO (R$)</label>
-                        <input type="number" id="crash_min_bet" min="1" step="1">
-                    </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>RTP SLOTS (%)</label>
-                        <input type="number" id="slot_rtp" min="1" max="100" step="1">
+                    <!-- Coluna 4 -->
+                    <div>
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">⚙️ Volatilidade</h4>
+                        <div class="form-group">
+                            <label>VOLATILIDADE SLOTS</label>
+                            <select id="slot_volatility" class="bet-input">
+                                <option value="low">Baixa</option>
+                                <option value="medium" selected>Média</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>VOLATILIDADE DADOS</label>
+                            <select id="dice_volatility" class="bet-input">
+                                <option value="low">Baixa</option>
+                                <option value="medium" selected>Média</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>VOLATILIDADE AVIÃO</label>
+                            <select id="crash_volatility" class="bet-input">
+                                <option value="low">Baixa</option>
+                                <option value="medium" selected>Média</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+                        <h4 style="color: var(--primary-color); margin: 20px 0 15px;">🎨 Personalização</h4>
+                        <div class="form-group">
+                            <label>NOME DO SITE</label>
+                            <input type="text" id="site_name" class="bet-input">
+                        </div>
+                        <div class="form-group">
+                            <label>E-MAIL DE CONTATO</label>
+                            <input type="email" id="contact_email" class="bet-input">
+                        </div>
+                        <div class="form-group">
+                            <label>COR PRIMÁRIA (hex)</label>
+                            <input type="color" id="primary_color" class="bet-input" value="#ffd700">
+                        </div>
+                        <div class="form-group">
+                            <label>CAMINHO DO LOGO</label>
+                            <input type="text" id="logo_path" class="bet-input" placeholder="/images/logo.png">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>RTP DADOS (%)</label>
-                        <input type="number" id="dice_rtp" min="1" max="100" step="1">
-                    </div>
-                    <div class="form-group">
-                        <label>RTP AVIÃO (%)</label>
-                        <input type="number" id="crash_rtp" min="1" max="100" step="1">
-                    </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>VOLATILIDADE SLOTS</label>
-                        <select id="slot_volatility">
-                            <option value="low">Baixa (vitórias frequentes)</option>
-                            <option value="medium">Média (equilibrado)</option>
-                            <option value="high">Alta (prêmios grandes)</option>
-                        </select>
+                    <div style="grid-column: 1 / -1; text-align: center;">
+                        <button type="button" class="save-btn" onclick="saveConfig()">💾 SALVAR CONFIGURAÇÕES</button>
+                        <div id="config-message" style="margin-top: 15px;"></div>
                     </div>
-                    <div class="form-group">
-                        <label>VOLATILIDADE DADOS</label>
-                        <select id="dice_volatility">
-                            <option value="low">Baixa</option>
-                            <option value="medium">Média</option>
-                            <option value="high">Alta</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>VOLATILIDADE AVIÃO</label>
-                        <select id="crash_volatility">
-                            <option value="low">Baixa</option>
-                            <option value="medium">Média</option>
-                            <option value="high">Alta</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button class="save-btn" onclick="saveConfig()">💾 SALVAR CONFIGURAÇÕES</button>
-                <div id="config-message" style="margin-top: 15px;"></div>
+                </form>
             </div>
         </div>
     </div>
@@ -765,40 +681,35 @@
     </div>
 
     <script>
-        // Configuração WebSocket
+        // ========== CONFIGURAÇÃO INICIAL ==========
         let ws = null;
         let adminData = JSON.parse(localStorage.getItem('user') || '{}');
         let reconnectAttempts = 0;
 
-        // Verificar login
         if (!adminData.id || adminData.status !== 'Admin') {
             window.location.href = '/login';
         }
 
         document.getElementById('admin-name').textContent = adminData.name;
 
-        // ===== WEBSOCKET =====
+        // ========== WEBSOCKET ==========
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}`;
-            
             ws = new WebSocket(wsUrl);
-            
             ws.onopen = () => {
                 console.log('✅ Conectado ao WebSocket');
                 reconnectAttempts = 0;
-                // Autenticar como admin
-                ws.send(JSON.stringify({ 
-                    type: 'auth', 
-                    userId: 'admin_' + adminData.id 
-                }));
+                ws.send(JSON.stringify({ type: 'auth', userId: 'admin_' + adminData.id }));
             };
-            
             ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                handleRealTimeUpdate(data);
+                try {
+                    const data = JSON.parse(event.data);
+                    handleRealTimeUpdate(data);
+                } catch (error) {
+                    console.error('Erro ao processar mensagem WebSocket:', error);
+                }
             };
-            
             ws.onclose = () => {
                 console.log('❌ WebSocket desconectado');
                 if (reconnectAttempts < 5) {
@@ -811,30 +722,17 @@
         function handleRealTimeUpdate(data) {
             switch(data.type) {
                 case 'new_deposit':
-                    showNotification('💰 Novo depósito solicitado!', 'warning');
-                    loadDeposits();
-                    loadStats();
-                    break;
-                    
+                case 'deposit_processed':
                 case 'new_withdraw':
-                    showNotification('💸 Novo saque solicitado!', 'warning');
-                    loadWithdraws();
-                    loadStats();
-                    break;
-                    
                 case 'withdraw_approved':
                 case 'withdraw_rejected':
-                    loadWithdraws();
                     loadStats();
-                    break;
-                    
-                case 'deposit_confirmed':
                     loadDeposits();
-                    loadStats();
+                    loadWithdraws();
                     break;
-                    
                 case 'config_updated':
-                    showNotification('⚙️ Configurações atualizadas!', 'success');
+                    showNotification('⚙️ Configurações atualizadas por outro admin', 'info');
+                    loadConfig();
                     break;
             }
         }
@@ -842,27 +740,23 @@
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `live-notification ${type}`;
-            notification.innerHTML = message;
+            notification.textContent = message;
             document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
+            setTimeout(() => notification.remove(), 4000);
         }
 
-        // ===== AUTENTICAÇÃO =====
+        // ========== AUTENTICAÇÃO ==========
         function getAuthHeader() {
             return 'Basic ' + btoa(`${adminData.email}:admin123`);
         }
 
-        // ===== ESTATÍSTICAS =====
+        // ========== ESTATÍSTICAS ==========
         async function loadStats() {
             try {
                 const response = await fetch('/api/admin/stats', {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const data = await response.json();
-                
                 if (response.ok) {
                     document.getElementById('total-users').textContent = data.total_users || 0;
                     document.getElementById('total-balance').textContent = `R$ ${(data.total_balance || 0).toFixed(2)}`;
@@ -872,12 +766,7 @@
                     document.getElementById('pending-withdraws-value').textContent = `R$ ${(data.pending_withdraws_value || 0).toFixed(2)}`;
                     document.getElementById('total-bets').textContent = `R$ ${(data.total_bets || 0).toFixed(2)}`;
                     document.getElementById('total-wins').textContent = `R$ ${(data.total_wins || 0).toFixed(2)}`;
-                    document.getElementById('total-deposits').textContent = `R$ ${(data.total_deposits || 0).toFixed(2)}`;
-                    document.getElementById('total-withdraws').textContent = `R$ ${(data.total_withdraws || 0).toFixed(2)}`;
-                    document.getElementById('house-profit').textContent = `R$ ${((data.total_bets || 0) - (data.total_wins || 0)).toFixed(2)}`;
-                    document.getElementById('active-users').textContent = data.active_users || 0;
                     
-                    // Atualizar badges
                     document.getElementById('deposits-badge').textContent = data.pending_deposits || 0;
                     document.getElementById('withdraws-badge').textContent = data.pending_withdraws || 0;
                 }
@@ -886,21 +775,18 @@
             }
         }
 
-        // ===== DEPÓSITOS =====
+        // ========== DEPÓSITOS ==========
         async function loadDeposits() {
             try {
                 const response = await fetch('/api/admin/deposits', {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const deposits = await response.json();
-                
                 const tbody = document.getElementById('deposits-list');
-                
                 if (!response.ok || deposits.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum depósito pendente</td></tr>';
                     return;
                 }
-                
                 tbody.innerHTML = deposits.map(d => `
                     <tr>
                         <td>#${d.id}</td>
@@ -921,9 +807,13 @@
         }
 
         async function confirmDeposit(id) {
-            const amount = prompt('Digite o valor a ser creditado (com bônus se houver):');
-            if (!amount) return;
-            
+            const input = prompt('Digite o valor a ser creditado (com bônus):', '');
+            if (!input) return;
+            const amount = parseFloat(input.replace(',', '.'));
+            if (isNaN(amount) || amount <= 0) {
+                alert('❌ Valor inválido');
+                return;
+            }
             try {
                 const response = await fetch(`/api/admin/confirm-deposit/${id}`, {
                     method: 'POST',
@@ -931,13 +821,11 @@
                         'Content-Type': 'application/json',
                         'Authorization': getAuthHeader()
                     },
-                    body: JSON.stringify({ amount: parseFloat(amount) })
+                    body: JSON.stringify({ amount })
                 });
-                
                 const data = await response.json();
-                
                 if (response.ok) {
-                    alert('✅ Depósito confirmado!');
+                    alert('✅ ' + (data.message || 'Depósito confirmado!'));
                     loadDeposits();
                     loadStats();
                 } else {
@@ -950,13 +838,11 @@
 
         async function rejectDeposit(id) {
             if (!confirm('Rejeitar este depósito?')) return;
-            
             try {
                 const response = await fetch(`/api/admin/reject-deposit/${id}`, {
                     method: 'POST',
                     headers: { 'Authorization': getAuthHeader() }
                 });
-                
                 if (response.ok) {
                     alert('Depósito rejeitado!');
                     loadDeposits();
@@ -968,21 +854,18 @@
             }
         }
 
-        // ===== SAQUES =====
+        // ========== SAQUES ==========
         async function loadWithdraws() {
             try {
                 const response = await fetch('/api/admin/withdraws', {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const withdraws = await response.json();
-                
                 const tbody = document.getElementById('withdraws-list');
-                
                 if (!response.ok || withdraws.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Nenhum saque pendente</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Nenhum saque pendente</td></tr>';
                     return;
                 }
-                
                 tbody.innerHTML = withdraws.map(w => `
                     <tr>
                         <td>#${w.id}</td>
@@ -991,7 +874,6 @@
                         <td>${w.cpf || '-'}</td>
                         <td>${w.pix_key}</td>
                         <td><strong>R$ ${w.amount.toFixed(2)}</strong></td>
-                        <td>R$ ${(w.net_amount || w.amount).toFixed(2)}</td>
                         <td>${new Date(w.created_at).toLocaleString()}</td>
                         <td><span class="status-badge status-pendente">PENDENTE</span></td>
                         <td>
@@ -1001,21 +883,18 @@
                     </tr>
                 `).join('');
             } catch (error) {
-                document.getElementById('withdraws-list').innerHTML = '<tr><td colspan="10" style="text-align: center;">Erro ao carregar</td></tr>';
+                document.getElementById('withdraws-list').innerHTML = '<tr><td colspan="9" style="text-align: center;">Erro ao carregar</td></tr>';
             }
         }
 
         async function approveWithdraw(id) {
             if (!confirm('Aprovar este saque? O valor será debitado da conta do usuário.')) return;
-            
             try {
                 const response = await fetch(`/api/admin/withdraw/${id}/approve`, {
                     method: 'POST',
                     headers: { 'Authorization': getAuthHeader() }
                 });
-                
                 const data = await response.json();
-                
                 if (response.ok) {
                     alert('✅ Saque aprovado!');
                     loadWithdraws();
@@ -1030,7 +909,6 @@
 
         async function rejectWithdraw(id) {
             const reason = prompt('Motivo da rejeição (opcional):');
-            
             try {
                 const response = await fetch(`/api/admin/withdraw/${id}/reject`, {
                     method: 'POST',
@@ -1040,7 +918,6 @@
                     },
                     body: JSON.stringify({ reason: reason || '' })
                 });
-                
                 if (response.ok) {
                     alert('Saque rejeitado!');
                     loadWithdraws();
@@ -1052,21 +929,18 @@
             }
         }
 
-        // ===== USUÁRIOS =====
+        // ========== USUÁRIOS ==========
         async function loadUsers() {
             try {
                 const response = await fetch('/api/admin/users', {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const users = await response.json();
-                
                 const tbody = document.getElementById('users-list');
-                
                 if (!response.ok || users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Nenhum usuário encontrado</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="13" style="text-align: center;">Nenhum usuário encontrado</td></tr>';
                     return;
                 }
-                
                 tbody.innerHTML = users.map(u => `
                     <tr>
                         <td>#${u.id}</td>
@@ -1074,74 +948,87 @@
                         <td>${u.email}</td>
                         <td>${u.cpf || '-'}</td>
                         <td><strong>R$ ${u.balance.toFixed(2)}</strong></td>
-                        <td><span class="status-badge ${u.status === 'Admin' ? 'status-admin' : u.status === 'Ativo' ? 'status-confirmado' : 'status-pendente'}">${u.status}</span></td>
+                        <td><span class="status-badge ${u.status === 'Ativo' ? 'status-confirmado' : 'status-pendente'}">${u.status}</span></td>
                         <td>R$ ${(u.total_deposits || 0).toFixed(2)}</td>
                         <td>R$ ${(u.total_withdraws || 0).toFixed(2)}</td>
                         <td>R$ ${(u.total_bets || 0).toFixed(2)}</td>
                         <td>R$ ${(u.total_wins || 0).toFixed(2)}</td>
+                        <td>${u.rtp_individual ? u.rtp_individual + '%' : 'Global'}</td>
+                        <td>${u.affiliate_commission || 10}%</td>
                         <td>
                             <button class="action-btn btn-view" onclick="editUser(${u.id})">✏️ EDITAR</button>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                document.getElementById('users-list').innerHTML = '<tr><td colspan="11" style="text-align: center;">Erro ao carregar</td></tr>';
+                document.getElementById('users-list').innerHTML = '<tr><td colspan="13" style="text-align: center;">Erro ao carregar</td></tr>';
             }
         }
 
+        // Busca de usuários
+        document.getElementById('user-search')?.addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#users-list tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        });
+
+        // Editar usuário
         async function editUser(userId) {
             try {
                 const response = await fetch(`/api/admin/user/${userId}`, {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const user = await response.json();
-                
                 if (!response.ok) {
                     alert('Erro ao carregar usuário');
                     return;
                 }
-                
                 const form = document.getElementById('user-form');
                 form.innerHTML = `
                     <div class="form-group">
                         <label>Nome</label>
-                        <input type="text" id="edit-name" value="${user.name || ''}">
+                        <input type="text" id="edit-name" class="bet-input" value="${user.name || ''}">
                     </div>
                     <div class="form-group">
                         <label>Email</label>
-                        <input type="email" id="edit-email" value="${user.email || ''}">
+                        <input type="email" id="edit-email" class="bet-input" value="${user.email || ''}">
                     </div>
                     <div class="form-group">
                         <label>CPF</label>
-                        <input type="text" id="edit-cpf" value="${user.cpf || ''}">
+                        <input type="text" id="edit-cpf" class="bet-input" value="${user.cpf || ''}">
                     </div>
                     <div class="form-group">
                         <label>Telefone</label>
-                        <input type="text" id="edit-phone" value="${user.phone || ''}">
+                        <input type="text" id="edit-phone" class="bet-input" value="${user.phone || ''}">
                     </div>
                     <div class="form-group">
                         <label>Chave PIX</label>
-                        <input type="text" id="edit-pix" value="${user.pix_key || ''}">
+                        <input type="text" id="edit-pix" class="bet-input" value="${user.pix_key || ''}">
                     </div>
                     <div class="form-group">
                         <label>Saldo</label>
-                        <input type="number" id="edit-balance" value="${user.balance || 0}" step="0.01">
+                        <input type="number" id="edit-balance" class="bet-input" value="${user.balance || 0}" step="0.01">
                     </div>
                     <div class="form-group">
                         <label>Status</label>
-                        <select id="edit-status">
+                        <select id="edit-status" class="bet-input">
                             <option value="Pendente" ${user.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
                             <option value="Ativo" ${user.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
-                            <option value="Bloqueado" ${user.status === 'Bloqueado' ? 'selected' : ''}>Bloqueado</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>RTP Individual (%)</label>
-                        <input type="number" id="edit-rtp" value="${user.rtp_individual || ''}" min="1" max="100" step="1">
+                        <input type="number" id="edit-rtp" class="bet-input" value="${user.rtp_individual || ''}" min="1" max="100" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Comissão de Afiliado (%)</label>
+                        <input type="number" id="edit-aff-commission" class="bet-input" value="${user.affiliate_commission || 10}" min="0" max="100" step="0.1">
                     </div>
                     <button class="save-btn" onclick="updateUser(${user.id})">💾 SALVAR ALTERAÇÕES</button>
                 `;
-                
                 document.getElementById('user-modal').style.display = 'block';
             } catch (error) {
                 alert('Erro ao carregar usuário');
@@ -1150,16 +1037,22 @@
 
         async function updateUser(userId) {
             const updates = {
-                name: document.getElementById('edit-name').value,
-                email: document.getElementById('edit-email').value,
-                cpf: document.getElementById('edit-cpf').value,
-                phone: document.getElementById('edit-phone').value,
-                pix_key: document.getElementById('edit-pix').value,
-                balance: parseFloat(document.getElementById('edit-balance').value),
-                status: document.getElementById('edit-status').value,
-                rtp_individual: document.getElementById('edit-rtp').value ? parseFloat(document.getElementById('edit-rtp').value) : null
+                name: document.getElementById('edit-name')?.value,
+                email: document.getElementById('edit-email')?.value,
+                cpf: document.getElementById('edit-cpf')?.value,
+                phone: document.getElementById('edit-phone')?.value,
+                pix_key: document.getElementById('edit-pix')?.value,
+                balance: parseFloat(document.getElementById('edit-balance')?.value || 0),
+                status: document.getElementById('edit-status')?.value,
+                rtp_individual: document.getElementById('edit-rtp')?.value ? parseFloat(document.getElementById('edit-rtp').value) : null,
+                affiliate_commission: parseFloat(document.getElementById('edit-aff-commission')?.value || 10)
             };
-            
+
+            if (!updates.name || !updates.email) {
+                alert('❌ Nome e e-mail são obrigatórios');
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/admin/user/${userId}/update`, {
                     method: 'POST',
@@ -1169,11 +1062,9 @@
                     },
                     body: JSON.stringify(updates)
                 });
-                
                 const data = await response.json();
-                
                 if (response.ok) {
-                    alert('✅ Usuário atualizado!');
+                    alert('✅ ' + (data.message || 'Usuário atualizado!'));
                     closeUserModal();
                     loadUsers();
                 } else {
@@ -1188,62 +1079,65 @@
             document.getElementById('user-modal').style.display = 'none';
         }
 
-        // ===== HISTÓRICO =====
+        // ========== HISTÓRICO ==========
         async function loadHistory() {
             try {
                 const response = await fetch('/api/admin/recent-history', {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const history = await response.json();
-                
                 const tbody = document.getElementById('history-list');
-                
                 if (!response.ok || history.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum histórico encontrado</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum histórico encontrado</td></tr>';
                     return;
                 }
-                
                 tbody.innerHTML = history.map(h => `
                     <tr>
                         <td>#${h.id}</td>
                         <td>${h.name}</td>
-                        <td>${h.game === 'slot' ? '🎰 Caça-níquel' : h.game === 'dice' ? '🎲 Dados' : '✈️ Aviãozinho'}</td>
+                        <td>${h.game === 'slot' ? '🎰 Caça-níquel' : h.game === 'dice' ? '🎲 Dados' : h.game === 'crash' ? '✈️ Avião' : h.game === 'roulette' ? '🎡 Roleta' : '🃏 Blackjack'}</td>
                         <td>R$ ${h.bet_amount.toFixed(2)}</td>
                         <td>${h.win_amount > 0 ? `R$ ${h.win_amount.toFixed(2)}` : '-'}</td>
-                        <td>${h.multiplier ? h.multiplier.toFixed(2) + 'x' : '-'}</td>
                         <td>${h.result}</td>
                         <td>${new Date(h.created_at).toLocaleString()}</td>
                     </tr>
                 `).join('');
             } catch (error) {
-                document.getElementById('history-list').innerHTML = '<tr><td colspan="8" style="text-align: center;">Erro ao carregar</td></tr>';
+                document.getElementById('history-list').innerHTML = '<tr><td colspan="7" style="text-align: center;">Erro ao carregar</td></tr>';
             }
         }
 
-        // ===== CONFIGURAÇÕES =====
+        // ========== CONFIGURAÇÕES ==========
         async function loadConfig() {
             try {
                 const response = await fetch('/api/admin/config', {
                     headers: { 'Authorization': getAuthHeader() }
                 });
                 const config = await response.json();
-                
                 if (response.ok) {
                     document.getElementById('pix_key').value = config.pix_key || '';
                     document.getElementById('min_deposit').value = config.min_deposit || 20;
                     document.getElementById('bonus_amount').value = config.bonus_amount || 30;
-                    document.getElementById('min_withdraw').value = config.min_withdraw || 50;
+                    document.getElementById('min_withdraw').value = config.min_withdraw || 150;
                     document.getElementById('max_withdraw').value = config.max_withdraw || 5000;
                     document.getElementById('withdraw_fee').value = config.withdraw_fee || 0;
-                    document.getElementById('slot_min_bet').value = config.slot_min_bet || 0,50;
-                    document.getElementById('dice_min_bet').value = config.dice_min_bet || 0,5;
-                    document.getElementById('crash_min_bet').value = config.crash_min_bet || 1;
-                    document.getElementById('slot_rtp').value = config.slot_rtp || 45;
-                    document.getElementById('dice_rtp').value = config.dice_rtp || 45;
-                    document.getElementById('crash_rtp').value = config.crash_rtp || 45;
+                    document.getElementById('slot_min_bet').value = config.slot_min_bet || 5;
+                    document.getElementById('dice_min_bet').value = config.dice_min_bet || 5;
+                    document.getElementById('crash_min_bet').value = config.crash_min_bet || 5;
+                    document.getElementById('roulette_min_bet').value = config.roulette_min_bet || 5;
+                    document.getElementById('blackjack_min_bet').value = config.blackjack_min_bet || 5;
+                    document.getElementById('slot_rtp').value = config.slot_rtp || 95;
+                    document.getElementById('dice_rtp').value = config.dice_rtp || 95;
+                    document.getElementById('crash_rtp').value = config.crash_rtp || 95;
+                    document.getElementById('roulette_rtp').value = config.roulette_rtp || 95;
+                    document.getElementById('blackjack_rtp').value = config.blackjack_rtp || 95;
                     document.getElementById('slot_volatility').value = config.slot_volatility || 'medium';
                     document.getElementById('dice_volatility').value = config.dice_volatility || 'medium';
                     document.getElementById('crash_volatility').value = config.crash_volatility || 'medium';
+                    document.getElementById('site_name').value = config.site_name || 'Nexus Trade';
+                    document.getElementById('contact_email').value = config.contact_email || 'suporte@nexustrade.com';
+                    document.getElementById('primary_color').value = config.primary_color || '#ffd700';
+                    document.getElementById('logo_path').value = config.logo_path || '/images/logo.png';
                 }
             } catch (error) {
                 console.error('Erro ao carregar configurações:', error);
@@ -1261,12 +1155,20 @@
                 slot_min_bet: parseFloat(document.getElementById('slot_min_bet').value),
                 dice_min_bet: parseFloat(document.getElementById('dice_min_bet').value),
                 crash_min_bet: parseFloat(document.getElementById('crash_min_bet').value),
+                roulette_min_bet: parseFloat(document.getElementById('roulette_min_bet').value),
+                blackjack_min_bet: parseFloat(document.getElementById('blackjack_min_bet').value),
                 slot_rtp: parseFloat(document.getElementById('slot_rtp').value),
                 dice_rtp: parseFloat(document.getElementById('dice_rtp').value),
                 crash_rtp: parseFloat(document.getElementById('crash_rtp').value),
+                roulette_rtp: parseFloat(document.getElementById('roulette_rtp').value),
+                blackjack_rtp: parseFloat(document.getElementById('blackjack_rtp').value),
                 slot_volatility: document.getElementById('slot_volatility').value,
                 dice_volatility: document.getElementById('dice_volatility').value,
-                crash_volatility: document.getElementById('crash_volatility').value
+                crash_volatility: document.getElementById('crash_volatility').value,
+                site_name: document.getElementById('site_name').value,
+                contact_email: document.getElementById('contact_email').value,
+                primary_color: document.getElementById('primary_color').value,
+                logo_path: document.getElementById('logo_path').value
             };
             
             try {
@@ -1278,39 +1180,26 @@
                     },
                     body: JSON.stringify(config)
                 });
-                
                 const data = await response.json();
-                
                 if (response.ok) {
-                    document.getElementById('config-message').innerHTML = '<p style="color: #28a745;">✅ Configurações salvas com sucesso!</p>';
-                    setTimeout(() => {
-                        document.getElementById('config-message').innerHTML = '';
-                    }, 3000);
+                    document.getElementById('config-message').innerHTML = '<p style="color: var(--success-color);">✅ Configurações salvas!</p>';
+                    setTimeout(() => document.getElementById('config-message').innerHTML = '', 3000);
                 } else {
-                    document.getElementById('config-message').innerHTML = `<p style="color: #dc3545;">❌ ${data.error}</p>`;
+                    document.getElementById('config-message').innerHTML = `<p style="color: var(--danger-color);">❌ ${data.error}</p>`;
                 }
             } catch (error) {
-                document.getElementById('config-message').innerHTML = '<p style="color: #dc3545;">❌ Erro de conexão</p>';
+                document.getElementById('config-message').innerHTML = '<p style="color: var(--danger-color);">❌ Erro de conexão</p>';
             }
         }
 
-        // ===== NAVEGAÇÃO =====
+        // ========== NAVEGAÇÃO ==========
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            const tabIndex = {
-                'dashboard': 0,
-                'deposits': 1,
-                'withdraws': 2,
-                'users': 3,
-                'history': 4,
-                'config': 5
-            }[tab];
-            
-            document.querySelectorAll('.tab')[tabIndex].classList.add('active');
+            const tabs = ['deposits', 'withdraws', 'users', 'history', 'config'];
+            const index = tabs.indexOf(tab);
+            document.querySelectorAll('.tab')[index].classList.add('active');
             document.getElementById(tab + '-tab').classList.add('active');
-            
             switch(tab) {
                 case 'deposits': loadDeposits(); break;
                 case 'withdraws': loadWithdraws(); break;
@@ -1320,24 +1209,13 @@
             }
         }
 
-        // ===== BUSCA DE USUÁRIOS =====
-        document.getElementById('user-search')?.addEventListener('input', (e) => {
-            const search = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#users-list tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(search) ? '' : 'none';
-            });
-        });
-
-        // ===== LOGOUT =====
+        // ========== LOGOUT ==========
         function logout() {
             localStorage.removeItem('user');
             window.location.href = '/login';
         }
 
-        // ===== INICIALIZAÇÃO =====
+        // ========== INICIALIZAÇÃO ==========
         connectWebSocket();
         loadStats();
         loadDeposits();
