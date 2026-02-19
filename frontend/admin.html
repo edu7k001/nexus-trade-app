@@ -3,970 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Trade - Painel Administrativo</title>
-    <style>
-        :root {
-            --primary-color: #ffd700;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --dark-bg: #0a0b0e;
-            --card-bg: rgba(255,255,255,0.03);
-            --text-color: #fff;
-            --text-secondary: #aaa;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f2e 100%);
-            color: var(--text-color);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        .admin-header {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--primary-color);
-            border-radius: 20px;
-            padding: 20px 30px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
-        .admin-title {
-            color: var(--primary-color);
-            font-size: 28px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .admin-title span {
-            background: var(--primary-color);
-            color: #000;
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-size: 14px;
-        }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--primary-color);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .logout-btn:hover {
-            background: var(--danger-color);
-            border-color: var(--danger-color);
-            transform: translateY(-2px);
-        }
-
-        /* Cards de estatísticas */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,215,0,0.2);
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 10px 30px rgba(255,215,0,0.2);
-        }
-
-        .stat-title {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .stat-sub {
-            font-size: 12px;
-            color: var(--success-color);
-            margin-top: 5px;
-        }
-
-        /* Abas */
-        .tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            padding: 15px 30px;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,215,0,0.2);
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tab:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, var(--primary-color), #ffa500);
-            border-color: var(--primary-color);
-            color: #000;
-        }
-
-        .badge {
-            background: var(--danger-color);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 50px;
-            font-size: 12px;
-            margin-left: 8px;
-        }
-
-        /* Conteúdo das abas */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Tabelas */
-        .table-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,215,0,0.2);
-            border-radius: 20px;
-            padding: 25px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 15px 10px;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            font-weight: 600;
-        }
-
-        td {
-            padding: 15px 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        tr:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .status-pendente {
-            background: #fd7e14;
-            color: white;
-        }
-
-        .status-confirmado,
-        .status-ativo {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .status-rejeitado {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .status-admin {
-            background: var(--primary-color);
-            color: #000;
-        }
-
-        /* Botões de ação */
-        .action-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 0 5px;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-
-        .btn-confirm {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .btn-confirm:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
-        }
-
-        .btn-reject {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn-reject:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(220,53,69,0.3);
-        }
-
-        .btn-view {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-view:hover {
-            background: #138496;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px);
-            z-index: 5000;
-        }
-
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #1a1f2f, #0b0f1a);
-            padding: 40px;
-            border-radius: 30px;
-            border: 2px solid var(--primary-color);
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .modal-title {
-            color: var(--primary-color);
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
-
-        .bet-input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid var(--primary-color);
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-
-        .save-btn {
-            background: linear-gradient(135deg, var(--primary-color), #ffa500);
-            color: #000;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        /* Notificações em tempo real */
-        .live-notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(26,31,47,0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--primary-color);
-            border-left: 4px solid var(--primary-color);
-            border-radius: 10px;
-            padding: 15px 20px;
-            color: white;
-            z-index: 6000;
-            animation: slideInRight 0.3s;
-            max-width: 350px;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-    </style>
+    <title>Nexus Trade - Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="admin-header">
-            <div class="admin-title">
-                👑 NEXUS TRADE ADMIN
-                <span id="admin-name">Carregando...</span>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://via.placeholder.com/120x40/1e293b/f5b342?text=ADMIN" alt="Nexus Trade">
+                <span>PAINEL ADMIN</span>
             </div>
-            <button class="logout-btn" onclick="logout()">SAIR</button>
-        </div>
-
-        <!-- Cards de estatísticas -->
-        <div class="stats-grid" id="stats-cards">
-            <div class="stat-card">
-                <div class="stat-title">👥 USUÁRIOS TOTAIS</div>
-                <div class="stat-value" id="total-users">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">💰 SALDO TOTAL</div>
-                <div class="stat-value" id="total-balance">R$ 0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">📥 DEPÓSITOS PENDENTES</div>
-                <div class="stat-value" id="pending-deposits">0</div>
-                <div class="stat-sub" id="pending-deposits-value">R$ 0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">📤 SAQUES PENDENTES</div>
-                <div class="stat-value" id="pending-withdraws">0</div>
-                <div class="stat-sub" id="pending-withdraws-value">R$ 0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">🎰 TOTAL APOSTADO</div>
-                <div class="stat-value" id="total-bets">R$ 0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">🏆 TOTAL PAGO</div>
-                <div class="stat-value" id="total-wins">R$ 0</div>
+            <div class="user-area">
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">A</div>
+                    <span class="user-name" id="user-name">Admin</span>
+                    <i class="fas fa-sign-out-alt logout-btn" onclick="logout()"></i>
+                </div>
             </div>
         </div>
+    </header>
 
-        <!-- Abas -->
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('deposits')">💰 DEPÓSITOS <span class="badge" id="deposits-badge">0</span></div>
-            <div class="tab" onclick="showTab('withdraws')">💸 SAQUES <span class="badge" id="withdraws-badge">0</span></div>
-            <div class="tab" onclick="showTab('users')">👥 USUÁRIOS</div>
-            <div class="tab" onclick="showTab('history')">📊 HISTÓRICO</div>
-            <div class="tab" onclick="showTab('config')">⚙️ CONFIGURAÇÕES</div>
+    <main class="container">
+        <!-- Abas de navegação -->
+        <div class="tabs" style="display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('deposits')">💰 Depósitos</button>
+            <button class="tab" onclick="showTab('withdraws')">💸 Saques</button>
+            <button class="tab" onclick="showTab('users')">👥 Usuários</button>
+            <button class="tab" onclick="showTab('history')">📜 Histórico</button>
+            <button class="tab" onclick="showTab('config')">⚙️ Configurações</button>
         </div>
 
-        <!-- Aba: Depósitos -->
-        <div id="deposits-tab" class="tab-content active">
-            <div class="table-container">
-                <h3 style="color: var(--primary-color); margin-bottom: 20px;">DEPÓSITOS PENDENTES</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>USUÁRIO</th>
-                            <th>EMAIL</th>
-                            <th>VALOR</th>
-                            <th>DATA</th>
-                            <th>STATUS</th>
-                            <th>AÇÕES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deposits-list">
-                        <tr><td colspan="7" style="text-align: center;">Carregando...</td></tr>
-                    </tbody>
-                </table>
+        <!-- Conteúdo das abas -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px;">
+                <div class="stat-card" style="background:var(--card-bg); padding:20px; border-radius:15px;">
+                    <div style="color:var(--gray);">Usuários Totais</div>
+                    <div style="font-size:32px; color:var(--primary);" id="total-users">0</div>
+                </div>
+                <div class="stat-card" style="background:var(--card-bg); padding:20px; border-radius:15px;">
+                    <div style="color:var(--gray);">Saldo Total</div>
+                    <div style="font-size:32px; color:var(--primary);" id="total-balance">R$ 0</div>
+                </div>
+                <div class="stat-card" style="background:var(--card-bg); padding:20px; border-radius:15px;">
+                    <div style="color:var(--gray);">Depósitos Pendentes</div>
+                    <div style="font-size:32px; color:var(--primary);" id="pending-deposits">0</div>
+                </div>
+                <div class="stat-card" style="background:var(--card-bg); padding:20px; border-radius:15px;">
+                    <div style="color:var(--gray);">Saques Pendentes</div>
+                    <div style="font-size:32px; color:var(--primary);" id="pending-withdraws">0</div>
+                </div>
             </div>
         </div>
 
-        <!-- Aba: Saques -->
-        <div id="withdraws-tab" class="tab-content">
-            <div class="table-container">
-                <h3 style="color: var(--primary-color); margin-bottom: 20px;">SAQUES PENDENTES</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>USUÁRIO</th>
-                            <th>NOME</th>
-                            <th>CPF</th>
-                            <th>CHAVE PIX</th>
-                            <th>VALOR</th>
-                            <th>DATA</th>
-                            <th>STATUS</th>
-                            <th>AÇÕES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdraws-list">
-                        <tr><td colspan="9" style="text-align: center;">Carregando...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div id="deposits-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Depósitos Pendentes</h2>
+            <table style="width:100%; background:var(--card-bg); border-radius:15px; overflow:hidden;">
+                <thead style="background:var(--primary); color:black;">
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="deposits-list">
+                    <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Aba: Usuários -->
-        <div id="users-tab" class="tab-content">
-            <div class="table-container">
-                <h3 style="color: var(--primary-color); margin-bottom: 20px;">TODOS OS USUÁRIOS</h3>
-                <input type="text" id="user-search" placeholder="🔍 Buscar por nome ou email..." style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid var(--primary-color); background: rgba(255,255,255,0.1); color: white;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>NOME</th>
-                            <th>EMAIL</th>
-                            <th>CPF</th>
-                            <th>SALDO</th>
-                            <th>STATUS</th>
-                            <th>DEPÓSITOS</th>
-                            <th>SAQUES</th>
-                            <th>APOSTAS</th>
-                            <th>VITÓRIAS</th>
-                            <th>RTP</th>
-                            <th>COMISSÃO</th>
-                            <th>AÇÕES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-list">
-                        <tr><td colspan="13" style="text-align: center;">Carregando...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div id="withdraws-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Saques Pendentes</h2>
+            <table style="width:100%; background:var(--card-bg); border-radius:15px; overflow:hidden;">
+                <thead style="background:var(--primary); color:black;">
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Valor</th>
+                        <th>Chave PIX</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="withdraws-list">
+                    <tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Aba: Histórico -->
-        <div id="history-tab" class="tab-content">
-            <div class="table-container">
-                <h3 style="color: var(--primary-color); margin-bottom: 20px;">HISTÓRICO DE JOGADAS</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>USUÁRIO</th>
-                            <th>JOGO</th>
-                            <th>APOSTA</th>
-                            <th>GANHO</th>
-                            <th>RESULTADO</th>
-                            <th>DATA</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-list">
-                        <tr><td colspan="7" style="text-align: center;">Carregando...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div id="users-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Usuários</h2>
+            <input type="text" id="user-search" placeholder="Buscar por nome ou email..." style="width:100%; padding:10px; margin-bottom:20px; border-radius:10px; border:1px solid var(--border); background:var(--card-bg); color:white;">
+            <table style="width:100%; background:var(--card-bg); border-radius:15px; overflow:hidden;">
+                <thead style="background:var(--primary); color:black;">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Saldo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="users-list">
+                    <tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Aba: Configurações -->
-        <div id="config-tab" class="tab-content">
-            <div class="table-container">
-                <h3 style="color: var(--primary-color); margin-bottom: 20px;">CONFIGURAÇÕES DO SISTEMA</h3>
-                <form id="config-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <!-- Coluna 1 -->
+        <div id="history-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Histórico de Jogadas</h2>
+            <table style="width:100%; background:var(--card-bg); border-radius:15px; overflow:hidden;">
+                <thead style="background:var(--primary); color:black;">
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Jogo</th>
+                        <th>Aposta</th>
+                        <th>Resultado</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody id="history-list">
+                    <tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="config-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Configurações</h2>
+            <div style="background:var(--card-bg); padding:30px; border-radius:15px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px;">
                     <div>
-                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">💰 PIX e Depósitos</h4>
-                        <div class="form-group">
-                            <label>CHAVE PIX (Admin)</label>
-                            <input type="text" id="pix_key" class="bet-input">
-                        </div>
-                        <div class="form-group">
-                            <label>DEPÓSITO MÍNIMO (R$)</label>
-                            <input type="number" id="min_deposit" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>BÔNUS DEPÓSITO (R$)</label>
-                            <input type="number" id="bonus_amount" class="bet-input" step="0.01">
-                        </div>
-                        <h4 style="color: var(--primary-color); margin: 20px 0 15px;">💸 Saques</h4>
-                        <div class="form-group">
-                            <label>SAQUE MÍNIMO (R$)</label>
-                            <input type="number" id="min_withdraw" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>SAQUE MÁXIMO (R$)</label>
-                            <input type="number" id="max_withdraw" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>TAXA DE SAQUE (%)</label>
-                            <input type="number" id="withdraw_fee" class="bet-input" step="0.1">
-                        </div>
+                        <label style="color:var(--primary);">Chave PIX</label>
+                        <input type="text" id="pix_key" class="bet-input" style="width:100%;">
                     </div>
-
-                    <!-- Coluna 2 -->
                     <div>
-                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">🎰 Limites de Apostas</h4>
-                        <div class="form-group">
-                            <label>APOSTA MÍNIMA SLOTS (R$)</label>
-                            <input type="number" id="slot_min_bet" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>APOSTA MÍNIMA DADOS (R$)</label>
-                            <input type="number" id="dice_min_bet" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>APOSTA MÍNIMA AVIÃO (R$)</label>
-                            <input type="number" id="crash_min_bet" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>APOSTA MÍNIMA ROLETA (R$)</label>
-                            <input type="number" id="roulette_min_bet" class="bet-input" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>APOSTA MÍNIMA BLACKJACK (R$)</label>
-                            <input type="number" id="blackjack_min_bet" class="bet-input" step="0.01">
-                        </div>
+                        <label style="color:var(--primary);">Depósito Mínimo (R$)</label>
+                        <input type="number" id="min_deposit" class="bet-input" style="width:100%;">
                     </div>
-
-                    <!-- Coluna 3 -->
                     <div>
-                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">🎲 RTP (%)</h4>
-                        <div class="form-group">
-                            <label>RTP SLOTS</label>
-                            <input type="number" id="slot_rtp" class="bet-input" min="1" max="100" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label>RTP DADOS</label>
-                            <input type="number" id="dice_rtp" class="bet-input" min="1" max="100" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label>RTP AVIÃO</label>
-                            <input type="number" id="crash_rtp" class="bet-input" min="1" max="100" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label>RTP ROLETA</label>
-                            <input type="number" id="roulette_rtp" class="bet-input" min="1" max="100" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label>RTP BLACKJACK</label>
-                            <input type="number" id="blackjack_rtp" class="bet-input" min="1" max="100" step="1">
-                        </div>
+                        <label style="color:var(--primary);">Bônus Depósito (R$)</label>
+                        <input type="number" id="bonus_amount" class="bet-input" style="width:100%;">
                     </div>
-
-                    <!-- Coluna 4 -->
                     <div>
-                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">⚙️ Volatilidade</h4>
-                        <div class="form-group">
-                            <label>VOLATILIDADE SLOTS</label>
-                            <select id="slot_volatility" class="bet-input">
-                                <option value="low">Baixa</option>
-                                <option value="medium" selected>Média</option>
-                                <option value="high">Alta</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>VOLATILIDADE DADOS</label>
-                            <select id="dice_volatility" class="bet-input">
-                                <option value="low">Baixa</option>
-                                <option value="medium" selected>Média</option>
-                                <option value="high">Alta</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>VOLATILIDADE AVIÃO</label>
-                            <select id="crash_volatility" class="bet-input">
-                                <option value="low">Baixa</option>
-                                <option value="medium" selected>Média</option>
-                                <option value="high">Alta</option>
-                            </select>
-                        </div>
-                        <h4 style="color: var(--primary-color); margin: 20px 0 15px;">🎨 Personalização</h4>
-                        <div class="form-group">
-                            <label>NOME DO SITE</label>
-                            <input type="text" id="site_name" class="bet-input">
-                        </div>
-                        <div class="form-group">
-                            <label>E-MAIL DE CONTATO</label>
-                            <input type="email" id="contact_email" class="bet-input">
-                        </div>
-                        <div class="form-group">
-                            <label>COR PRIMÁRIA (hex)</label>
-                            <input type="color" id="primary_color" class="bet-input" value="#ffd700">
-                        </div>
-                        <div class="form-group">
-                            <label>CAMINHO DO LOGO</label>
-                            <input type="text" id="logo_path" class="bet-input" placeholder="/images/logo.png">
-                        </div>
+                        <label style="color:var(--primary);">Saque Mínimo (R$)</label>
+                        <input type="number" id="min_withdraw" class="bet-input" style="width:100%;">
                     </div>
-
-                    <div style="grid-column: 1 / -1; text-align: center;">
-                        <button type="button" class="save-btn" onclick="saveConfig()">💾 SALVAR CONFIGURAÇÕES</button>
-                        <div id="config-message" style="margin-top: 15px;"></div>
+                    <div>
+                        <label style="color:var(--primary);">Saque Máximo (R$)</label>
+                        <input type="number" id="max_withdraw" class="bet-input" style="width:100%;">
                     </div>
-                </form>
+                    <div>
+                        <label style="color:var(--primary);">Taxa de Saque (%)</label>
+                        <input type="number" id="withdraw_fee" class="bet-input" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">Aposta Mínima Slots</label>
+                        <input type="number" id="slot_min_bet" class="bet-input" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">Aposta Mínima Dados</label>
+                        <input type="number" id="dice_min_bet" class="bet-input" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">Aposta Mínima Avião</label>
+                        <input type="number" id="crash_min_bet" class="bet-input" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">Aposta Mínima Roleta</label>
+                        <input type="number" id="roulette_min_bet" class="bet-input" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">Aposta Mínima Blackjack</label>
+                        <input type="number" id="blackjack_min_bet" class="bet-input" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">RTP Slots (%)</label>
+                        <input type="number" id="slot_rtp" class="bet-input" style="width:100%;" min="1" max="100">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">RTP Dados (%)</label>
+                        <input type="number" id="dice_rtp" class="bet-input" style="width:100%;" min="1" max="100">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">RTP Avião (%)</label>
+                        <input type="number" id="crash_rtp" class="bet-input" style="width:100%;" min="1" max="100">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">RTP Roleta (%)</label>
+                        <input type="number" id="roulette_rtp" class="bet-input" style="width:100%;" min="1" max="100">
+                    </div>
+                    <div>
+                        <label style="color:var(--primary);">RTP Blackjack (%)</label>
+                        <input type="number" id="blackjack_rtp" class="bet-input" style="width:100%;" min="1" max="100">
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:30px;" onclick="saveConfig()">Salvar Configurações</button>
+                <div id="config-message" style="margin-top:15px;"></div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Modal de edição de usuário -->
-    <div id="user-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeUserModal()">×</button>
-            <h3 class="modal-title">✏️ EDITAR USUÁRIO</h3>
+    <!-- Modal de edição de usuário (simples) -->
+    <div id="user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000;">
+        <div style="background:var(--card-bg); max-width:500px; margin:50px auto; padding:30px; border-radius:20px;">
+            <h3 style="color:var(--primary);">Editar Usuário</h3>
             <div id="user-form"></div>
+            <button class="btn btn-primary" onclick="closeUserModal()">Fechar</button>
         </div>
     </div>
 
     <script>
-        // ========== CONFIGURAÇÃO INICIAL ==========
-        let ws = null;
         let adminData = JSON.parse(localStorage.getItem('user') || '{}');
-        let reconnectAttempts = 0;
-
         if (!adminData.id || adminData.status !== 'Admin') {
             window.location.href = '/login';
         }
+        document.getElementById('user-name').textContent = adminData.name || 'Admin';
+        document.getElementById('user-avatar').textContent = (adminData.name || 'A').charAt(0);
 
-        document.getElementById('admin-name').textContent = adminData.name;
-
-        // ========== WEBSOCKET ==========
-        function connectWebSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}`;
-            ws = new WebSocket(wsUrl);
-            ws.onopen = () => {
-                console.log('✅ Conectado ao WebSocket');
-                reconnectAttempts = 0;
-                ws.send(JSON.stringify({ type: 'auth', userId: 'admin_' + adminData.id }));
-            };
-            ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    handleRealTimeUpdate(data);
-                } catch (error) {
-                    console.error('Erro ao processar mensagem WebSocket:', error);
-                }
-            };
-            ws.onclose = () => {
-                console.log('❌ WebSocket desconectado');
-                if (reconnectAttempts < 5) {
-                    reconnectAttempts++;
-                    setTimeout(connectWebSocket, 3000);
-                }
-            };
-        }
-
-        function handleRealTimeUpdate(data) {
-            switch(data.type) {
-                case 'new_deposit':
-                case 'deposit_processed':
-                case 'new_withdraw':
-                case 'withdraw_approved':
-                case 'withdraw_rejected':
-                    loadStats();
-                    loadDeposits();
-                    loadWithdraws();
-                    break;
-                case 'config_updated':
-                    showNotification('⚙️ Configurações atualizadas por outro admin', 'info');
-                    loadConfig();
-                    break;
-            }
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `live-notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 4000);
-        }
-
-        // ========== AUTENTICAÇÃO ==========
         function getAuthHeader() {
             return 'Basic ' + btoa(`${adminData.email}:admin123`);
         }
 
-        // ========== ESTATÍSTICAS ==========
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            event.target.classList.add('active');
+            document.getElementById(tab+'-tab').style.display = 'block';
+            if (tab === 'dashboard') loadStats();
+            if (tab === 'deposits') loadDeposits();
+            if (tab === 'withdraws') loadWithdraws();
+            if (tab === 'users') loadUsers();
+            if (tab === 'history') loadHistory();
+            if (tab === 'config') loadConfig();
+        }
+
         async function loadStats() {
             try {
-                const response = await fetch('/api/admin/stats', {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const data = await response.json();
-                if (response.ok) {
+                const res = await fetch('/api/admin/stats', { headers: { 'Authorization': getAuthHeader() } });
+                const data = await res.json();
+                if (res.ok) {
                     document.getElementById('total-users').textContent = data.total_users || 0;
                     document.getElementById('total-balance').textContent = `R$ ${(data.total_balance || 0).toFixed(2)}`;
                     document.getElementById('pending-deposits').textContent = data.pending_deposits || 0;
-                    document.getElementById('pending-deposits-value').textContent = `R$ ${(data.pending_deposits_value || 0).toFixed(2)}`;
                     document.getElementById('pending-withdraws').textContent = data.pending_withdraws || 0;
-                    document.getElementById('pending-withdraws-value').textContent = `R$ ${(data.pending_withdraws_value || 0).toFixed(2)}`;
-                    document.getElementById('total-bets').textContent = `R$ ${(data.total_bets || 0).toFixed(2)}`;
-                    document.getElementById('total-wins').textContent = `R$ ${(data.total_wins || 0).toFixed(2)}`;
-                    
-                    document.getElementById('deposits-badge').textContent = data.pending_deposits || 0;
-                    document.getElementById('withdraws-badge').textContent = data.pending_withdraws || 0;
                 }
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-            }
+            } catch(e) { console.error(e); }
         }
 
-        // ========== DEPÓSITOS ==========
         async function loadDeposits() {
             try {
-                const response = await fetch('/api/admin/deposits', {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const deposits = await response.json();
-                const tbody = document.getElementById('deposits-list');
-                if (!response.ok || deposits.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum depósito pendente</td></tr>';
-                    return;
+                const res = await fetch('/api/admin/deposits', { headers: { 'Authorization': getAuthHeader() } });
+                const data = await res.json();
+                let html = '';
+                if (data.length) {
+                    data.forEach(d => {
+                        html += `<tr>
+                            <td>#${d.id}</td>
+                            <td>${d.name}</td>
+                            <td>R$ ${d.amount.toFixed(2)}</td>
+                            <td>${new Date(d.created_at).toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="confirmDeposit(${d.id})">Confirmar</button>
+                                <button class="btn btn-outline" onclick="rejectDeposit(${d.id})">Rejeitar</button>
+                            </td>
+                        </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="5">Nenhum depósito pendente</td></tr>';
                 }
-                tbody.innerHTML = deposits.map(d => `
-                    <tr>
-                        <td>#${d.id}</td>
-                        <td>${d.name}</td>
-                        <td>${d.email}</td>
-                        <td><strong>R$ ${d.amount.toFixed(2)}</strong></td>
-                        <td>${new Date(d.created_at).toLocaleString()}</td>
-                        <td><span class="status-badge status-pendente">PENDENTE</span></td>
-                        <td>
-                            <button class="action-btn btn-confirm" onclick="confirmDeposit(${d.id})">✅ CONFIRMAR</button>
-                            <button class="action-btn btn-reject" onclick="rejectDeposit(${d.id})">❌ REJEITAR</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                document.getElementById('deposits-list').innerHTML = '<tr><td colspan="7" style="text-align: center;">Erro ao carregar</td></tr>';
-            }
+                document.getElementById('deposits-list').innerHTML = html;
+            } catch(e) { console.error(e); }
         }
 
         async function confirmDeposit(id) {
-            const input = prompt('Digite o valor a ser creditado (com bônus):', '');
-            if (!input) return;
-            const amount = parseFloat(input.replace(',', '.'));
-            if (isNaN(amount) || amount <= 0) {
-                alert('❌ Valor inválido');
-                return;
-            }
-            try {
-                const response = await fetch(`/api/admin/confirm-deposit/${id}`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ amount })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    alert('✅ ' + (data.message || 'Depósito confirmado!'));
-                    loadDeposits();
-                    loadStats();
-                } else {
-                    alert('❌ ' + (data.error || 'Erro ao confirmar'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
+            const amount = prompt('Valor a creditar (com bônus):');
+            if (!amount) return;
+            const res = await fetch(`/api/admin/confirm-deposit/${id}`, {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':getAuthHeader()},
+                body:JSON.stringify({amount:parseFloat(amount)})
+            });
+            const data = await res.json();
+            alert(data.message || 'Erro');
+            loadDeposits();
         }
 
         async function rejectDeposit(id) {
             if (!confirm('Rejeitar este depósito?')) return;
-            try {
-                const response = await fetch(`/api/admin/reject-deposit/${id}`, {
-                    method: 'POST',
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                if (response.ok) {
-                    alert('Depósito rejeitado!');
-                    loadDeposits();
-                } else {
-                    alert('Erro ao rejeitar');
-                }
-            } catch (error) {
-                alert('Erro de conexão');
-            }
+            await fetch(`/api/admin/reject-deposit/${id}`, { method:'POST', headers:{'Authorization':getAuthHeader()} });
+            loadDeposits();
         }
 
-        // ========== SAQUES ==========
         async function loadWithdraws() {
             try {
-                const response = await fetch('/api/admin/withdraws', {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const withdraws = await response.json();
-                const tbody = document.getElementById('withdraws-list');
-                if (!response.ok || withdraws.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Nenhum saque pendente</td></tr>';
-                    return;
+                const res = await fetch('/api/admin/withdraws', { headers: { 'Authorization': getAuthHeader() } });
+                const data = await res.json();
+                let html = '';
+                if (data.length) {
+                    data.forEach(w => {
+                        html += `<tr>
+                            <td>#${w.id}</td>
+                            <td>${w.user_name}</td>
+                            <td>R$ ${w.amount.toFixed(2)}</td>
+                            <td>${w.pix_key}</td>
+                            <td>${new Date(w.created_at).toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="approveWithdraw(${w.id})">Aprovar</button>
+                                <button class="btn btn-outline" onclick="rejectWithdraw(${w.id})">Rejeitar</button>
+                            </td>
+                        </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="6">Nenhum saque pendente</td></tr>';
                 }
-                tbody.innerHTML = withdraws.map(w => `
-                    <tr>
-                        <td>#${w.id}</td>
-                        <td>${w.user_name}</td>
-                        <td>${w.name || w.user_name}</td>
-                        <td>${w.cpf || '-'}</td>
-                        <td>${w.pix_key}</td>
-                        <td><strong>R$ ${w.amount.toFixed(2)}</strong></td>
-                        <td>${new Date(w.created_at).toLocaleString()}</td>
-                        <td><span class="status-badge status-pendente">PENDENTE</span></td>
-                        <td>
-                            <button class="action-btn btn-confirm" onclick="approveWithdraw(${w.id})">✅ APROVAR</button>
-                            <button class="action-btn btn-reject" onclick="rejectWithdraw(${w.id})">❌ REJEITAR</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                document.getElementById('withdraws-list').innerHTML = '<tr><td colspan="9" style="text-align: center;">Erro ao carregar</td></tr>';
-            }
+                document.getElementById('withdraws-list').innerHTML = html;
+            } catch(e) { console.error(e); }
         }
 
         async function approveWithdraw(id) {
-            if (!confirm('Aprovar este saque? O valor será debitado da conta do usuário.')) return;
-            try {
-                const response = await fetch(`/api/admin/withdraw/${id}/approve`, {
-                    method: 'POST',
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    alert('✅ Saque aprovado!');
-                    loadWithdraws();
-                    loadStats();
-                } else {
-                    alert('❌ ' + (data.error || 'Erro ao aprovar'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
+            if (!confirm('Aprovar saque?')) return;
+            const res = await fetch(`/api/admin/withdraw/${id}/approve`, { method:'POST', headers:{'Authorization':getAuthHeader()} });
+            const data = await res.json();
+            alert(data.message || 'Erro');
+            loadWithdraws();
         }
 
         async function rejectWithdraw(id) {
             const reason = prompt('Motivo da rejeição (opcional):');
-            try {
-                const response = await fetch(`/api/admin/withdraw/${id}/reject`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify({ reason: reason || '' })
-                });
-                if (response.ok) {
-                    alert('Saque rejeitado!');
-                    loadWithdraws();
-                } else {
-                    alert('Erro ao rejeitar');
-                }
-            } catch (error) {
-                alert('Erro de conexão');
-            }
+            const res = await fetch(`/api/admin/withdraw/${id}/reject`, {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':getAuthHeader()},
+                body:JSON.stringify({reason})
+            });
+            const data = await res.json();
+            alert(data.message || 'Erro');
+            loadWithdraws();
         }
 
-        // ========== USUÁRIOS ==========
         async function loadUsers() {
             try {
-                const response = await fetch('/api/admin/users', {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const users = await response.json();
-                const tbody = document.getElementById('users-list');
-                if (!response.ok || users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="13" style="text-align: center;">Nenhum usuário encontrado</td></tr>';
-                    return;
+                const res = await fetch('/api/admin/users', { headers: { 'Authorization': getAuthHeader() } });
+                const data = await res.json();
+                let html = '';
+                if (data.length) {
+                    data.forEach(u => {
+                        html += `<tr>
+                            <td>#${u.id}</td>
+                            <td>${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>R$ ${u.balance.toFixed(2)}</td>
+                            <td>${u.status}</td>
+                            <td><button class="btn btn-primary" onclick="editUser(${u.id})">Editar</button></td>
+                        </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="6">Nenhum usuário</td></tr>';
                 }
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>#${u.id}</td>
-                        <td>${u.name}</td>
-                        <td>${u.email}</td>
-                        <td>${u.cpf || '-'}</td>
-                        <td><strong>R$ ${u.balance.toFixed(2)}</strong></td>
-                        <td><span class="status-badge ${u.status === 'Ativo' ? 'status-confirmado' : 'status-pendente'}">${u.status}</span></td>
-                        <td>R$ ${(u.total_deposits || 0).toFixed(2)}</td>
-                        <td>R$ ${(u.total_withdraws || 0).toFixed(2)}</td>
-                        <td>R$ ${(u.total_bets || 0).toFixed(2)}</td>
-                        <td>R$ ${(u.total_wins || 0).toFixed(2)}</td>
-                        <td>${u.rtp_individual ? u.rtp_individual + '%' : 'Global'}</td>
-                        <td>${u.affiliate_commission || 10}%</td>
-                        <td>
-                            <button class="action-btn btn-view" onclick="editUser(${u.id})">✏️ EDITAR</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                document.getElementById('users-list').innerHTML = '<tr><td colspan="13" style="text-align: center;">Erro ao carregar</td></tr>';
-            }
+                document.getElementById('users-list').innerHTML = html;
+            } catch(e) { console.error(e); }
         }
 
         // Busca de usuários
-        document.getElementById('user-search')?.addEventListener('input', (e) => {
+        document.getElementById('user-search').addEventListener('input', (e) => {
             const search = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#users-list tr');
             rows.forEach(row => {
@@ -975,146 +378,110 @@
             });
         });
 
-        // Editar usuário
-        async function editUser(userId) {
-            try {
-                const response = await fetch(`/api/admin/user/${userId}`, {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const user = await response.json();
-                if (!response.ok) {
-                    alert('Erro ao carregar usuário');
-                    return;
-                }
-                const form = document.getElementById('user-form');
-                form.innerHTML = `
-                    <div class="form-group">
-                        <label>Nome</label>
-                        <input type="text" id="edit-name" class="bet-input" value="${user.name || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="edit-email" class="bet-input" value="${user.email || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>CPF</label>
-                        <input type="text" id="edit-cpf" class="bet-input" value="${user.cpf || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="text" id="edit-phone" class="bet-input" value="${user.phone || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Chave PIX</label>
-                        <input type="text" id="edit-pix" class="bet-input" value="${user.pix_key || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Saldo</label>
-                        <input type="number" id="edit-balance" class="bet-input" value="${user.balance || 0}" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="edit-status" class="bet-input">
-                            <option value="Pendente" ${user.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                            <option value="Ativo" ${user.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>RTP Individual (%)</label>
-                        <input type="number" id="edit-rtp" class="bet-input" value="${user.rtp_individual || ''}" min="1" max="100" step="1">
-                    </div>
-                    <div class="form-group">
-                        <label>Comissão de Afiliado (%)</label>
-                        <input type="number" id="edit-aff-commission" class="bet-input" value="${user.affiliate_commission || 10}" min="0" max="100" step="0.1">
-                    </div>
-                    <button class="save-btn" onclick="updateUser(${user.id})">💾 SALVAR ALTERAÇÕES</button>
-                `;
-                document.getElementById('user-modal').style.display = 'block';
-            } catch (error) {
-                alert('Erro ao carregar usuário');
-            }
+        async function editUser(id) {
+            const res = await fetch(`/api/admin/user/${id}`, { headers: { 'Authorization': getAuthHeader() } });
+            const user = await res.json();
+            const form = document.getElementById('user-form');
+            form.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <label>Nome</label>
+                    <input type="text" id="edit-name" class="bet-input" value="${user.name || ''}">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Email</label>
+                    <input type="email" id="edit-email" class="bet-input" value="${user.email || ''}">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>CPF</label>
+                    <input type="text" id="edit-cpf" class="bet-input" value="${user.cpf || ''}">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Telefone</label>
+                    <input type="text" id="edit-phone" class="bet-input" value="${user.phone || ''}">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Chave PIX</label>
+                    <input type="text" id="edit-pix" class="bet-input" value="${user.pix_key || ''}">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Saldo</label>
+                    <input type="number" id="edit-balance" class="bet-input" value="${user.balance || 0}" step="0.01">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Status</label>
+                    <select id="edit-status" class="bet-input">
+                        <option value="Pendente" ${user.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                        <option value="Ativo" ${user.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>RTP Individual (%)</label>
+                    <input type="number" id="edit-rtp" class="bet-input" value="${user.rtp_individual || ''}" min="1" max="100">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Comissão Afiliado (%)</label>
+                    <input type="number" id="edit-aff-commission" class="bet-input" value="${user.affiliate_commission || 10}" step="0.1">
+                </div>
+                <button class="btn btn-primary" onclick="updateUser(${user.id})">Salvar</button>
+            `;
+            document.getElementById('user-modal').style.display = 'block';
         }
 
-        async function updateUser(userId) {
+        async function updateUser(id) {
             const updates = {
-                name: document.getElementById('edit-name')?.value,
-                email: document.getElementById('edit-email')?.value,
-                cpf: document.getElementById('edit-cpf')?.value,
-                phone: document.getElementById('edit-phone')?.value,
-                pix_key: document.getElementById('edit-pix')?.value,
-                balance: parseFloat(document.getElementById('edit-balance')?.value || 0),
-                status: document.getElementById('edit-status')?.value,
-                rtp_individual: document.getElementById('edit-rtp')?.value ? parseFloat(document.getElementById('edit-rtp').value) : null,
-                affiliate_commission: parseFloat(document.getElementById('edit-aff-commission')?.value || 10)
+                name: document.getElementById('edit-name').value,
+                email: document.getElementById('edit-email').value,
+                cpf: document.getElementById('edit-cpf').value,
+                phone: document.getElementById('edit-phone').value,
+                pix_key: document.getElementById('edit-pix').value,
+                balance: parseFloat(document.getElementById('edit-balance').value),
+                status: document.getElementById('edit-status').value,
+                rtp_individual: document.getElementById('edit-rtp').value ? parseFloat(document.getElementById('edit-rtp').value) : null,
+                affiliate_commission: parseFloat(document.getElementById('edit-aff-commission').value)
             };
-
-            if (!updates.name || !updates.email) {
-                alert('❌ Nome e e-mail são obrigatórios');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/admin/user/${userId}/update`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify(updates)
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    alert('✅ ' + (data.message || 'Usuário atualizado!'));
-                    closeUserModal();
-                    loadUsers();
-                } else {
-                    alert('❌ ' + (data.error || 'Erro ao atualizar'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
+            const res = await fetch(`/api/admin/user/${id}/update`, {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':getAuthHeader()},
+                body:JSON.stringify(updates)
+            });
+            const data = await res.json();
+            alert(data.message || 'Erro');
+            closeUserModal();
+            loadUsers();
         }
 
         function closeUserModal() {
             document.getElementById('user-modal').style.display = 'none';
         }
 
-        // ========== HISTÓRICO ==========
         async function loadHistory() {
             try {
-                const response = await fetch('/api/admin/recent-history', {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const history = await response.json();
-                const tbody = document.getElementById('history-list');
-                if (!response.ok || history.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum histórico encontrado</td></tr>';
-                    return;
+                const res = await fetch('/api/admin/recent-history', { headers: { 'Authorization': getAuthHeader() } });
+                const data = await res.json();
+                let html = '';
+                if (data.length) {
+                    data.forEach(h => {
+                        html += `<tr>
+                            <td>#${h.id}</td>
+                            <td>${h.name}</td>
+                            <td>${h.game}</td>
+                            <td>R$ ${h.bet_amount.toFixed(2)}</td>
+                            <td>${h.result}</td>
+                            <td>${new Date(h.created_at).toLocaleString()}</td>
+                        </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="6">Nenhum histórico</td></tr>';
                 }
-                tbody.innerHTML = history.map(h => `
-                    <tr>
-                        <td>#${h.id}</td>
-                        <td>${h.name}</td>
-                        <td>${h.game === 'slot' ? '🎰 Caça-níquel' : h.game === 'dice' ? '🎲 Dados' : h.game === 'crash' ? '✈️ Avião' : h.game === 'roulette' ? '🎡 Roleta' : '🃏 Blackjack'}</td>
-                        <td>R$ ${h.bet_amount.toFixed(2)}</td>
-                        <td>${h.win_amount > 0 ? `R$ ${h.win_amount.toFixed(2)}` : '-'}</td>
-                        <td>${h.result}</td>
-                        <td>${new Date(h.created_at).toLocaleString()}</td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                document.getElementById('history-list').innerHTML = '<tr><td colspan="7" style="text-align: center;">Erro ao carregar</td></tr>';
-            }
+                document.getElementById('history-list').innerHTML = html;
+            } catch(e) { console.error(e); }
         }
 
-        // ========== CONFIGURAÇÕES ==========
         async function loadConfig() {
             try {
-                const response = await fetch('/api/admin/config', {
-                    headers: { 'Authorization': getAuthHeader() }
-                });
-                const config = await response.json();
-                if (response.ok) {
+                const res = await fetch('/api/admin/config', { headers: { 'Authorization': getAuthHeader() } });
+                const config = await res.json();
+                if (res.ok) {
                     document.getElementById('pix_key').value = config.pix_key || '';
                     document.getElementById('min_deposit').value = config.min_deposit || 20;
                     document.getElementById('bonus_amount').value = config.bonus_amount || 30;
@@ -1131,17 +498,8 @@
                     document.getElementById('crash_rtp').value = config.crash_rtp || 95;
                     document.getElementById('roulette_rtp').value = config.roulette_rtp || 95;
                     document.getElementById('blackjack_rtp').value = config.blackjack_rtp || 95;
-                    document.getElementById('slot_volatility').value = config.slot_volatility || 'medium';
-                    document.getElementById('dice_volatility').value = config.dice_volatility || 'medium';
-                    document.getElementById('crash_volatility').value = config.crash_volatility || 'medium';
-                    document.getElementById('site_name').value = config.site_name || 'Nexus Trade';
-                    document.getElementById('contact_email').value = config.contact_email || 'suporte@nexustrade.com';
-                    document.getElementById('primary_color').value = config.primary_color || '#ffd700';
-                    document.getElementById('logo_path').value = config.logo_path || '/images/logo.png';
                 }
-            } catch (error) {
-                console.error('Erro ao carregar configurações:', error);
-            }
+            } catch(e) { console.error(e); }
         }
 
         async function saveConfig() {
@@ -1161,64 +519,24 @@
                 dice_rtp: parseFloat(document.getElementById('dice_rtp').value),
                 crash_rtp: parseFloat(document.getElementById('crash_rtp').value),
                 roulette_rtp: parseFloat(document.getElementById('roulette_rtp').value),
-                blackjack_rtp: parseFloat(document.getElementById('blackjack_rtp').value),
-                slot_volatility: document.getElementById('slot_volatility').value,
-                dice_volatility: document.getElementById('dice_volatility').value,
-                crash_volatility: document.getElementById('crash_volatility').value,
-                site_name: document.getElementById('site_name').value,
-                contact_email: document.getElementById('contact_email').value,
-                primary_color: document.getElementById('primary_color').value,
-                logo_path: document.getElementById('logo_path').value
+                blackjack_rtp: parseFloat(document.getElementById('blackjack_rtp').value)
             };
-            
-            try {
-                const response = await fetch('/api/admin/config', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': getAuthHeader()
-                    },
-                    body: JSON.stringify(config)
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    document.getElementById('config-message').innerHTML = '<p style="color: var(--success-color);">✅ Configurações salvas!</p>';
-                    setTimeout(() => document.getElementById('config-message').innerHTML = '', 3000);
-                } else {
-                    document.getElementById('config-message').innerHTML = `<p style="color: var(--danger-color);">❌ ${data.error}</p>`;
-                }
-            } catch (error) {
-                document.getElementById('config-message').innerHTML = '<p style="color: var(--danger-color);">❌ Erro de conexão</p>';
-            }
+            const res = await fetch('/api/admin/config', {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':getAuthHeader()},
+                body:JSON.stringify(config)
+            });
+            const data = await res.json();
+            document.getElementById('config-message').innerHTML = `<p style="color:${res.ok?'var(--success)':'var(--danger)'};">${data.message || 'Erro'}</p>`;
         }
 
-        // ========== NAVEGAÇÃO ==========
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            const tabs = ['deposits', 'withdraws', 'users', 'history', 'config'];
-            const index = tabs.indexOf(tab);
-            document.querySelectorAll('.tab')[index].classList.add('active');
-            document.getElementById(tab + '-tab').classList.add('active');
-            switch(tab) {
-                case 'deposits': loadDeposits(); break;
-                case 'withdraws': loadWithdraws(); break;
-                case 'users': loadUsers(); break;
-                case 'history': loadHistory(); break;
-                case 'config': loadConfig(); break;
-            }
-        }
-
-        // ========== LOGOUT ==========
         function logout() {
             localStorage.removeItem('user');
             window.location.href = '/login';
         }
 
-        // ========== INICIALIZAÇÃO ==========
-        connectWebSocket();
+        // Inicializa carregando a primeira aba
         loadStats();
-        loadDeposits();
     </script>
 </body>
 </html>

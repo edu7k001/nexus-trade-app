@@ -4,187 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Trade - Cadastro</title>
-    <style>
-        :root {
-            --primary-color: #ffd700;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --dark-bg: #0a0b0e;
-            --card-bg: rgba(255,255,255,0.05);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f2e 100%);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .register-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--primary-color);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
-        h2 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 50px;
-            border: 1px solid var(--primary-color);
-            background: rgba(255,255,255,0.1);
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(255,215,0,0.3);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--primary-color), #ffa500);
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255,215,0,0.3);
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #aaa;
-        }
-
-        .login-link a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .message {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo img {
-            max-height: 60px;
-        }
-
-        .ref-info {
-            background: rgba(255,215,0,0.1);
-            border: 1px dashed var(--primary-color);
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            color: var(--primary-color);
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="register-container">
-        <div class="logo">
-            <img src="/images/logo.png" alt="Nexus Trade" onerror="this.style.display='none'">
+    <div class="cadastro-container" style="max-width:500px; margin:50px auto; background:var(--card-bg); border:1px solid var(--border); border-radius:30px; padding:40px;">
+        <div style="text-align:center; margin-bottom:30px;">
+            <h2 style="color:var(--primary);">CRIAR CONTA</h2>
+            <p>Preencha os dados para se registrar</p>
         </div>
-        <h2>📝 CRIAR CONTA</h2>
-        
-        <!-- Área de informação de afiliado (aparece se houver código na URL) -->
-        <div id="ref-info" class="ref-info" style="display: none;"></div>
-
-        <div class="form-group">
-            <input type="text" id="name" placeholder="Nome completo" autocomplete="name">
-        </div>
-        
-        <div class="form-group">
-            <input type="email" id="email" placeholder="E-mail" autocomplete="email">
-        </div>
-        
-        <div class="form-group">
-            <input type="password" id="password" placeholder="Senha" autocomplete="new-password">
-        </div>
-        
-        <div class="form-group">
-            <input type="text" id="cpf" placeholder="CPF (opcional)" autocomplete="off">
-        </div>
-        
-        <div class="form-group">
-            <input type="text" id="phone" placeholder="Telefone (opcional)" autocomplete="tel">
-        </div>
-        
-        <div class="form-group">
-            <input type="text" id="pixKey" placeholder="Chave PIX (opcional)" autocomplete="off">
-        </div>
-        
-        <!-- Campo oculto para o código de afiliado -->
+        <input type="text" id="name" class="bet-input" style="width:100%; margin-bottom:15px;" placeholder="Nome completo">
+        <input type="email" id="email" class="bet-input" style="width:100%; margin-bottom:15px;" placeholder="E-mail">
+        <input type="password" id="password" class="bet-input" style="width:100%; margin-bottom:15px;" placeholder="Senha">
+        <input type="text" id="cpf" class="bet-input" style="width:100%; margin-bottom:15px;" placeholder="CPF (opcional)">
+        <input type="text" id="phone" class="bet-input" style="width:100%; margin-bottom:15px;" placeholder="Telefone (opcional)">
+        <input type="text" id="pixKey" class="bet-input" style="width:100%; margin-bottom:15px;" placeholder="Chave PIX (opcional)">
         <input type="hidden" id="ref" value="">
-        
-        <button onclick="register()">CADASTRAR</button>
-        
-        <div class="message" id="message"></div>
-        
-        <div class="login-link">
-            Já tem conta? <a href="/login">Faça login</a>
+        <button class="btn btn-primary" style="width:100%;" onclick="register()">CADASTRAR</button>
+        <div id="message" style="margin-top:15px; text-align:center;"></div>
+        <div style="margin-top:20px; text-align:center;">
+            Já tem conta? <a href="/login" style="color:var(--primary);">Faça login</a>
         </div>
     </div>
-
     <script>
-        // Capturar código de afiliado da URL
         const urlParams = new URLSearchParams(window.location.search);
-        const refCode = urlParams.get('ref');
-        if (refCode) {
-            document.getElementById('ref').value = refCode;
-            // Mostrar informação visual
-            const refInfo = document.getElementById('ref-info');
-            refInfo.style.display = 'block';
-            refInfo.innerHTML = `🔗 Você está sendo indicado por um afiliado! Código: <strong>${refCode}</strong>`;
-        }
+        document.getElementById('ref').value = urlParams.get('ref') || '';
 
         async function register() {
             const name = document.getElementById('name').value.trim();
@@ -194,61 +37,28 @@
             const phone = document.getElementById('phone').value.trim();
             const pixKey = document.getElementById('pixKey').value.trim();
             const ref = document.getElementById('ref').value;
-            const msgDiv = document.getElementById('message');
+            const msg = document.getElementById('message');
 
-            // Validações básicas
             if (!name || !email || !password) {
-                msgDiv.innerHTML = '<span style="color: var(--danger-color);">Nome, e-mail e senha são obrigatórios</span>';
+                msg.innerHTML = '<span style="color:var(--danger);">Nome, e-mail e senha obrigatórios</span>';
                 return;
-            }
-
-            // Validação simples de email
-            if (!email.includes('@') || !email.includes('.')) {
-                msgDiv.innerHTML = '<span style="color: var(--danger-color);">E-mail inválido</span>';
-                return;
-            }
-
-            if (password.length < 6) {
-                msgDiv.innerHTML = '<span style="color: var(--danger-color);">Senha deve ter pelo menos 6 caracteres</span>';
-                return;
-            }
-
-            // Validação de CPF (se preenchido, deve ter 11 dígitos)
-            if (cpf) {
-                const cpfClean = cpf.replace(/\D/g, '');
-                if (cpfClean.length !== 11) {
-                    msgDiv.innerHTML = '<span style="color: var(--danger-color);">CPF deve ter 11 dígitos ou deixar vazio</span>';
-                    return;
-                }
-            }
-
-            // Validação de telefone (se preenchido, deve ter 10 ou 11 dígitos)
-            if (phone) {
-                const phoneClean = phone.replace(/\D/g, '');
-                if (phoneClean.length < 10 || phoneClean.length > 11) {
-                    msgDiv.innerHTML = '<span style="color: var(--danger-color);">Telefone deve ter 10 ou 11 dígitos ou deixar vazio</span>';
-                    return;
-                }
             }
 
             try {
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password, cpf, phone, pixKey, ref })
+                const res = await fetch('/api/register', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({name,email,password,cpf,phone,pixKey,ref})
                 });
-                const data = await response.json();
-
-                if (response.ok) {
-                    msgDiv.innerHTML = '<span style="color: var(--success-color);">✅ Cadastro realizado! Redirecionando para login...</span>';
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
+                const data = await res.json();
+                if (res.ok) {
+                    msg.innerHTML = '<span style="color:var(--success);">✅ Cadastro realizado! Redirecionando...</span>';
+                    setTimeout(() => window.location.href = '/login', 2000);
                 } else {
-                    msgDiv.innerHTML = `<span style="color: var(--danger-color);">❌ ${data.error || 'Erro no cadastro'}</span>`;
+                    msg.innerHTML = `<span style="color:var(--danger);">❌ ${data.error}</span>`;
                 }
-            } catch (error) {
-                msgDiv.innerHTML = '<span style="color: var(--danger-color);">❌ Erro de conexão</span>';
+            } catch(e) {
+                msg.innerHTML = '<span style="color:var(--danger);">❌ Erro de conexão</span>';
             }
         }
     </script>

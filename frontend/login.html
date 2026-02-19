@@ -4,174 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Trade - Login</title>
-    <style>
-        :root {
-            --primary-color: #ffd700;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --dark-bg: #0a0b0e;
-            --card-bg: rgba(255,255,255,0.05);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f2e 100%);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--primary-color);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
-        h2 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 50px;
-            border: 1px solid var(--primary-color);
-            background: rgba(255,255,255,0.1);
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(255,215,0,0.3);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--primary-color), #ffa500);
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255,215,0,0.3);
-        }
-
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #aaa;
-        }
-
-        .register-link a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .message {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo img {
-            max-height: 60px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">
-            <!-- Placeholder para logo - substitua pelo caminho da sua imagem -->
-            <img src="/images/logo.png" alt="Nexus Trade" onerror="this.style.display='none'">
+    <div class="login-container" style="max-width:400px; margin:100px auto; background:var(--card-bg); border:1px solid var(--border); border-radius:30px; padding:40px;">
+        <div style="text-align:center; margin-bottom:30px;">
+            <h2 style="color:var(--primary);">NEXUS TRADE</h2>
+            <p>Faça login para acessar sua conta</p>
         </div>
-        <h2>🔑 ENTRAR</h2>
-        
-        <div class="form-group">
-            <input type="email" id="email" placeholder="E-mail" autocomplete="email">
+        <div style="margin-bottom:20px;">
+            <input type="email" id="email" class="bet-input" style="width:100%;" placeholder="E-mail">
         </div>
-        
-        <div class="form-group">
-            <input type="password" id="password" placeholder="Senha" autocomplete="current-password">
+        <div style="margin-bottom:20px;">
+            <input type="password" id="password" class="bet-input" style="width:100%;" placeholder="Senha">
         </div>
-        
-        <button onclick="login()">ENTRAR</button>
-        
-        <div class="message" id="message"></div>
-        
-        <div class="register-link">
-            Não tem conta? <a href="/cadastro">Cadastre-se</a>
+        <button class="btn btn-primary" style="width:100%;" onclick="login()">ENTRAR</button>
+        <div id="message" style="margin-top:15px; text-align:center;"></div>
+        <div style="margin-top:20px; text-align:center;">
+            Não tem conta? <a href="/cadastro" style="color:var(--primary);">Cadastre-se</a>
         </div>
     </div>
-
     <script>
         async function login() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            const msgDiv = document.getElementById('message');
-
+            const msg = document.getElementById('message');
             if (!email || !password) {
-                msgDiv.innerHTML = '<span style="color: var(--danger-color);">Preencha todos os campos</span>';
+                msg.innerHTML = '<span style="color:var(--danger);">Preencha todos os campos</span>';
                 return;
             }
-
             try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                const res = await fetch('/api/login', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({email,password})
                 });
-                const data = await response.json();
-
-                if (response.ok) {
+                const data = await res.json();
+                if (res.ok) {
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    msgDiv.innerHTML = '<span style="color: var(--success-color);">Login realizado! Redirecionando...</span>';
-                    setTimeout(() => {
-                        window.location.href = data.redirect || '/dashboard';
-                    }, 1000);
+                    msg.innerHTML = '<span style="color:var(--success);">Login realizado! Redirecionando...</span>';
+                    setTimeout(() => window.location.href = data.redirect || '/dashboard', 1000);
                 } else {
-                    msgDiv.innerHTML = `<span style="color: var(--danger-color);">❌ ${data.error || 'Erro no login'}</span>`;
+                    msg.innerHTML = `<span style="color:var(--danger);">❌ ${data.error}</span>`;
                 }
-            } catch (error) {
-                msgDiv.innerHTML = '<span style="color: var(--danger-color);">❌ Erro de conexão</span>';
+            } catch(e) {
+                msg.innerHTML = '<span style="color:var(--danger);">❌ Erro de conexão</span>';
             }
         }
     </script>

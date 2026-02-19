@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça-níquel - Nexus Trade</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://via.placeholder.com/120x40/1e293b/f5b342?text=NEXUS" alt="Nexus Trade">
+                <span>NEXUS TRADE</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Início</a>
+                <a href="/slot" class="nav-link active"><i class="fas fa-dice"></i> Slots</a>
+                <a href="/dice" class="nav-link"><i class="fas fa-dice-d6"></i> Dados</a>
+                <a href="/crash" class="nav-link"><i class="fas fa-plane"></i> Avião</a>
+                <a href="/roulette" class="nav-link"><i class="fas fa-circle"></i> Roleta</a>
+                <a href="/blackjack" class="nav-link"><i class="fas fa-spade"></i> Blackjack</a>
+                <a href="/affiliates" class="nav-link"><i class="fas fa-users"></i> Afiliados</a>
+            </nav>
+            <div class="user-area">
+                <div class="balance-box" onclick="showDepositModal()">
+                    <i class="fas fa-wallet balance-icon"></i>
+                    <span class="balance-value" id="user-balance">R$ 0,00</span>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">U</div>
+                    <span class="user-name" id="user-name">Carregando</span>
+                    <i class="fas fa-sign-out-alt logout-btn" onclick="logout()"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="game-container">
+            <h2 class="game-title">🎰 CAÇA-NÍQUEL</h2>
+            <div class="reels-container">
+                <div class="reel" id="slot-reel1">🍒</div>
+                <div class="reel" id="slot-reel2">🍒</div>
+                <div class="reel" id="slot-reel3">🍒</div>
+            </div>
+            <div class="bet-controls">
+                <input type="number" id="slot-bet" class="bet-input" min="5" value="10" step="5">
+                <button class="play-btn" onclick="playSlot()">GIRAR</button>
+            </div>
+            <div id="slot-result" class="result-box hidden"></div>
+        </div>
+    </main>
+
+    <!-- Modal QR Code (depósito) - igual ao do dashboard -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <button class="btn-close" onclick="closeModal()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:white;font-size:24px;">×</button>
+            <h2 style="color:var(--primary);">💰 DEPÓSITO PIX</h2>
+            <div class="quick-amounts">
+                <button class="quick-amount-btn" onclick="setDepositAmount(20)">R$20</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(30)">R$30</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(50)">R$50</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(100)">R$100</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(200)">R$200</button>
+                <button class="custom-amount-btn" onclick="setCustomAmount()">OUTRO</button>
+            </div>
+            <div id="custom-amount-container" style="display:none; margin-bottom:20px;">
+                <input type="number" id="custom-amount" class="bet-input" placeholder="Digite o valor" min="20" step="5" style="width:100%;">
+            </div>
+            <img id="qr-code-img" class="qr-image" src="" alt="QR Code">
+            <p id="pix-key-display" style="word-break:break-all; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px;"></p>
+            <div style="display:flex; gap:10px;">
+                <button class="copy-btn" onclick="copyPixKey()"><i class="fas fa-copy"></i> COPIAR</button>
+                <button class="copy-btn" onclick="confirmDepositRequest()" style="background:var(--success);"><i class="fas fa-check"></i> JÁ DEPOSITEI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="live-notifications" id="live-notifications"></div>
+
+    <script src="script.js"></script>
+    <script>
+        // Função específica do jogo Slot
+        async function playSlot() {
+            if (!userData) {
+                alert('Usuário não carregado. Tente novamente.');
+                return;
+            }
+            if (userData.status === 'Pendente' && !hasDeposited) {
+                showDepositPopup('first-time');
+                return;
+            }
+            if (userData.balance <= 0) {
+                showDepositPopup('zero');
+                return;
+            }
+            const bet = parseFloat(document.getElementById('slot-bet').value);
+            if (bet > userData.balance) {
+                showDepositPopup('zero');
+                return;
+            }
+            if (bet < 5) {
+                alert('Aposta mínima: R$5');
+                return;
+            }
+
+            // Animação de giro
+            document.getElementById('slot-reel1').classList.add('spinning');
+            document.getElementById('slot-reel2').classList.add('spinning');
+            document.getElementById('slot-reel3').classList.add('spinning');
+
+            try {
+                const response = await fetch('/api/game/slot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.id, betAmount: bet })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Aguarda a animação terminar
+                    setTimeout(() => {
+                        document.getElementById('slot-reel1').classList.remove('spinning');
+                        document.getElementById('slot-reel2').classList.remove('spinning');
+                        document.getElementById('slot-reel3').classList.remove('spinning');
+
+                        document.getElementById('slot-reel1').textContent = data.symbols[0];
+                        document.getElementById('slot-reel2').textContent = data.symbols[1];
+                        document.getElementById('slot-reel3').textContent = data.symbols[2];
+
+                        userData.balance = data.newBalance;
+                        updateUI();
+
+                        const resultDiv = document.getElementById('slot-result');
+                        resultDiv.classList.remove('hidden', 'win', 'lose');
+                        resultDiv.classList.add(data.win > 0 ? 'win' : 'lose');
+                        resultDiv.innerHTML = data.message;
+                    }, 1000);
+                } else {
+                    alert('Erro: ' + (data.error || 'Desconhecido'));
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        // Inicializa os dados do usuário ao carregar a página
+        loadUserData();
+    </script>
+</body>
+</html>

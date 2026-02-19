@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta - Nexus Trade</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://via.placeholder.com/120x40/1e293b/f5b342?text=NEXUS" alt="Nexus Trade">
+                <span>NEXUS TRADE</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Início</a>
+                <a href="/slot" class="nav-link"><i class="fas fa-dice"></i> Slots</a>
+                <a href="/dice" class="nav-link"><i class="fas fa-dice-d6"></i> Dados</a>
+                <a href="/crash" class="nav-link"><i class="fas fa-plane"></i> Avião</a>
+                <a href="/roulette" class="nav-link active"><i class="fas fa-circle"></i> Roleta</a>
+                <a href="/blackjack" class="nav-link"><i class="fas fa-spade"></i> Blackjack</a>
+                <a href="/affiliates" class="nav-link"><i class="fas fa-users"></i> Afiliados</a>
+            </nav>
+            <div class="user-area">
+                <div class="balance-box" onclick="showDepositModal()">
+                    <i class="fas fa-wallet balance-icon"></i>
+                    <span class="balance-value" id="user-balance">R$ 0,00</span>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">U</div>
+                    <span class="user-name" id="user-name">Carregando</span>
+                    <i class="fas fa-sign-out-alt logout-btn" onclick="logout()"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="game-container">
+            <h2 class="game-title">🎡 ROLETA</h2>
+
+            <!-- Resultado da roleta -->
+            <div class="roulette-wheel">
+                <span class="roulette-result" id="roulette-result">?</span>
+            </div>
+
+            <!-- Opções de aposta -->
+            <div class="roulette-options">
+                <button class="roulette-option selected" onclick="selectRoulette('number')">Número</button>
+                <button class="roulette-option" onclick="selectRoulette('color')">Cor</button>
+                <button class="roulette-option" onclick="selectRoulette('dozen')">Dúzia</button>
+                <button class="roulette-option" onclick="selectRoulette('half')">Metade</button>
+            </div>
+
+            <!-- Controles dinâmicos conforme o tipo de aposta -->
+            <div id="roulette-controls">
+                <div id="roulette-number-control" style="display:block;">
+                    <input type="number" id="roulette-number" class="bet-input" min="0" max="36" value="7" style="width:100px; margin:10px auto; display:block;">
+                </div>
+                <div id="roulette-color-control" style="display:none;">
+                    <select id="roulette-color" class="bet-input" style="width:150px; margin:10px auto; display:block;">
+                        <option value="red">Vermelho</option>
+                        <option value="black">Preto</option>
+                        <option value="green">Verde</option>
+                    </select>
+                </div>
+                <div id="roulette-dozen-control" style="display:none;">
+                    <select id="roulette-dozen" class="bet-input" style="width:150px; margin:10px auto; display:block;">
+                        <option value="1">1ª dúzia (1-12)</option>
+                        <option value="2">2ª dúzia (13-24)</option>
+                        <option value="3">3ª dúzia (25-36)</option>
+                    </select>
+                </div>
+                <div id="roulette-half-control" style="display:none;">
+                    <select id="roulette-half" class="bet-input" style="width:150px; margin:10px auto; display:block;">
+                        <option value="low">1-18 (baixo)</option>
+                        <option value="high">19-36 (alto)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Controles de aposta -->
+            <div class="bet-controls">
+                <input type="number" id="roulette-bet" class="bet-input" min="5" value="10" step="5">
+                <button class="play-btn" onclick="playRoulette()">GIRAR</button>
+            </div>
+
+            <!-- Resultado da aposta -->
+            <div id="roulette-result-message" class="result-box hidden"></div>
+        </div>
+    </main>
+
+    <!-- Modal QR Code (depósito) -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <button class="btn-close" onclick="closeModal()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:white;font-size:24px;">×</button>
+            <h2 style="color:var(--primary);">💰 DEPÓSITO PIX</h2>
+            <div class="quick-amounts">
+                <button class="quick-amount-btn" onclick="setDepositAmount(20)">R$20</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(30)">R$30</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(50)">R$50</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(100)">R$100</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(200)">R$200</button>
+                <button class="custom-amount-btn" onclick="setCustomAmount()">OUTRO</button>
+            </div>
+            <div id="custom-amount-container" style="display:none; margin-bottom:20px;">
+                <input type="number" id="custom-amount" class="bet-input" placeholder="Digite o valor" min="20" step="5" style="width:100%;">
+            </div>
+            <img id="qr-code-img" class="qr-image" src="" alt="QR Code">
+            <p id="pix-key-display" style="word-break:break-all; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px;"></p>
+            <div style="display:flex; gap:10px;">
+                <button class="copy-btn" onclick="copyPixKey()"><i class="fas fa-copy"></i> COPIAR</button>
+                <button class="copy-btn" onclick="confirmDepositRequest()" style="background:var(--success);"><i class="fas fa-check"></i> JÁ DEPOSITEI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="live-notifications" id="live-notifications"></div>
+
+    <script src="script.js"></script>
+    <script>
+        let rouletteType = 'number';
+
+        // Seleciona o tipo de aposta na roleta
+        function selectRoulette(type) {
+            document.querySelectorAll('#game-roulette .roulette-option').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+            rouletteType = type;
+
+            // Mostra o controle adequado
+            document.getElementById('roulette-number-control').style.display = type === 'number' ? 'block' : 'none';
+            document.getElementById('roulette-color-control').style.display = type === 'color' ? 'block' : 'none';
+            document.getElementById('roulette-dozen-control').style.display = type === 'dozen' ? 'block' : 'none';
+            document.getElementById('roulette-half-control').style.display = type === 'half' ? 'block' : 'none';
+        }
+
+        // Função principal do jogo de roleta
+        async function playRoulette() {
+            if (!userData) {
+                alert('Usuário não carregado. Tente novamente.');
+                return;
+            }
+            if (userData.status === 'Pendente' && !hasDeposited) {
+                showDepositPopup('first-time');
+                return;
+            }
+            if (userData.balance <= 0) {
+                showDepositPopup('zero');
+                return;
+            }
+            const bet = parseFloat(document.getElementById('roulette-bet').value);
+            if (bet > userData.balance) {
+                showDepositPopup('zero');
+                return;
+            }
+            if (bet < 5) {
+                alert('Aposta mínima: R$5');
+                return;
+            }
+
+            // Obtém o valor da aposta conforme o tipo selecionado
+            let betValue;
+            if (rouletteType === 'number') betValue = parseInt(document.getElementById('roulette-number').value);
+            else if (rouletteType === 'color') betValue = document.getElementById('roulette-color').value;
+            else if (rouletteType === 'dozen') betValue = parseInt(document.getElementById('roulette-dozen').value);
+            else if (rouletteType === 'half') betValue = document.getElementById('roulette-half').value;
+
+            try {
+                const response = await fetch('/api/game/roulette', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.id, betAmount: bet, betType: rouletteType, betValue })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Exibe o resultado no círculo
+                    document.getElementById('roulette-result').textContent = data.result;
+
+                    // Atualiza saldo
+                    userData.balance = data.newBalance;
+                    updateUI();
+
+                    // Exibe mensagem de resultado
+                    const resultDiv = document.getElementById('roulette-result-message');
+                    resultDiv.classList.remove('hidden', 'win', 'lose');
+                    resultDiv.classList.add(data.win > 0 ? 'win' : 'lose');
+                    resultDiv.innerHTML = data.message;
+                } else {
+                    alert('Erro: ' + (data.error || 'Desconhecido'));
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        // Inicializa os dados do usuário
+        loadUserData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviãozinho - Nexus Trade</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://via.placeholder.com/120x40/1e293b/f5b342?text=NEXUS" alt="Nexus Trade">
+                <span>NEXUS TRADE</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Início</a>
+                <a href="/slot" class="nav-link"><i class="fas fa-dice"></i> Slots</a>
+                <a href="/dice" class="nav-link"><i class="fas fa-dice-d6"></i> Dados</a>
+                <a href="/crash" class="nav-link active"><i class="fas fa-plane"></i> Avião</a>
+                <a href="/roulette" class="nav-link"><i class="fas fa-circle"></i> Roleta</a>
+                <a href="/blackjack" class="nav-link"><i class="fas fa-spade"></i> Blackjack</a>
+                <a href="/affiliates" class="nav-link"><i class="fas fa-users"></i> Afiliados</a>
+            </nav>
+            <div class="user-area">
+                <div class="balance-box" onclick="showDepositModal()">
+                    <i class="fas fa-wallet balance-icon"></i>
+                    <span class="balance-value" id="user-balance">R$ 0,00</span>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">U</div>
+                    <span class="user-name" id="user-name">Carregando</span>
+                    <i class="fas fa-sign-out-alt logout-btn" onclick="logout()"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="game-container">
+            <h2 class="game-title">✈️ AVIÃOZINHO</h2>
+
+            <!-- Área do multiplicador e avião -->
+            <div class="multiplier-box">
+                <div class="multiplier-value" id="crash-multiplier">1.00</div>
+                <span class="multiplier-suffix">x</span>
+                <div class="plane" id="crash-plane">✈️</div>
+            </div>
+
+            <!-- Controles de aposta -->
+            <div class="bet-controls">
+                <input type="number" id="crash-bet" class="bet-input" min="5" value="10" step="5">
+                <button class="crash-btn" id="crash-start" onclick="startCrash()">APOSTAR</button>
+                <button class="crash-btn cashout hidden" id="crash-cashout" onclick="cashout()">RETIRAR</button>
+            </div>
+
+            <!-- Resultado -->
+            <div id="crash-result" class="result-box hidden"></div>
+        </div>
+    </main>
+
+    <!-- Modal QR Code (depósito) -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <button class="btn-close" onclick="closeModal()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:white;font-size:24px;">×</button>
+            <h2 style="color:var(--primary);">💰 DEPÓSITO PIX</h2>
+            <div class="quick-amounts">
+                <button class="quick-amount-btn" onclick="setDepositAmount(20)">R$20</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(30)">R$30</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(50)">R$50</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(100)">R$100</button>
+                <button class="quick-amount-btn" onclick="setDepositAmount(200)">R$200</button>
+                <button class="custom-amount-btn" onclick="setCustomAmount()">OUTRO</button>
+            </div>
+            <div id="custom-amount-container" style="display:none; margin-bottom:20px;">
+                <input type="number" id="custom-amount" class="bet-input" placeholder="Digite o valor" min="20" step="5" style="width:100%;">
+            </div>
+            <img id="qr-code-img" class="qr-image" src="" alt="QR Code">
+            <p id="pix-key-display" style="word-break:break-all; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px;"></p>
+            <div style="display:flex; gap:10px;">
+                <button class="copy-btn" onclick="copyPixKey()"><i class="fas fa-copy"></i> COPIAR</button>
+                <button class="copy-btn" onclick="confirmDepositRequest()" style="background:var(--success);"><i class="fas fa-check"></i> JÁ DEPOSITEI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="live-notifications" id="live-notifications"></div>
+
+    <script src="script.js"></script>
+    <script>
+        // Variáveis de estado do jogo
+        let crashInterval = null;
+        let crashMultiplier = 1.0;
+        let crashActive = false;
+        let crashBetAmount = 0;
+
+        // Função para iniciar a aposta
+        async function startCrash() {
+            if (!userData) {
+                alert('Usuário não carregado. Tente novamente.');
+                return;
+            }
+            if (userData.status === 'Pendente' && !hasDeposited) {
+                showDepositPopup('first-time');
+                return;
+            }
+            if (userData.balance <= 0) {
+                showDepositPopup('zero');
+                return;
+            }
+            const bet = parseFloat(document.getElementById('crash-bet').value);
+            if (bet > userData.balance) {
+                showDepositPopup('zero');
+                return;
+            }
+            if (bet < 5) {
+                alert('Aposta mínima: R$5');
+                return;
+            }
+
+            // Deduz a aposta localmente e atualiza UI
+            userData.balance -= bet;
+            updateUI();
+            crashBetAmount = bet;
+
+            // Esconde botão APOSTAR e mostra RETIRAR
+            document.getElementById('crash-start').classList.add('hidden');
+            document.getElementById('crash-cashout').classList.remove('hidden');
+            document.getElementById('crash-result').classList.add('hidden');
+
+            // Inicia o jogo
+            crashActive = true;
+            crashMultiplier = 1.0;
+            document.getElementById('crash-multiplier').textContent = '1.00';
+            document.getElementById('crash-plane').style.animation = 'fly 4s linear infinite';
+
+            // Intervalo que aumenta o multiplicador e verifica crash aleatório
+            crashInterval = setInterval(() => {
+                if (crashActive) {
+                    crashMultiplier += 0.01;
+                    document.getElementById('crash-multiplier').textContent = crashMultiplier.toFixed(2);
+                    // Chance de crash aumenta com o tempo (aqui 2% a cada tick)
+                    if (Math.random() < 0.02) {
+                        crashGame();
+                    }
+                }
+            }, 100);
+        }
+
+        // Função chamada quando o avião "crasha"
+        async function crashGame() {
+            if (!crashActive) return;
+            crashActive = false;
+            clearInterval(crashInterval);
+
+            // Para a animação do avião
+            document.getElementById('crash-plane').style.animation = 'none';
+
+            // Registra a perda no servidor (cashoutMultiplier = 0)
+            try {
+                await fetch('/api/game/crash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.id, betAmount: crashBetAmount, cashoutMultiplier: 0 })
+                });
+            } catch (error) {
+                console.error('Erro ao registrar crash:', error);
+            }
+
+            // Volta ao estado inicial
+            document.getElementById('crash-start').classList.remove('hidden');
+            document.getElementById('crash-cashout').classList.add('hidden');
+
+            // Exibe resultado
+            const resultDiv = document.getElementById('crash-result');
+            resultDiv.classList.remove('hidden', 'win', 'lose');
+            resultDiv.classList.add('lose');
+            resultDiv.innerHTML = `💥 CRASH! Perdeu R$ ${crashBetAmount.toFixed(2)}`;
+        }
+
+        // Função chamada quando o usuário clica em RETIRAR
+        async function cashout() {
+            if (!crashActive) return;
+            crashActive = false;
+            clearInterval(crashInterval);
+
+            // Para a animação do avião
+            document.getElementById('crash-plane').style.animation = 'none';
+
+            // Calcula ganho
+            const win = crashBetAmount * crashMultiplier;
+
+            // Registra a retirada no servidor
+            try {
+                const response = await fetch('/api/game/crash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.id, betAmount: crashBetAmount, cashoutMultiplier: crashMultiplier })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    userData.balance = data.newBalance;
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Erro ao registrar cashout:', error);
+            }
+
+            // Volta ao estado inicial
+            document.getElementById('crash-start').classList.remove('hidden');
+            document.getElementById('crash-cashout').classList.add('hidden');
+
+            // Exibe resultado
+            const resultDiv = document.getElementById('crash-result');
+            resultDiv.classList.remove('hidden', 'win', 'lose');
+            resultDiv.classList.add('win');
+            resultDiv.innerHTML = `💰 RETIRADA! ${crashMultiplier.toFixed(2)}x +R$ ${(win - crashBetAmount).toFixed(2)}`;
+        }
+
+        // Inicializa os dados do usuário
+        loadUserData();
+    </script>
+</body>
+</html>

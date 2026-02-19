@@ -13,10 +13,8 @@ const wss = new WebSocket.Server({ server });
 
 const PORT = process.env.PORT || 3001;
 
-// Armazenar conexões WebSocket
 const clients = new Map();
 
-// WebSocket
 wss.on('connection', (ws, req) => {
     console.log('✅ Novo cliente conectado');
     ws.on('message', (message) => {
@@ -41,7 +39,6 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-// Funções auxiliares WebSocket
 function sendRealTimeUpdate(userId, type, data) {
     const client = clients.get(userId.toString());
     if (client && client.readyState === WebSocket.OPEN) {
@@ -59,18 +56,15 @@ function sendToAllAdmins(type, data) {
     }
 }
 
-// Configurações do Express
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Banco de dados SQLite
 const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) return console.error('Erro no banco:', err.message);
     console.log('✅ Conectado ao DB SQLite.');
 
     db.serialize(() => {
-        // Tabela de usuários (com campos para afiliados)
         db.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
@@ -94,7 +88,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de comissões de afiliados
         db.run(`CREATE TABLE IF NOT EXISTS affiliate_commissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             affiliate_id INTEGER,
@@ -105,7 +98,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de histórico de jogos
         db.run(`CREATE TABLE IF NOT EXISTS game_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -116,7 +108,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de depósitos
         db.run(`CREATE TABLE IF NOT EXISTS deposits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -127,7 +118,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de saques
         db.run(`CREATE TABLE IF NOT EXISTS withdraw_requests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -142,7 +132,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de transações
         db.run(`CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -155,7 +144,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de estatísticas da casa
         db.run(`CREATE TABLE IF NOT EXISTS house_stats (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             total_bets REAL DEFAULT 0,
@@ -164,7 +152,6 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Tabela de configurações do admin
         db.run(`CREATE TABLE IF NOT EXISTS admin_config (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             pix_key TEXT,
@@ -189,11 +176,10 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
             site_name TEXT DEFAULT 'Nexus Trade',
             contact_email TEXT DEFAULT 'suporte@nexustrade.com',
             logo_path TEXT DEFAULT '/images/logo.png',
-            primary_color TEXT DEFAULT '#ffd700',
+            primary_color TEXT DEFAULT '#f5b342',
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Inserções iniciais
         db.get('SELECT * FROM admin_config WHERE id = 1', (err, row) => {
             if (!row) {
                 db.run(`INSERT INTO admin_config 
@@ -212,12 +198,10 @@ const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite
     });
 });
 
-// ===== FUNÇÕES AUXILIARES =====
 function gerarCodigoAfiliado() {
     return 'NEX' + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
-// ===== ROTA DO QR CODE =====
 app.get('/api/pix-qrcode', (req, res) => {
     const imagePath = path.join(__dirname, '../frontend/images/pix-nexus.png');
     if (fs.existsSync(imagePath)) {
@@ -230,11 +214,16 @@ app.get('/api/pix-qrcode', (req, res) => {
     }
 });
 
-// ===== ROTAS DE AUTENTICAÇÃO =====
 app.get('/cadastro', (req, res) => res.sendFile(path.join(__dirname, '../frontend/cadastro.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../frontend/login.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../frontend/admin.html')));
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, '../frontend/dashboard.html')));
+app.get('/slot', (req, res) => res.sendFile(path.join(__dirname, '../frontend/slot.html')));
+app.get('/dice', (req, res) => res.sendFile(path.join(__dirname, '../frontend/dice.html')));
+app.get('/crash', (req, res) => res.sendFile(path.join(__dirname, '../frontend/crash.html')));
+app.get('/roulette', (req, res) => res.sendFile(path.join(__dirname, '../frontend/roulette.html')));
+app.get('/blackjack', (req, res) => res.sendFile(path.join(__dirname, '../frontend/blackjack.html')));
+app.get('/affiliates', (req, res) => res.sendFile(path.join(__dirname, '../frontend/affiliates.html')));
 
 app.post('/api/register', async (req, res) => {
     const { name, email, password, pixKey, cpf, phone, ref } = req.body;
@@ -246,10 +235,9 @@ app.post('/api/register', async (req, res) => {
         const affiliateCode = gerarCodigoAfiliado();
         let referredBy = null;
         if (ref) {
-            const userRef = await new Promise((resolve) => {
-                db.get('SELECT id FROM users WHERE affiliate_code = ?', [ref], (err, row) => resolve(row));
+            db.get('SELECT id FROM users WHERE affiliate_code = ?', [ref], (err, row) => {
+                if (row) referredBy = row.id;
             });
-            if (userRef) referredBy = userRef.id;
         }
         db.run(
             `INSERT INTO users (name, email, password, pix_key, cpf, phone, affiliate_code, referred_by) 
@@ -281,7 +269,6 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// ===== ROTAS DE DEPÓSITO =====
 app.post('/api/request-deposit', (req, res) => {
     const { userId, amount } = req.body;
     db.get('SELECT name, email FROM users WHERE id = ?', [userId], (err, user) => {
@@ -294,7 +281,6 @@ app.post('/api/request-deposit', (req, res) => {
     });
 });
 
-// ===== ROTAS DE SAQUE =====
 app.post('/api/request-withdraw', (req, res) => {
     const { userId, amount, name, cpf, pixKey } = req.body;
     db.get('SELECT balance, name, email FROM users WHERE id = ?', [userId], (err, user) => {
@@ -314,9 +300,6 @@ app.post('/api/request-withdraw', (req, res) => {
     });
 });
 
-// ===== ROTAS DE JOGOS =====
-
-// Função para processar comissão de afiliado
 function processarComissaoAfiliado(userId, amount, type) {
     db.get('SELECT referred_by FROM users WHERE id = ?', [userId], (err, user) => {
         if (err || !user || !user.referred_by) return;
@@ -332,7 +315,6 @@ function processarComissaoAfiliado(userId, amount, type) {
     });
 }
 
-// Slot
 app.post('/api/game/slot', (req, res) => {
     const { userId, betAmount } = req.body;
     db.get(`
@@ -388,7 +370,6 @@ app.post('/api/game/slot', (req, res) => {
     });
 });
 
-// Dados
 app.post('/api/game/dice', (req, res) => {
     const { userId, betAmount, betType } = req.body;
     db.get(`
@@ -431,7 +412,6 @@ app.post('/api/game/dice', (req, res) => {
     });
 });
 
-// Aviãozinho (crash)
 app.post('/api/game/crash', (req, res) => {
     const { userId, betAmount, cashoutMultiplier } = req.body;
     db.get(`
@@ -444,7 +424,7 @@ app.post('/api/game/crash', (req, res) => {
         }
 
         const winAmount = betAmount * (cashoutMultiplier || 0);
-        const newBalance = data.balance + winAmount; // A aposta já foi deduzida no frontend
+        const newBalance = data.balance + winAmount;
         let message = '';
         if (cashoutMultiplier > 0) {
             message = `💰 RETIRADA! ${cashoutMultiplier.toFixed(2)}x +R$ ${winAmount.toFixed(2)}`;
@@ -463,7 +443,6 @@ app.post('/api/game/crash', (req, res) => {
     });
 });
 
-// Roleta
 app.post('/api/game/roulette', (req, res) => {
     const { userId, betAmount, betType, betValue } = req.body;
     db.get(`
@@ -522,7 +501,6 @@ app.post('/api/game/roulette', (req, res) => {
     });
 });
 
-// Blackjack (simplificado)
 app.post('/api/game/blackjack', (req, res) => {
     const { userId, betAmount, action } = req.body;
     db.get(`
@@ -535,7 +513,6 @@ app.post('/api/game/blackjack', (req, res) => {
         }
         if (data.balance < betAmount) return res.status(400).json({ error: 'Saldo insuficiente' });
 
-        // Lógica simplificada: dealer sempre ganha a menos que jogador tenha 21
         const playerCard1 = Math.floor(Math.random() * 10) + 1;
         const playerCard2 = Math.floor(Math.random() * 10) + 1;
         const playerSum = playerCard1 + playerCard2;
@@ -561,7 +538,6 @@ app.post('/api/game/blackjack', (req, res) => {
     });
 });
 
-// ===== ROTAS DE AFILIADOS =====
 app.get('/api/affiliate/stats/:userId', (req, res) => {
     const userId = req.params.userId;
     db.get(`SELECT affiliate_code, affiliate_balance, affiliate_commission FROM users WHERE id = ?`, [userId], (err, user) => {
@@ -580,7 +556,6 @@ app.get('/api/affiliate/stats/:userId', (req, res) => {
     });
 });
 
-// ===== ROTAS DO ADMIN =====
 const checkAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -602,7 +577,6 @@ const checkAdmin = (req, res, next) => {
     }
 };
 
-// Estatísticas
 app.get('/api/admin/stats', checkAdmin, (req, res) => {
     db.get(`
         SELECT
@@ -623,7 +597,6 @@ app.get('/api/admin/stats', checkAdmin, (req, res) => {
     });
 });
 
-// Listar usuários
 app.get('/api/admin/users', checkAdmin, (req, res) => {
     db.all(`SELECT id, name, email, pix_key, cpf, phone, balance, status,
                    total_deposits, total_withdraws, total_bets, total_wins, rtp_individual,
@@ -634,7 +607,6 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
     });
 });
 
-// Buscar usuário por ID
 app.get('/api/admin/user/:id', checkAdmin, (req, res) => {
     db.get(`SELECT * FROM users WHERE id = ?`, [req.params.id], (err, user) => {
         if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -643,7 +615,6 @@ app.get('/api/admin/user/:id', checkAdmin, (req, res) => {
     });
 });
 
-// Atualizar usuário
 app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
     const { id } = req.params;
     const updates = req.body;
@@ -669,7 +640,6 @@ app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
     });
 });
 
-// Depósitos pendentes
 app.get('/api/admin/deposits', checkAdmin, (req, res) => {
     db.all(`SELECT d.*, u.name, u.email FROM deposits d
             JOIN users u ON d.user_id = u.id
@@ -679,7 +649,6 @@ app.get('/api/admin/deposits', checkAdmin, (req, res) => {
     });
 });
 
-// Confirmar depósito (com bônus e comissão de afiliado)
 app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
     const { id } = req.params;
     const { amount } = req.body;
@@ -711,7 +680,6 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
                             db.run('ROLLBACK');
                             return res.status(500).json({ error: 'Erro ao creditar' });
                         }
-                        // Processar comissão de afiliado sobre depósito
                         if (user.referred_by) {
                             db.get('SELECT affiliate_commission FROM users WHERE id = ?', [user.referred_by], (err, aff) => {
                                 if (!err && aff) {
@@ -732,7 +700,6 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
     });
 });
 
-// Rejeitar depósito
 app.post('/api/admin/reject-deposit/:id', checkAdmin, (req, res) => {
     db.run('UPDATE deposits SET status = "Rejeitado" WHERE id = ?', [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: 'Erro ao rejeitar' });
@@ -740,7 +707,6 @@ app.post('/api/admin/reject-deposit/:id', checkAdmin, (req, res) => {
     });
 });
 
-// Saques pendentes
 app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
     db.all(`SELECT w.*, u.name as user_name, u.email FROM withdraw_requests w
             JOIN users u ON w.user_id = u.id
@@ -750,7 +716,6 @@ app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
     });
 });
 
-// Aprovar saque
 app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
     const { id } = req.params;
     db.serialize(() => {
@@ -787,7 +752,6 @@ app.post('/api/admin/withdraw/:id/approve', checkAdmin, (req, res) => {
     });
 });
 
-// Rejeitar saque
 app.post('/api/admin/withdraw/:id/reject', checkAdmin, (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
@@ -801,7 +765,6 @@ app.post('/api/admin/withdraw/:id/reject', checkAdmin, (req, res) => {
         });
 });
 
-// Histórico recente
 app.get('/api/admin/recent-history', checkAdmin, (req, res) => {
     db.all(`SELECT gh.*, u.name FROM game_history gh
             JOIN users u ON gh.user_id = u.id
@@ -811,7 +774,6 @@ app.get('/api/admin/recent-history', checkAdmin, (req, res) => {
     });
 });
 
-// Configurações
 app.get('/api/admin/config', checkAdmin, (req, res) => {
     db.get('SELECT * FROM admin_config WHERE id = 1', (err, config) => {
         if (err) return res.status(500).json({ error: 'Erro ao buscar configurações' });
@@ -819,7 +781,6 @@ app.get('/api/admin/config', checkAdmin, (req, res) => {
     });
 });
 
-// Salvar configurações
 app.post('/api/admin/config', checkAdmin, (req, res) => {
     const {
         pix_key, min_deposit, bonus_amount, min_withdraw, max_withdraw,
@@ -856,7 +817,6 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
         });
 });
 
-// Dados do usuário
 app.get('/api/user/:id', (req, res) => {
     db.get(`SELECT id, name, email, pix_key, cpf, phone, balance, status,
                    total_deposits, total_withdraws, total_bets, total_wins,
