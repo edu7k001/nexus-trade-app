@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ... (manter todo o CSS existente) ... */
+        /* ===== RESET E VARIÁVEIS ===== */
         :root {
             --primary: #f5b342;
             --primary-dark: #e09e2f;
@@ -473,7 +473,6 @@
             cursor: pointer;
         }
 
-        /* Seção de saque (agora como container) */
         .withdraw-container {
             display: none;
             background: var(--card-bg);
@@ -759,6 +758,7 @@
             padding: 40px;
             max-width: 400px;
             text-align: center;
+            position: relative;
         }
 
         .popup-content h3 {
@@ -807,7 +807,6 @@
                 <a href="#" class="nav-link" onclick="selectGame('dice')"><i class="fas fa-dice-d6"></i> Dados</a>
                 <a href="#" class="nav-link" onclick="selectGame('crash')"><i class="fas fa-plane"></i> Avião</a>
                 <a href="#" class="nav-link" onclick="selectGame('blackjack')"><i class="fas fa-spade"></i> Blackjack</a>
-                <!-- Nova aba de Saque (substitui a roleta) -->
                 <a href="#" class="nav-link" onclick="selectGame('withdraw')"><i class="fas fa-money-bill-wave"></i> Saque</a>
             </nav>
             <div class="user-area">
@@ -906,7 +905,7 @@
             </div>
         </div>
 
-        <!-- Container de Saque (agora separado) -->
+        <!-- Container de Saque -->
         <div id="withdraw-container" class="withdraw-container">
             <h2 class="withdraw-title"><i class="fas fa-money-bill-wave"></i> Solicitar Saque</h2>
             <div class="withdraw-form">
@@ -1005,27 +1004,11 @@
     <script>
         // ========== VARIÁVEIS GLOBAIS ==========
         let userData = null;
-        let currentGame = 'slot'; // padrão
-        let diceChoice = 'sum7';
-        let crashInterval = null;
-        let crashMultiplier = 1.0;
-       -notifications" id="live-notifications"></div>
-
-    <script>
-        // ========== VARIÁVEIS GLOBAIS ==========
-        let userData = null;
-        let currentGame = 'slot'; // padrão
+        let currentGame = 'slot';
         let diceChoice = 'sum7';
         let crashInterval = null;
         let crashMultiplier = 1.0;
         let crashActive = false;
-        let crashBetAmount = 0;
-        let ws = null;
-        let highestBalance = 0;
-        let hasDeposited = localStorage.getItem('hasDeposited') === 'true';
-        let showFirstTimePopup = !localStorage.getItem('firstDepositShown') && !hasDeposited;
-        let selectedDepositAmount = null;
- let crashActive = false;
         let crashBetAmount = 0;
         let ws = null;
         let highestBalance = 0;
@@ -1039,23 +1022,7 @@
         // ========== WEBSOCKET ==========
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const ws        let lastPopupTime = 0;
-
-        const fakeNames = ['João','Maria','Carlos','Ana','Pedro','Paula','Lucas','Fernanda','Rafael','Juliana'];
-
-        // ========== WEBSOCKET ==========
-        function connectWebSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-           Url = `${protocol}//${window.location.host}`;
-            ws = new WebSocket(wsUrl);
-            ws.onopen = () => {
-                if (userData) ws.send(JSON.stringify({ type: 'auth', userId: userData.id }));
-            };
-            ws.onmessage = (e) => {
-                try {
-                    const data = JSON.parse(e.data);
-                    if (data.type === 'balance_update') {
-                        userData.b const wsUrl = `${protocol}//${window.location.host}`;
+            const wsUrl = `${protocol}//${window.location.host}`;
             ws = new WebSocket(wsUrl);
             ws.onopen = () => {
                 if (userData) ws.send(JSON.stringify({ type: 'auth', userId: userData.id }));
@@ -1069,20 +1036,7 @@
                     } else if (data.type === 'deposit_confirmed') {
                         userData.balance = data.data.newBalance;
                         if (data.data.newBalance > highestBalance) {
-                            highestBalancealance = data.data.balance;
-                        updateUI();
-                    } else if (data.type === 'deposit_confirmed') {
-                        userData.balance = data.data.newBalance;
-                        if (data.data.newBalance > highestBalance) {
-                            = data.data.newBalance;
-                        }
-                        updateUI();
-                        alert('✅ Depósito confirmado!');
-                    } else if (data.type === 'withdraw_approved') {
-                        userData.balance = data.data.newBalance;
-                        updateUI();
-                        alert('✅ Saque aprovado!');
-                    } else if (data.type === ' highestBalance = data.data.newBalance;
+                            highestBalance = data.data.newBalance;
                         }
                         updateUI();
                         alert('✅ Depósito confirmado!');
@@ -1094,18 +1048,7 @@
                         carregarDadosAfiliado();
                     }
                 } catch (error) {
-                    console.error('Erro no WebSocketaffiliate_commission') {
-                        carregarDadosAfiliado();
-                    }
-                } catch (error) {
                     console.error('Erro no WebSocket:', error);
-                }
-            };
-            ws.onclose = () => setTimeout(connectWebSocket, 3000);
-        }
-
-        // ========== CARREGAR DADOS DO USUÁRIO ==========
-:', error);
                 }
             };
             ws.onclose = () => setTimeout(connectWebSocket, 3000);
@@ -1114,37 +1057,17 @@
         // ========== CARREGAR DADOS DO USUÁRIO ==========
         async function loadUserData() {
             const userStr = localStorage.getItem('user');
-            if (!userStr) { window        async function loadUserData() {
-            const userStr = localStorage.getItem('user');
             if (!userStr) { window.location.href = '/login'; return; }
             userData = JSON.parse(userStr);
             try {
-                const res = await fetch(`/api/user/${userData.id.location.href = '/login'; return; }
-            userData = JSON.parse(userStr);
-            try {
-                const res = await fetch(`/api/user}`);
+                const res = await fetch(`/api/user/${userData.id}`);
                 const data = await res.json();
                 if (res.ok) {
                     userData = { ...userData, ...data };
                     if (userData.balance > highestBalance) {
                         highestBalance = userData.balance;
                     }
-                    if (userData.balance > /${userData.id}`);
-                const data = await res.json();
-                if (res.ok) {
-                    userData = { ...userData, ...data };
-                    if (userData.balance > highestBalance) {
-                        highestBalance = userData.balance;
-                    }
-                    if (userData.balance > 0 ||0 || userData.status === 'Ativo') {
-                        hasDeposited = true;
-                        localStorage.setItem('hasDeposited', 'true');
-                    }
-                    updateUI();
-                    checkFirstTimePopup();
-                    startLiveNotifications();
-                    startOnlineCounter();
- userData.status === 'Ativo') {
+                    if (userData.balance > 0 || userData.status === 'Ativo') {
                         hasDeposited = true;
                         localStorage.setItem('hasDeposited', 'true');
                     }
@@ -1154,19 +1077,7 @@
                     startOnlineCounter();
                     connectWebSocket();
                     carregarDadosAfiliado();
-                    document.getElementById('withdraw-name').value = user                    connectWebSocket();
-                    carregarDadosAfiliado();
                     document.getElementById('withdraw-name').value = userData.name || '';
-                }
-            } catch (error) {
-                console.error('Erro ao carregar usuário:', error);
-                updateUI();
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('user-name').textContent = userData.name || 'Usuário';
-            document.getElementById('user-avatar').textContent = (userData.name || 'U').charAt(0Data.name || '';
                 }
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error);
@@ -1183,70 +1094,51 @@
             }
         }
 
-);
-            document.getElementById('user-balance').textContent = `R$ ${(userData.balance || 0).toFixed(2)}`;
-            if (userData.balance > highestBalance) {
-                highestBalance = userData.balance;
-            }
-        }
-
         // ========== SELEÇÃO DE ABAS ==========
         function selectGame(game) {
-            currentGame = game;
+            console.log('Aba selecionada:', game);
             
-            // Atualizar classes ativas no menu e seletor
+            // Remove classe 'active' de todas as abas do menu e do seletor
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            document.querySelector        // ========== SELEÇÃO DE ABAS ==========
-        function selectGame(game) {
-            currentGame = game;
-            
-            // Atualizar classes ativas no menu e seletor
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            document.querySelectorAll('.All('.game-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.game-tab').forEach(tab => tab.classList.remove('active'));
 
             if (game === 'withdraw') {
-                // Mostrar container de saque, ocultar jogos
+                // Oculta todos os jogos e mostra o container de saque
                 document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
-                document.getElementById('withdraw-container').classList.add('active');
-                // Marcar aba correspondgame-tab').forEach(tab => tab.classList.remove('active'));
-
-            if (game === 'withdraw') {
-                // Mostrar container de saque, ocultar jogos
-                document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
-                document.getElementById('withdraw-container').classList.add('active');
-                // Marcar aba correspondente
-                document.querySelectorAll('.nav-link')[4].classList.add('active'); // Saque
-                document.querySelectorAll('.game-tab')[4].classList.add('active'); // Saque
-            } else {
-                // Mostrar jogo selecionado, ocultar saque
-                document.getElementById('withente
-                document.querySelectorAll('.nav-link')[4].classList.add('active'); // Saque
-                document.querySelectorAll('.game-tab')[4].classList.add('active'); // Saque
-            } else {
-                // Mostrar jogo selecionado, ocultar saque
-                document.getElementById('withdraw-container').classdraw-container').classList.remove('active');
-                document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
-                document.getElementById(`game-${game}`).classList.add('active');
+                const withdrawContainer = document.getElementById('withdraw-container');
+                if (withdrawContainer) {
+                    withdrawContainer.classList.add('active');
+                }
                 
-                // Marcar aba correta
-                const index = game === 'slot' ? 0 : game === 'dice'List.remove('active');
-                document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
-                document.getElementById(`game-${game}`).classList.add('active');
+                // Ativa a aba de saque (última posição)
+                const navLinks = document.querySelectorAll('.nav-link');
+                const gameTabs = document.querySelectorAll('.game-tab');
+                if (navLinks.length > 4) navLinks[4].classList.add('active');
+                if (gameTabs.length > 4) gameTabs[4].classList.add('active');
+            } else {
+                // Oculta container de saque e mostra o jogo correspondente
+                const withdrawContainer = document.getElementById('withdraw-container');
+                if (withdrawContainer) withdrawContainer.classList.remove('active');
                 
-                // Marcar aba correta
-                const index = game === 'slot' ? 0 : game === 'dice' ? 1 : game === 'crash' ? 2 : game === 'blackjack' ? 3 : 4;
-                document.querySelectorAll('.nav-link')[index].classList.add('active');
-                document.querySelectorAll('.game-tab')[index].classList.add(' ? 1 : game === 'crash' ? 2 : game === 'blackjack' ? 3 : 4;
-                document.querySelectorAll('.nav-link')[index].classList.add('active');
-                document.querySelectorAll('.game-tab')[index].classListactive');
-            }
-        }
-
-        // ========== NOTIFICAÇÕES ==========
-        function startLiveNotifications() {
-            setInterval(addRandomNotification, 30000 + Math.random() * 30000);
-            setTimeout(addRandomNotification, 5000);
-.add('active');
+                document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
+                const gameContainer = document.getElementById(`game-${game}`);
+                if (gameContainer) {
+                    gameContainer.classList.add('active');
+                }
+                
+                // Ativa a aba correta baseada no jogo
+                let index = 0;
+                switch(game) {
+                    case 'slot': index = 0; break;
+                    case 'dice': index = 1; break;
+                    case 'crash': index = 2; break;
+                    case 'blackjack': index = 3; break;
+                    default: index = 0;
+                }
+                const navLinks = document.querySelectorAll('.nav-link');
+                const gameTabs = document.querySelectorAll('.game-tab');
+                if (navLinks.length > index) navLinks[index].classList.add('active');
+                if (gameTabs.length > index) gameTabs[index].classList.add('active');
             }
         }
 
@@ -1255,33 +1147,16 @@
             setInterval(addRandomNotification, 30000 + Math.random() * 30000);
             setTimeout(addRandomNotification, 5000);
         }
-
-        function addRandom        }
 
         function addRandomNotification() {
             const types = ['win','withdraw','deposit'];
             const type = types[Math.floor(Math.random()*types.length)];
             const name = fakeNames[Math.floor(Math.random()*fakeNames.length)];
-            constNotification() {
-            const types = ['win','withdraw','deposit'];
-            const type = types[Math.floor(Math.random()*types.length)];
-            const name = fakeNames[Math.floor(Math.random()*fakeNames.length)];
-            const amount = amount = (Math.random()*2000+100).toFixed(2);
+            const amount = (Math.random()*2000+100).toFixed(2);
             const container = document.getElementById('live-notifications');
             const notif = document.createElement('div');
             notif.className = `notification ${type}`;
-            notif.innerHTML (Math.random()*2000+100).toFixed(2);
-            const container = document.getElementById('live-notifications');
-            const notif = document.createElement('div');
-            notif.className = `notification ${type}`;
-            notif.innerHTML = `<div>${type==='win'?'🏆':type==='withdraw'?'💸':'💰'} ${name} ${type==='win'?'ganhou':type==='withdraw'?'sacou':'depositou = `<div>${type==='win'?'🏆':type==='withdraw'?'💸':'💰'} ${name} ${type==='win'?'ganhou':type==='withdraw'?'sacou':'depositou'} R$ ${amount}</div>`;
-            container.appendChild(notif);
-            setTimeout(() => notif.remove(), 5000);
-        }
-
-        function startOnlineCounter() {
-            const counter = document.createElement('div');
-            counter.className = 'online-counter'} R$ ${amount}</div>`;
+            notif.innerHTML = `<div>${type==='win'?'🏆':type==='withdraw'?'💸':'💰'} ${name} ${type==='win'?'ganhou':type==='withdraw'?'sacou':'depositou'} R$ ${amount}</div>`;
             container.appendChild(notif);
             setTimeout(() => notif.remove(), 5000);
         }
@@ -1289,71 +1164,36 @@
         function startOnlineCounter() {
             const counter = document.createElement('div');
             counter.className = 'online-counter';
-            counter.style.cssText = 'position:fixed; top:20px; right:20px; background:rgba(0,0,0,0';
-            counter.style.cssText = 'position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); border:1px solid var(--primary); border-radius:50px; padding:8px 20px; z.8); backdrop-filter:blur(10px); border:1px solid var(--primary); border-radius:50px; padding:8px 20px; z-index:1000; display:flex; align-items:center; gap:10px;';
-            counter.innerHTML = `<span style="width:-index:1000; display:flex; align-items:center; gap:10px;';
-            counter.innerHTML = `<span style="width:10px10px; height:10px; background:var(--success); border-radius:50%;"></span> <span id="online-count">147</span> online`;
-            document.body.appendChild(counter);
-            setInterval(() => {
-                document; height:10px; background:var(--success); border-radius:50%;"></span> <span id="online-count">147</span> online`;
+            counter.style.cssText = 'position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); border:1px solid var(--primary); border-radius:50px; padding:8px 20px; z-index:1000; display:flex; align-items:center; gap:10px;';
+            counter.innerHTML = `<span style="width:10px; height:10px; background:var(--success); border-radius:50%;"></span> <span id="online-count">147</span> online`;
             document.body.appendChild(counter);
             setInterval(() => {
                 document.getElementById('online-count').textContent = 147 + Math.floor(Math.random()*20-10);
             }, 10000);
-       .getElementById('online-count').textContent = 147 + Math.floor(Math.random()*20-10);
-            }, 10000);
         }
 
         // ========== POP-UPS DE DEPÓSITO ==========
         function checkFirstTimePopup() {
-            }
-
-        // ========== POP-UPS DE DEPÓSITO ==========
-        function checkFirstTimePopup() {
-            if (showFirstTimePopup && !hasDeposited && user if (showFirstTimePopup && !hasDeposited && userData.status === 'Pendente') {
-                setTimeout(() => showDepositPopup('first-time'), 2000);
-            }
-        }
-
-       Data.status === 'Pendente') {
+            if (showFirstTimePopup && !hasDeposited && userData && userData.status === 'Pendente') {
                 setTimeout(() => showDepositPopup('first-time'), 2000);
             }
         }
 
         function checkBalanceForPopup() {
-            if (!hasDeposited) return function checkBalanceForPopup() {
-            if (!hasDeposited) return false;
+            if (!hasDeposited || !userData) return false;
             const now = Date.now();
-            if (now - lastPopupTime < 300000) return false;
+            if (now - lastPopupTime < 300000) return false; // 5 minutos
             if (userData.balance <= 0) {
                 lastPopupTime = now;
                 showDepositPopup('zero');
                 return true;
- false;
-            const now = Date.now();
-            if (now - lastPopupTime < 300000) return false;
-            if (userData.balance <= 0) {
-                lastPopupTime = now;
-                showDepositPopup('zero');
-                return            }
-            if (highestBalance > 0) {
-                const percentLost = ((highestBalance - userData.balance) / highestBalance) * 100;
-                if (percentLost >= 80 && !localStorage.getItem('lowBalanceShown_' + userData.id)) true;
             }
             if (highestBalance > 0) {
                 const percentLost = ((highestBalance - userData.balance) / highestBalance) * 100;
                 if (percentLost >= 80 && !localStorage.getItem('lowBalanceShown_' + userData.id)) {
                     lastPopupTime = now;
                     showDepositPopup('low-balance');
-                    localStorage.setItem('lowBalanceShown_' {
-                    lastPopupTime = now;
-                    showDepositPopup('low-balance');
                     localStorage.setItem('lowBalanceShown_' + userData.id, 'true');
-                    setTimeout(() => localStorage.removeItem('lowBalanceShown_' + userData.id), 3600000);
-                    return true;
-                }
-            }
-            return false + userData.id, 'true');
                     setTimeout(() => localStorage.removeItem('lowBalanceShown_' + userData.id), 3600000);
                     return true;
                 }
@@ -1363,35 +1203,37 @@
 
         function showDepositPopup(type) {
             const existingPopup = document.querySelector('.deposit-popup');
-            if (existingPopup) existingPopup.remove;
-        }
-
-        function showDepositPopup(type) {
-            const existingPopup = document.querySelector('.deposit-popup');
             if (existingPopup) existingPopup.remove();
             const popup = document.createElement('div');
             popup.className = 'deposit-popup';
             let content = '';
-            if();
-            const popup = document.createElement('div');
-            popup.className = 'deposit-popup';
-            let content = '';
-            if (type === ' (type === 'zero') {
-                content = `<div class="popup-content"><h3>⚠️ SALDO ZERADO!</h3><p>Seu saldo acabou. Para continuar jogando, faça um depósito agora mesmo e ganhe bônus!</p><button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">💰 DEPOSITAR AGORAzero') {
-                content = `<div class="popup-content"><h3>⚠️ SALDO ZERADO!</h3><p>Seu saldo acabou. Para continuar jogando, faça um depósito agora mesmo e ganhe bônus!</p><button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">💰 DEPOSITAR AGORA</button></div>`;
+            if (type === 'zero') {
+                content = `
+                    <div class="popup-content">
+                        <h3>⚠️ SALDO ZERADO!</h3>
+                        <p>Seu saldo acabou. Para continuar jogando, faça um depósito agora mesmo e ganhe bônus!</p>
+                        <button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">💰 DEPOSITAR AGORA</button>
+                    </div>
+                `;
             } else if (type === 'low-balance') {
-                content = `<div class="popup-content"><button class="btn-close" onclick="this.closest('.deposit-popup').remove()">×</button><h3>⚠️ SALDO BAIXO</h3><p>Seu saldo está acabando. Que tal reforçar para continuar ganhando?</p><button class="btn-deposit</button></div>`;
-            } else if (type === 'low-balance') {
-                content = `<div class="popup-content"><button class="btn-close" onclick="this.closest('.deposit-popup').remove()">×</button><h3>⚠️ SALDO BAIXO</h3><p>Seu saldo está acabando. Que tal reforçar para continuar ganhando?</p><button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">DEPOSITAR</button></div>`;
-                setTimeout(() => { const p = document.querySelector('.deposit-pop" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">DEPOSITAR</button></div>`;
+                content = `
+                    <div class="popup-content">
+                        <button class="btn-close" onclick="this.closest('.deposit-popup').remove()">×</button>
+                        <h3>⚠️ SALDO BAIXO</h3>
+                        <p>Seu saldo está acabando. Que tal reforçar para continuar ganhando?</p>
+                        <button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">DEPOSITAR</button>
+                    </div>
+                `;
                 setTimeout(() => { const p = document.querySelector('.deposit-popup'); if (p) p.remove(); }, 5000);
             } else if (type === 'first-time') {
-                content = `<div class="popup-content"><button class="btn-up'); if (p) p.remove(); }, 5000);
-            } else if (type === 'first-time') {
-                content = `<div class="popup-content"><button class="btn-close" onclick="this.closest('.deposit-popup').remove()">×</button><h3>close" onclick="this.closest('.deposit-popup').remove()">×</button><h3>🎉 BEM-VINDO!</h3><p>Faça seu primeiro depósito e ganhe bônus!</p><button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">DEPOSITAR</button></div>`;
-                localStorage.setItem('firstDepositShown', 'true');
-            }
-            popup🎉 BEM-VINDO!</h3><p>Faça seu primeiro depósito e ganhe bônus!</p><button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">DEPOSITAR</button></div>`;
+                content = `
+                    <div class="popup-content">
+                        <button class="btn-close" onclick="this.closest('.deposit-popup').remove()">×</button>
+                        <h3>🎉 BEM-VINDO!</h3>
+                        <p>Faça seu primeiro depósito e ganhe bônus!</p>
+                        <button class="btn-deposit" onclick="showDepositModal(); this.closest('.deposit-popup').remove()">DEPOSITAR</button>
+                    </div>
+                `;
                 localStorage.setItem('firstDepositShown', 'true');
             }
             popup.innerHTML = content;
@@ -1399,27 +1241,10 @@
         }
 
         function checkBalanceBeforePlay() {
-            if (userData.status === 'Pendente' && !hasDeposited) {
-                showDepositPopup('first-time');
-                return false.innerHTML = content;
-            document.body.appendChild(popup);
-        }
-
-        function checkBalanceBeforePlay() {
+            if (!userData) return false;
             if (userData.status === 'Pendente' && !hasDeposited) {
                 showDepositPopup('first-time');
                 return false;
-            }
-            if (userData.balance <= 0) {
-                showDepositPopup('zero');
-                return false;
-            }
-            checkBalanceForPopup();
-            return true;
-        }
-
-        // ========== JOGOS ==========
-        function selectDice;
             }
             if (userData.balance <= 0) {
                 showDepositPopup('zero');
@@ -1439,24 +1264,7 @@
         async function playSlot() {
             if (!checkBalanceBeforePlay()) return;
             const bet = parseFloat(document.getElementById('slot-bet').value);
-            if ((opt) {
-            document.querySelectorAll('.dice-option').forEach(el => el.classList.remove('selected'));
-            event.target.classList.add('selected');
-            diceChoice = opt;
-        }
-
-        async function playSlot() {
-            if (!checkBalanceBeforePlay()) return;
-            const bet = parseFloat(document.getElementById('slot-bet').value);
-            if (bet >bet > userData.balance) { showDepositPopup('zero'); return; }
-            if (bet < 5) { alert('Aposta mínima: R$5'); return; }
-            document.getElementById('slot-reel1').classList.add('spinning');
-            document.getElementById('slot-reel2').classList.add('spinning');
-            document.getElementById('slot-reel3').classList.add('spinning');
-            try {
-                const res = await fetch('/api/game/slot', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
- userData.balance) { showDepositPopup('zero'); return; }
+            if (bet > userData.balance) { showDepositPopup('zero'); return; }
             if (bet < 5) { alert('Aposta mínima: R$5'); return; }
             document.getElementById('slot-reel1').classList.add('spinning');
             document.getElementById('slot-reel2').classList.add('spinning');
@@ -1470,17 +1278,7 @@
                 if (res.ok) {
                     setTimeout(() => {
                         document.getElementById('slot-reel1').classList.remove('spinning');
-                        document.getElementById('slot-reel2').classList.remove('spinning                    body:JSON.stringify({ userId:userData.id, betAmount:bet })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    setTimeout(() => {
-                        document.getElementById('slot-reel1').classList.remove('spinning');
                         document.getElementById('slot-reel2').classList.remove('spinning');
-                        document.getElementById('slot-reel3').classList.remove('spinning');
-                        document.getElementById('slot-reel1').textContent = data.symbols[0];
-                        document.getElementById('slot-reel2').textContent = data.symbols[1];
-                        document.getElementById('slot-reel3').textContent = data.symbol');
                         document.getElementById('slot-reel3').classList.remove('spinning');
                         document.getElementById('slot-reel1').textContent = data.symbols[0];
                         document.getElementById('slot-reel2').textContent = data.symbols[1];
@@ -1495,27 +1293,7 @@
                         checkBalanceForPopup();
                     }, 1000);
                 } else {
-                    alert('Erro: 's[2];
-                        userData.balance = data.newBalance;
-                        updateUI();
-                        const resDiv = document.getElementById('slot-result');
-                        resDiv.classList.remove('hidden','win','lose');
-                        resDiv.classList.add(data.win>0?'win':'lose');
-                        resDiv.innerHTML = data.message;
-                        addToHistory(data.message);
-                        checkBalanceForPopup();
-                    }, 1000);
-                } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
-                }
-            } catch (e) { alert('Erro de conexão'); }
-        }
-
-        async function playDice() {
-            if (!checkBalanceBeforePlay()) return;
-            const bet = parseFloat(document.getElementById('dice-bet').value);
-            if (bet > userData.balance) { showDepositPopup('zero'); return; }
- + (data.error || 'Desconhecido'));
                 }
             } catch (e) { alert('Erro de conexão'); }
         }
@@ -1527,16 +1305,7 @@
             if (bet < 5) { alert('Aposta mínima: R$5'); return; }
             const betType = {
                 type: diceChoice.startsWith('sum')?'sum':diceChoice==='double'?'double':'specific',
-                value: diceChoice==='sum7'?7:diceChoice==='sum2'?2            if (bet < 5) { alert('Aposta mínima: R$5'); return; }
-            const betType = {
-                type: diceChoice.startsWith('sum')?'sum':diceChoice==='double'?'double':'specific',
-                value: diceChoice==='sum7'?7:diceChoice==='sum2':diceChoice==='sum12'?12:diceChoice==='one'?1:diceChoice==='six'?6:0
-            };
-            document.getElementById('dice1').classList.add('rolling');
-            document.getElementById('dice2').classList.add('rolling');
-            try {
-                const res = await fetch('/api/game/dice', {
-                    method:'POST', headers:{'Content-Type?2:diceChoice==='sum12'?12:diceChoice==='one'?1:diceChoice==='six'?6:0
+                value: diceChoice==='sum7'?7:diceChoice==='sum2'?2:diceChoice==='sum12'?12:diceChoice==='one'?1:diceChoice==='six'?6:0
             };
             document.getElementById('dice1').classList.add('rolling');
             document.getElementById('dice2').classList.add('rolling');
@@ -1547,27 +1316,12 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                   ':'application/json'},
-                    body:JSON.stringify({ userId:userData.id, betAmount:bet, betType })
-                });
-                const data = await res.json();
-                if (res.ok) {
                     setTimeout(() => {
                         document.getElementById('dice1').classList.remove('rolling');
                         document.getElementById('dice2').classList.remove('rolling');
                         const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
-                        document.getElementById setTimeout(() => {
-                        document.getElementById('dice1').classList.remove('rolling');
-                        document.getElementById('dice2').classList.remove('rolling');
-                        const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
                         document.getElementById('dice1').textContent = faces[data.dice[0]-1];
-                        document.getElementById('dice2').textContent = faces[data.dice('dice1').textContent = faces[data.dice[0]-1];
                         document.getElementById('dice2').textContent = faces[data.dice[1]-1];
-                        userData.balance = data.newBalance;
-                        updateUI();
-                        const resDiv = document.getElementById('dice-result');
-                        resDiv.classList.remove('hidden','win','lose');
-                        resDiv.classList[1]-1];
                         userData.balance = data.newBalance;
                         updateUI();
                         const resDiv = document.getElementById('dice-result');
@@ -1577,19 +1331,6 @@
                         addToHistory(data.message);
                         checkBalanceForPopup();
                     }, 800);
-                }.add(data.win>0?'win':'lose');
-                        resDiv.innerHTML = data.message;
-                        addToHistory(data.message);
-                        checkBalanceForPopup();
-                    }, 800);
- else {
-                    alert('Erro: ' + (data.error || 'Desconhecido'));
-                }
-            } catch (e) { alert('Erro de conexão'); }
-        }
-
-        async function startCrash() {
-            if (!checkBalanceBeforePlay()) return;
                 } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
                 }
@@ -1599,12 +1340,7 @@
         async function startCrash() {
             if (!checkBalanceBeforePlay()) return;
             const bet = parseFloat(document.getElementById('crash-bet').value);
-            if (bet > userData.balance) { showDeposit            const bet = parseFloat(document.getElementById('crash-bet').value);
             if (bet > userData.balance) { showDepositPopup('zero'); return; }
-            if (bet < 5) { alert('Aposta mínima: R$5'); return; }
-            userData.balance -= bet;
-            updateUI();
-            crashBetAmountPopup('zero'); return; }
             if (bet < 5) { alert('Aposta mínima: R$5'); return; }
             userData.balance -= bet;
             updateUI();
@@ -1613,17 +1349,7 @@
             document.getElementById('crash-cashout').classList.remove('hidden');
             document.getElementById('crash-result').classList.add('hidden');
             crashActive = true;
-            crashMultiplier = 1 = bet;
-            document.getElementById('crash-start').classList.add('hidden');
-            document.getElementById('crash-cashout').classList.remove('hidden');
-            document.getElementById('crash-result').classList.add('hidden');
-            crashActive = true;
             crashMultiplier = 1.0;
-            document.getElementById('crash-multiplier').textContent = '1.00';
-            document.getElementById('crash-plane').style.animation = 'fly 4s linear infinite';
-            crashInterval = setInterval(() => {
-                if (crashActive) {
-                    crashMulti.0;
             document.getElementById('crash-multiplier').textContent = '1.00';
             document.getElementById('crash-plane').style.animation = 'fly 4s linear infinite';
             crashInterval = setInterval(() => {
@@ -1635,20 +1361,7 @@
             }, 100);
         }
 
-        async functionplier += 0.01;
-                    document.getElementById('crash-multiplier').textContent = crashMultiplier.toFixed(2);
-                    if (Math.random() < 0.02) crashGame();
-                }
-            }, 100);
-        }
-
-        async function crashGame crashGame() {
-            if (!crashActive) return;
-            crashActive = false;
-            clearInterval(crashInterval);
-            document.getElementById('crash-plane').style.animation = 'none';
-            try {
-                await fetch('/api/g() {
+        async function crashGame() {
             if (!crashActive) return;
             crashActive = false;
             clearInterval(crashInterval);
@@ -1658,28 +1371,13 @@
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({ userId:userData.id, betAmount:crashBetAmount, cashoutMultiplier:0 })
                 });
-ame/crash', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({ userId:userData.id, betAmount:crashBetAmount, cashoutMultiplier:0 })
-                });
             } catch(e){}
             document.getElementById('crash-start').classList.remove('hidden');
-            document.getElementById('crash-cashout').            } catch(e){}
-            document.getElementById('crash-start').classList.remove('hidden');
-            document.getElementById('crash-cashout').classList.add('classList.add('hidden');
-            const resDiv = document.getElementById('crash-result');
-            resDiv.classList.remove('hidden','win','lose');
-            resDiv.classList.add('lose');
-            resDiv.innerHTML = `💥 Perdehidden');
+            document.getElementById('crash-cashout').classList.add('hidden');
             const resDiv = document.getElementById('crash-result');
             resDiv.classList.remove('hidden','win','lose');
             resDiv.classList.add('lose');
             resDiv.innerHTML = `💥 Perdeu R$ ${crashBetAmount.toFixed(2)}`;
-            addToHistory(`Avião: perdeu R$ ${crashBetAmount.toFixed(2)}`);
-            checkBalanceForPopup();
-        }
-
-        async functionu R$ ${crashBetAmount.toFixed(2)}`;
             addToHistory(`Avião: perdeu R$ ${crashBetAmount.toFixed(2)}`);
             checkBalanceForPopup();
         }
@@ -1690,19 +1388,9 @@ ame/crash', {
             clearInterval(crashInterval);
             const win = crashBetAmount * crashMultiplier;
             try {
-                const res = await fetch('/ cashout() {
-            if (!crashActive) return;
-            crashActive = false;
-            clearInterval(crashInterval);
-            const win = crashBetAmount * crashMultiplier;
-            try {
                 const res = await fetch('/api/game/crash', {
                     method:'POST', headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({ userId:userData.id, betapi/game/crash', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({ userId:userData.id, betAmount:crashBetAmount, cashoutMultiplier:crashMultiplier })
-                });
-                const dataAmount:crashBetAmount, cashoutMultiplier:crashMultiplier })
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -1710,33 +1398,14 @@ ame/crash', {
                     updateUI();
                 }
             } catch(e){}
-            document.getElementById('crash = await res.json();
-                if (res.ok) {
-                    userData.balance = data.newBalance;
-                    updateUI();
-                }
-            } catch(e){}
             document.getElementById('crash-plane').style.animation = 'none';
-            document.getElementById('crash-start').classList.remove-plane').style.animation = 'none';
             document.getElementById('crash-start').classList.remove('hidden');
-            document.getElementById('crash-cashout').classList.add('hidden');
-            const resDiv = document.getElementById('crash-result');
-           ('hidden');
             document.getElementById('crash-cashout').classList.add('hidden');
             const resDiv = document.getElementById('crash-result');
             resDiv.classList.remove('hidden','win','lose');
             resDiv.classList.add('win');
-            resDiv.innerHTML = ` resDiv.classList.remove('hidden','win','lose');
-            resDiv.classList.add('win');
-            resDiv.innerHTML = `💰 Retirada! ${crashMultiplier.toFixed(2)}x +R$ ${(win-crashBetAmount💰 Retirada! ${crashMultiplier.toFixed(2)}x +R$ ${(win-crashBetAmount).toFixed(2)}`;
-            addToHistory(`Avião: ganhou R$ ${(win-crashBet).toFixed(2)}`;
+            resDiv.innerHTML = `💰 Retirada! ${crashMultiplier.toFixed(2)}x +R$ ${(win-crashBetAmount).toFixed(2)}`;
             addToHistory(`Avião: ganhou R$ ${(win-crashBetAmount).toFixed(2)}`);
-        }
-
-        async function blackjackStart() {
-            if (!checkBalanceBeforePlay()) return;
-            const bet = parseFloat(document.getElementById('blackjack-bet').value);
-            if (bet > userData.balance) { showDepositPopup('zero'); return;Amount).toFixed(2)}`);
         }
 
         async function blackjackStart() {
@@ -1745,14 +1414,7 @@ ame/crash', {
             if (bet > userData.balance) { showDepositPopup('zero'); return; }
             if (bet < 5) { alert('Aposta mínima: R$5'); return; }
             try {
-                const res = await fetch('/api/game/ }
-            if (bet < 5) { alert('Aposta mínima: R$5'); return; }
-            try {
                 const res = await fetch('/api/game/blackjack', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({ userId:userData.id, betAmount:bet, action:'start' })
-                });
-blackjack', {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({ userId:userData.id, betAmount:bet, action:'start' })
                 });
@@ -1760,32 +1422,15 @@ blackjack', {
                 if (res.ok) {
                     userData.balance = data.newBalance;
                     updateUI();
-                    document.getElementById('blackjack-player-hand').innerHTML = data                const data = await res.json();
-                if (res.ok) {
-                    userData.balance = data.newBalance;
-                    updateUI();
                     document.getElementById('blackjack-player-hand').innerHTML = data.playerCards.map(c => `<div class="blackjack-card">${c}</div>`).join('');
-                    document.getElementById('blackjack-dealer-hand').innerHTML =.playerCards.map(c => `<div class="blackjack-card">${c}</div>`).join('');
                     document.getElementById('blackjack-dealer-hand').innerHTML = `<div class="blackjack-card">${data.dealerCard}</div><div class="blackjack-card">?</div>`;
-                    document.getElementById('blackjack-result').classList.add `<div class="blackjack-card">${data.dealerCard}</div><div class="blackjack-card">?</div>`;
                     document.getElementById('blackjack-result').classList.add('hidden');
                     checkBalanceForPopup();
                 } else {
                     alert('Erro: ' + (data.error || 'Desconhecido'));
                 }
             } catch(e){ alert('Erro de conexão'); }
-       ('hidden');
-                    checkBalanceForPopup();
-                } else {
-                    alert('Erro: ' + (data.error || 'Desconhecido'));
-                }
-            } catch(e){ alert('Erro de conexão'); }
         }
-
-        function blackjackHit() { alert('Funcionalidade em desenvolvimento'); }
-        function blackjackStand() { alert('Funcionalidade em desenvolvimento'); }
-
-        // ========== SAQUE ========= }
 
         function blackjackHit() { alert('Funcionalidade em desenvolvimento'); }
         function blackjackStand() { alert('Funcionalidade em desenvolvimento'); }
@@ -1795,18 +1440,7 @@ blackjack', {
             const name = document.getElementById('withdraw-name').value.trim();
             const cpf = document.getElementById('withdraw-cpf').value.trim();
             const pixKey = document.getElementById('withdraw-pix').value.trim();
-            const amount = parse=
-        async function requestWithdraw() {
-            const name = document.getElementById('withdraw-name').value.trim();
-            const cpf = document.getElementById('withdraw-cpf').value.trim();
-            const pixKey = document.getElementById('withdraw-pix').value.trim();
-            const amount = parseFloat(documentFloat(document.getElementById('withdraw-amount').value);
-            const msgDiv = document.getElementById('withdraw-message');
-
-            if (!name || !cpf || !pixKey || !amount) {
-                msgDiv.innerHTML = '<p style="color:var(--danger);">Preencha todos os campos</p>'; return;
-            }
-            if (amount < 50) { msgDiv.innerHTML = '<p style="color:var(--danger);">Saque.getElementById('withdraw-amount').value);
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const msgDiv = document.getElementById('withdraw-message');
 
             if (!name || !cpf || !pixKey || !amount) {
@@ -1815,21 +1449,7 @@ blackjack', {
             if (amount < 50) { msgDiv.innerHTML = '<p style="color:var(--danger);">Saque mínimo R$50</p>'; return; }
             if (amount > userData.balance) { msgDiv.innerHTML = '<p style="color:var(--danger);">Saldo insuficiente</p>'; return; }
             const cpfClean = cpf.replace(/\D/g,'');
-            if ( mínimo R$50</p>'; return; }
-            if (amount > userData.balance) { msgDiv.innerHTML = '<p style="color:var(--danger);">Saldo insuficiente</p>'; return; }
-            const cpfClean = cpf.replace(/\D/g,'');
-           cpfClean.length !== 11) { msgDiv.innerHTML = '<p style="color:var(--danger);">CPF inválido</p>'; return; }
-
-            const btn = document.querySelector('.withdraw-btn');
-            btn.disabled = true; btn.textContent = 'PROCESSANDO...';
-            try {
-                const res = await fetch('/api/request-withdraw', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({ userId:userData.id, amount, name, cpf:cpfClean, pixKey })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    msg if (cpfClean.length !== 11) { msgDiv.innerHTML = '<p style="color:var(--danger);">CPF inválido</p>'; return; }
+            if (cpfClean.length !== 11) { msgDiv.innerHTML = '<p style="color:var(--danger);">CPF inválido</p>'; return; }
 
             const btn = document.querySelector('.withdraw-btn');
             btn.disabled = true; btn.textContent = 'PROCESSANDO...';
@@ -1848,14 +1468,6 @@ blackjack', {
                     msgDiv.innerHTML = `<p style="color:var(--danger);">❌ ${data.error}</p>`;
                 }
             } catch(e) {
-               Div.innerHTML = `<p style="color:var(--success);">✅ ${data.message}</p>`;
-                    document.getElementById('withdraw-cpf').value = '';
-                    document.getElementById('withdraw-pix').value = '';
-                    document.getElementById('withdraw-amount').value = '';
-                } else {
-                    msgDiv.innerHTML = `<p style="color:var(--danger);">❌ ${data.error}</p>`;
-                }
-            } catch(e) {
                 msgDiv.innerHTML = '<p style="color:var(--danger);">Erro de conexão</p>';
             } finally {
                 btn.disabled = false; btn.textContent = 'SOLICITAR';
@@ -1867,25 +1479,7 @@ blackjack', {
         async function carregarDadosAfiliado() {
             if (!userData) return;
             try {
-                const res = await fetch(`/api msgDiv.innerHTML = '<p style="color:var(--danger);">Erro de conexão</p>';
-            } finally {
-                btn.disabled = false; btn.textContent = 'SOLICITAR';
-                setTimeout(() => msgDiv.innerHTML = '', 5000);
-            }
-        }
-
-        // ========== AFILIADOS ==========
-        async function carregarDadosAfiliado() {
-            if (!userData) return;
-            try {
-                const res = await fetch(`/api/affiliate/st/affiliate/stats/${userData.id}`);
-                const data = await res.json();
-                if (res.ok) {
-                    document.getElementById('aff-code').textContent = data.code;
-                    document.getElementById('aff-commission').textContent = data.commission;
-                    document.getElementById('aff-balance').textContent = data.balance.toFixed(2);
-                    document.getElementById('aff-refs').textContent = data.totalRefs;
-                    document.getElementById('aff-link').textContent =ats/${userData.id}`);
+                const res = await fetch(`/api/affiliate/stats/${userData.id}`);
                 const data = await res.json();
                 if (res.ok) {
                     document.getElementById('aff-code').textContent = data.code;
@@ -1893,21 +1487,6 @@ blackjack', {
                     document.getElementById('aff-balance').textContent = data.balance.toFixed(2);
                     document.getElementById('aff-refs').textContent = data.totalRefs;
                     document.getElementById('aff-link').textContent = `${window.location.origin}/cadastro?ref=${data.code}`;
-                }
-            } catch(e){}
-        }
-
-        function copyAffiliateLink() {
-            const link = document.getElementById('aff-link').textContent;
-            navigator.clipboard.writeText(link);
-            alert('Link copiado!');
-        }
-
-        // ========== DEPÓSITO ==========
-        window.showDepositModal = async function() {
-            selectedDepositAmount = null;
-            document.getElementById('custom-amount-container').style.display = 'none';
-            document.getElementById(' `${window.location.origin}/cadastro?ref=${data.code}`;
                 }
             } catch(e){}
         }
@@ -1930,14 +1509,6 @@ blackjack', {
                 if (res.ok) {
                     document.getElementById('qr-code-img').src = data.qrcode;
                     document.getElementById('pix-key-display').textContent = data.pixKey;
-                } elsecustom-amount').value = '';
-            document.getElementById('qr-modal').style.display = 'block';
-            try {
-                const res = await fetch('/api/pix-qrcode');
-                const data = await res.json();
-                if (res.ok) {
-                    document.getElementById('qr-code-img').src = data.qrcode;
-                    document.getElementById('pix-key-display').textContent = data.pixKey;
                 } else alert('Erro ao carregar QR Code');
             } catch(e) { alert('Erro de conexão'); }
         };
@@ -1945,38 +1516,7 @@ blackjack', {
         function setDepositAmount(amount) {
             selectedDepositAmount = amount;
             document.getElementById('custom-amount-container').style.display = 'none';
-            alert(`Valor de R$ ${amount} selecionado! Copie a chave PIX e faça alert('Erro ao carregar QR Code');
-            } catch(e) { alert('Erro de conexão'); }
-        };
-
-        function setDepositAmount(amount) {
-            selectedDepositAmount = amount;
-            document.getElementById('custom-amount-container').style.display = 'none';
-            alert(`Valor de R$ ${amount} selecionado! Copie a chave PIX e faça o pag o pagamento.`);
-        }
-
-        function setCustomAmount() {
-            document.getElementById('custom-amount-container').style.display = 'block';
-            selectedDepositAmount = null;
-        }
-
-        async function confirmDepositRequest() {
-            if (!userData) { alert('Usuário não logado'); return; }
-            let amount = selectedDepositAmount;
-            if (!amount) {
-                amount = parseFloat(document.getElementById('custom-amount')?.value);
-                if (!amount || amount < 20) {
-                    alert('❌ Digite um valor válido (mínimo R$ 20)');
-                    return;
-                }
-            }
-            try {
-                const res = await fetch('/api/request-deposit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: userData.id, amount })
-                });
-                const data = await resamento.`);
+            alert(`Valor de R$ ${amount} selecionado! Copie a chave PIX e faça o pagamento.`);
         }
 
         function setCustomAmount() {
@@ -2001,28 +1541,6 @@ blackjack', {
                     body: JSON.stringify({ userId: userData.id, amount })
                 });
                 const data = await res.json();
-                if (res.ok) {
-                    alert('✅ ' + data.message);
-                    closeModal();
-                } else {
-                    alert('❌ ' + (data.error || 'Erro ao solicitar depósito'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão');
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('qr-modal').style.display = 'none';
-        }
-
-        function copyPixKey() {
-            navigator.clipboard.writeText(document.getElementById('pix-key-display').textContent);
-            alert('Chave copiada!');
-        }
-
-        // ========== LOGOUT ==========
-.json();
                 if (res.ok) {
                     alert('✅ ' + data.message);
                     closeModal();
@@ -2045,17 +1563,6 @@ blackjack', {
 
         // ========== LOGOUT ==========
         function logout() {
-            localStorage.removeItem('user');
-            window.location.href = '/login';
-        }
-
-        // ========== HISTÓRICO ==========
-        function addToHistory(text) {
-            const list = document.getElementById('history-list');
-            const item = document.createElement('div');
-            item.className = 'history-item ' + (text.includes('VITÓRIA')||text.includes('Ganhou')||text.includes('ganhou')?'win':'lose');
-            item.textContent = text.length > 50 ? text.substring(0,50)+'...' : text;
-            list.insert        function logout() {
             localStorage.removeItem('user');
             window.location.href = '/login';
         }
