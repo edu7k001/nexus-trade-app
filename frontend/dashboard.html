@@ -105,8 +105,9 @@
             gap: 10px;
         }
 
-        .logo img {
-            height: 40px;
+        .logo i {
+            font-size: 32px;
+            color: var(--primary);
         }
 
         .logo span {
@@ -213,7 +214,6 @@
             color: var(--danger);
         }
 
-        /* Seletor de jogos */
         .game-selector {
             display: flex;
             gap: 15px;
@@ -242,7 +242,6 @@
             color: var(--dark);
         }
 
-        /* Área de jogo */
         .game-container {
             display: none;
             background: var(--card-bg);
@@ -309,7 +308,6 @@
         .win { background: rgba(16,185,129,0.2); border:1px solid var(--success); color: var(--success); }
         .lose { background: rgba(239,68,68,0.2); border:1px solid var(--danger); color: var(--danger); }
 
-        /* Slot */
         .reels-container {
             display: flex;
             justify-content: center;
@@ -338,7 +336,6 @@
             100% { transform: rotateX(360deg); }
         }
 
-        /* Dados */
         .dice-container {
             display: flex;
             justify-content: center;
@@ -391,7 +388,6 @@
             color: black;
         }
 
-        /* Avião */
         .multiplier-box {
             background: linear-gradient(145deg, #1a1f2e, #0f1322);
             border: 3px solid var(--primary);
@@ -438,7 +434,6 @@
             color: black;
         }
 
-        /* Roleta */
         .roulette-wheel {
             text-align: center;
             margin: 30px 0;
@@ -482,7 +477,6 @@
             text-align: center;
         }
 
-        /* Blackjack */
         .blackjack-hand {
             display: flex;
             justify-content: center;
@@ -521,7 +515,6 @@
             cursor: pointer;
         }
 
-        /* Seção de saque */
         .withdraw-section {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -569,7 +562,6 @@
             cursor: pointer;
         }
 
-        /* Área de afiliados (resumida) */
         .affiliate-section {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -602,7 +594,6 @@
             cursor: pointer;
         }
 
-        /* Histórico */
         .history-section {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -629,7 +620,6 @@
             border: 1px solid var(--success);
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -697,7 +687,6 @@
 
         .hidden { display: none; }
 
-        /* Notificações */
         .live-notifications {
             position: fixed;
             bottom: 20px;
@@ -729,7 +718,6 @@
             to { opacity: 0; }
         }
 
-        /* Footer */
         .footer {
             background: #0b0f17;
             border-top: 1px solid var(--border);
@@ -784,16 +772,6 @@
             .user-area {
                 justify-content: center;
             }
-            .reel {
-                width: 70px;
-                height: 70px;
-                font-size: 35px;
-            }
-            .dice {
-                width: 70px;
-                height: 70px;
-                font-size: 35px;
-            }
         }
     </style>
 </head>
@@ -801,7 +779,7 @@
     <header class="header">
         <div class="container header-content">
             <div class="logo">
-                <img src="https://via.placeholder.com/120x40/1e293b/f5b342?text=NEXUS" alt="Nexus Trade">
+                <i class="fas fa-dice-d20"></i>
                 <span>NEXUS TRADE</span>
             </div>
             <nav class="nav-menu">
@@ -826,7 +804,6 @@
     </header>
 
     <main class="container">
-        <!-- Seletor de jogos (mobile) -->
         <div class="game-selector">
             <div class="game-tab active" onclick="selectGame('slot')">🎰 Slots</div>
             <div class="game-tab" onclick="selectGame('dice')">🎲 Dados</div>
@@ -835,7 +812,6 @@
             <div class="game-tab" onclick="selectGame('blackjack')">🃏 Blackjack</div>
         </div>
 
-        <!-- Área de jogos -->
         <div class="game-area">
             <!-- Slot -->
             <div id="game-slot" class="game-container active">
@@ -976,7 +952,7 @@
             </div>
         </div>
 
-        <!-- Área de afiliados (resumida, sem página extra) -->
+        <!-- Área de afiliados -->
         <div class="affiliate-section">
             <h2 style="color:var(--primary);"><i class="fas fa-users"></i> Programa de Afiliados</h2>
             <div class="affiliate-stats">
