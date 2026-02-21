@@ -971,6 +971,8 @@ app.get('/', (req, res) => res.redirect('/login'));
 // ===== ROTA PARA O JOGO FORTUNE OX =====
 app.get('/fortune-ox', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/fortune-ox.html'));
+});app.get('/fortune-ox', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/fortune-ox.html'));
 });
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
