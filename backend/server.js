@@ -967,11 +967,11 @@ app.get('/api/user/:id/history', async (req, res) => {
 
 // ========== ROTA PRINCIPAL ==========
 app.get('/', (req, res) => res.redirect('/login'));
+// ========== INICIAR SERVIDOR ==========
 // ===== ROTA PARA O JOGO FORTUNE OX =====
 app.get('/fortune-ox', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/fortune-ox.html'));
 });
-// ========== INICIAR SERVIDOR ==========
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`📱 Login: http://localhost:${PORT}/login`);
