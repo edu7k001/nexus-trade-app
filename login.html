@@ -1,23 +1,265 @@
 <!DOCTYPE html>
-<html>
-<head><title>Login</title></head>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MEGABET777</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a0000, #4a0000);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Lanternas decorativas */
+        .lantern {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(145deg, #c49a1f, #ffd700);
+            border-radius: 25px 25px 5px 5px;
+            box-shadow: 0 0 20px #ffd700;
+            z-index: 10;
+            animation: swing 3s infinite ease-in-out;
+        }
+
+        .lantern::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+        }
+
+        .lantern::after {
+            content: '福';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            color: #8b0000;
+            font-weight: bold;
+        }
+
+        .lantern.right {
+            left: auto;
+            right: 20px;
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .login-card {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border: 3px solid #ffd700;
+            border-radius: 40px;
+            padding: 50px;
+            width: 450px;
+            max-width: 90%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+            z-index: 20;
+            position: relative;
+        }
+
+        .login-card h1 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            box-shadow: 0 0 20px #ffd700;
+            border-color: #ffa500;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            border: none;
+            border-radius: 50px;
+            color: #1a0000;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px #ffd700;
+        }
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            font-size: 0.95rem;
+        }
+
+        .links a {
+            color: #ffd700;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .links a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 50px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #0f0;
+            color: #0f0;
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #f00;
+            color: #f00;
+        }
+
+        .dragon-bg {
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            font-size: 15rem;
+            color: #ffd700;
+            opacity: 0.1;
+            transform: rotate(10deg);
+            z-index: 1;
+        }
+    </style>
+</head>
 <body>
-    <h2>Login</h2>
-    <input id="email" placeholder="Email"><br>
-    <input id="password" type="password" placeholder="Senha"><br>
-    <button onclick="login()">Entrar</button>
+    <div class="lantern"></div>
+    <div class="lantern right"></div>
+    <div class="dragon-bg"><i class="fas fa-dragon"></i></div>
+
+    <div class="login-card">
+        <h1><i class="fas fa-key"></i> LOGIN</h1>
+
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" id="email" placeholder="seu@email.com">
+        </div>
+
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button onclick="login()">ENTRAR</button>
+
+        <div class="links">
+            <a href="/register.html"><i class="fas fa-user-plus"></i> Criar conta</a>
+            <a href="/"><i class="fas fa-home"></i> Voltar</a>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
     <script>
         async function login() {
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({email: email.value, password: password.value})
-            });
-            const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = data.redirect;
-            } else alert(data.erro);
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msgDiv = document.getElementById('message');
+
+            if (!email || !password) {
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Preencha todos os campos';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    msgDiv.className = 'message success';
+                    msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/dashboard.html';
+                    }, 1000);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.innerHTML = '❌ ' + (data.error || 'Erro no login');
+                }
+            } catch (error) {
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Erro de conexão com o servidor';
+            }
         }
     </script>
 </body>
