@@ -1,292 +1,48 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - MEGABET777</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1a0000, #3a0000);
-            color: #fff;
-            min-height: 100vh;
-        }
-        .header {
-            background: rgba(0,0,0,0.7);
-            border-bottom: 3px solid #ffd700;
-            padding: 20px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ffd700;
-        }
-        .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .logout-btn {
-            padding: 10px 25px;
-            background: transparent;
-            border: 2px solid #ffd700;
-            border-radius: 50px;
-            color: #ffd700;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .logout-btn:hover {
-            background: #ffd700;
-            color: #1a0000;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        .tab {
-            padding: 12px 25px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid #ffd700;
-            border-radius: 50px;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .tab:hover {
-            background: rgba(255,215,0,0.2);
-        }
-        .tab.active {
-            background: #ffd700;
-            color: #1a0000;
-            font-weight: 600;
-        }
-        .section {
-            display: none;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid #ffd700;
-            border-radius: 20px;
-            padding: 25px;
-        }
-        .section.active {
-            display: block;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th {
-            text-align: left;
-            padding: 12px;
-            color: #ffd700;
-            border-bottom: 2px solid #ffd700;
-        }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,215,0,0.2);
-        }
-        .btn {
-            padding: 6px 15px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .btn-success { background: #00c851; color: white; }
-        .btn-danger { background: #ff4444; color: white; }
-        .btn-warning { background: #ffbb33; color: black; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="logo">MEGABET777 ADMIN</div>
-        <div class="admin-info">
-            <span id="adminEmail"></span>
-            <button class="logout-btn" onclick="logout()">Sair</button>
-        </div>
+<div id="config-pix" class="config-section">
+    <h3>Configuração PIX</h3>
+    <div class="form-group">
+        <label>Chave PIX da Empresa</label>
+        <input type="text" id="pix_key" placeholder="Chave PIX">
     </div>
-    <div class="container">
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
-            <button class="tab" onclick="showTab('users')">👥 Usuários</button>
-            <button class="tab" onclick="showTab('deposits')">💰 Depósitos</button>
-            <button class="tab" onclick="showTab('withdraws')">💸 Saques</button>
-            <button class="tab" onclick="showTab('games')">🎮 Jogos</button>
-        </div>
-
-        <div id="dashboard" class="section active">
-            <h2>Visão Geral</h2>
-            <p>Bem-vindo ao painel administrativo. Utilize as abas para gerenciar o sistema.</p>
-        </div>
-
-        <div id="users" class="section">
-            <h2>Usuários</h2>
-            <table id="usersTable">
-                <thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Saldo</th><th>Bônus</th><th>Status</th><th>Ações</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div id="deposits" class="section">
-            <h2>Depósitos Pendentes</h2>
-            <table id="depositsTable">
-                <thead><tr><th>ID</th><th>Usuário</th><th>Valor</th><th>Data</th><th>Ações</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div id="withdraws" class="section">
-            <h2>Saques Pendentes</h2>
-            <table id="withdrawsTable">
-                <thead><tr><th>ID</th><th>Usuário</th><th>Valor</th><th>PIX</th><th>Data</th><th>Ações</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div id="games" class="section">
-            <h2>Configuração de Jogos</h2>
-            <table id="gamesTable">
-                <thead><tr><th>Jogo</th><th>RTP</th><th>Min</th><th>Max</th><th>Ativo</th><th>Ações</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <div class="form-group">
+        <label>Depósito Mínimo (R$)</label>
+        <input type="number" id="min_deposit" step="0.01">
     </div>
+    <div class="form-group">
+        <label>Bônus de Depósito (R$)</label>
+        <input type="number" id="bonus_deposit" step="0.01">
+    </div>
+    <div class="form-group">
+        <label>Saque Mínimo (R$)</label>
+        <input type="number" id="min_withdraw" step="0.01">
+    </div>
+    <div class="form-group">
+        <label>Saque Máximo (R$)</label>
+        <input type="number" id="max_withdraw" step="0.01">
+    </div>
+    <div class="form-group">
+        <label>Taxa de Saque (%)</label>
+        <input type="number" id="withdraw_fee" step="0.1" min="0" max="100">
+    </div>
+    <button onclick="salvarConfigPix()">Salvar Configurações PIX</button>
+</div>
 
-    <script>
-        const admin = JSON.parse(localStorage.getItem('admin') || '{}');
-        if (!admin.email) window.location.href = '/admin-login.html';
-        document.getElementById('adminEmail').innerText = admin.email;
-
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab).classList.add('active');
-            if (tab === 'users') loadUsers();
-            if (tab === 'deposits') loadDeposits();
-            if (tab === 'withdraws') loadWithdraws();
-            if (tab === 'games') loadGames();
-        }
-
-        async function loadUsers() {
-            const res = await fetch('/api/admin/users');
-            const users = await res.json();
-            let html = '';
-            users.forEach(u => {
-                html += `<tr>
-                    <td>#${u.id}</td>
-                    <td>${u.name}</td>
-                    <td>${u.email}</td>
-                    <td>R$ ${(u.balance||0).toFixed(2)}</td>
-                    <td>R$ ${(u.bonus_balance||0).toFixed(2)}</td>
-                    <td>${u.status}</td>
-                    <td><button class="btn btn-warning" onclick="alert('Editar usuário #${u.id}')">✏️</button></td>
-                </tr>`;
-            });
-            document.querySelector('#usersTable tbody').innerHTML = html;
-        }
-
-        async function loadDeposits() {
-            const res = await fetch('/api/admin/deposits');
-            const deposits = await res.json();
-            let html = '';
-            deposits.forEach(d => {
-                html += `<tr>
-                    <td>#${d.id}</td>
-                    <td>${d.name}</td>
-                    <td>R$ ${d.amount}</td>
-                    <td>${new Date(d.created_at).toLocaleString()}</td>
-                    <td><button class="btn btn-success" onclick="confirmDeposit(${d.id})">✅</button></td>
-                </tr>`;
-            });
-            document.querySelector('#depositsTable tbody').innerHTML = html;
-        }
-
-        async function confirmDeposit(id) {
-            const amount = prompt('Valor a creditar:');
-            const bonus = prompt('Bônus:');
-            await fetch(`/api/admin/confirm-deposit/${id}`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({amount: parseFloat(amount), bonus: parseFloat(bonus)})
-            });
-            loadDeposits();
-        }
-
-        async function loadWithdraws() {
-            const res = await fetch('/api/admin/withdraws');
-            const w = await res.json();
-            let html = '';
-            w.forEach(d => {
-                html += `<tr>
-                    <td>#${d.id}</td>
-                    <td>${d.name}</td>
-                    <td>R$ ${d.amount}</td>
-                    <td>${d.pix_key}</td>
-                    <td>${new Date(d.created_at).toLocaleString()}</td>
-                    <td><button class="btn btn-success" onclick="approveWithdraw(${d.id})">✅</button>
-                        <button class="btn btn-danger" onclick="rejectWithdraw(${d.id})">❌</button></td>
-                </tr>`;
-            });
-            document.querySelector('#withdrawsTable tbody').innerHTML = html;
-        }
-
-        async function approveWithdraw(id) {
-            await fetch(`/api/admin/approve-withdraw/${id}`, {method:'POST'});
-            loadWithdraws();
-        }
-        async function rejectWithdraw(id) {
-            await fetch(`/api/admin/reject-withdraw/${id}`, {method:'POST'});
-            loadWithdraws();
-        }
-
-        async function loadGames() {
-            const res = await fetch('/api/admin/games');
-            const games = await res.json();
-            let html = '';
-            games.forEach(g => {
-                html += `<tr>
-                    <td>${g.name}</td>
-                    <td><input type="number" id="rtp_${g.name}" value="${g.rtp}" step="0.1"></td>
-                    <td><input type="number" id="min_${g.name}" value="${g.min_bet}"></td>
-                    <td><input type="number" id="max_${g.name}" value="${g.max_bet}"></td>
-                    <td><select id="active_${g.name}"><option value="1" ${g.active?'selected':''}>Ativo</option><option value="0">Inativo</option></select></td>
-                    <td><button class="btn btn-warning" onclick="saveGame('${g.name}')">Salvar</button></td>
-                </tr>`;
-            });
-            document.querySelector('#gamesTable tbody').innerHTML = html;
-        }
-
-        async function saveGame(name) {
-            const rtp = document.getElementById('rtp_'+name).value;
-            const min = document.getElementById('min_'+name).value;
-            const max = document.getElementById('max_'+name).value;
-            const active = document.getElementById('active_'+name).value;
-            await fetch(`/api/admin/game/${name}`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({rtp, min_bet: min, max_bet: max, active: parseInt(active)})
-            });
-            alert('Salvo!');
-        }
-
-        function logout() {
-            localStorage.removeItem('admin');
-            window.location.href = '/';
-        }
-    </script>
-</body>
-</html>
+<script>
+async function salvarConfigPix() {
+    const config = {
+        pix_key: document.getElementById('pix_key').value,
+        min_deposit: parseFloat(document.getElementById('min_deposit').value),
+        bonus_deposit: parseFloat(document.getElementById('bonus_deposit').value),
+        min_withdraw: parseFloat(document.getElementById('min_withdraw').value),
+        max_withdraw: parseFloat(document.getElementById('max_withdraw').value),
+        withdraw_fee: parseFloat(document.getElementById('withdraw_fee').value)
+    };
+    const res = await fetch('/api/admin/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': getAuthHeader() },
+        body: JSON.stringify(config)
+    });
+    const data = await res.json();
+    alert(data.success ? 'Configurações salvas!' : 'Erro ao salvar');
+}
+</script>
