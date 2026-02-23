@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - Nexus Trade</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0b0f17, #1a1f2e);
+            color: white;
+            padding: 30px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #f5b342;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h2 {
+            color: #f5b342;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .sucesso {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+        .erro {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+        .info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+        }
+        button {
+            background: #f5b342;
+            color: #0b0f17;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245,179,66,0.4);
+        }
+        pre {
+            background: #0b0f17;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            color: #94a3b8;
+        }
+        .link {
+            color: #f5b342;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 DIAGNÓSTICO DO SISTEMA</h1>
+        
+        <!-- Status do Servidor -->
+        <div class="card">
+            <h2>📡 1. STATUS DO SERVIDOR</h2>
+            <div id="server-status" class="status info">Verificando...</div>
+        </div>
+        
+        <!-- Teste de API -->
+        <div class="card">
+            <h2>🌐 2. TESTE DE API</h2>
+            <button onclick="testarAPI()">Testar API</button>
+            <button onclick="testarLogin()">Testar Login Admin</button>
+            <div id="api-result"></div>
+        </div>
+        
+        <!-- Criar Admin -->
+        <div class="card">
+            <h2>👑 3. CRIAR ADMIN</h2>
+            <p>Clique no botão abaixo para criar o usuário admin no banco de dados:</p>
+            <button onclick="criarAdmin()">🚀 CRIAR ADMIN AGORA</button>
+            <div id="admin-result"></div>
+        </div>
+        
+        <!-- Acesso Direto -->
+        <div class="card">
+            <h2>🔑 4. ACESSO DIRETO</h2>
+            <p>Use estas credenciais após criar o admin:</p>
+            <div style="background:#0b0f17; padding:15px; border-radius:10px;">
+                <p><strong>Email:</strong> admin@nexus.com</p>
+                <p><strong>Senha:</strong> admin123</p>
+            </div>
+            <div style="margin-top:20px;">
+                <a href="/admin-login.html" class="link">🔑 Ir para Login Admin</a>
+                <a href="/admin.html" class="link">📊 Ir para Painel Admin</a>
+                <a href="/fortune-ox.html" class="link">🐂 Ir para Fortune Ox</a>
+            </div>
+        </div>
+        
+        <!-- Informações Técnicas -->
+        <div class="card">
+            <h2>ℹ️ 5. INFORMAÇÕES TÉCNICAS</h2>
+            <pre id="info">
+URL: window.location.origin
+Último commit: 695c9b3
+Data: 23/02/2026
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        // Mostra URL atual
+        document.getElementById('info').innerHTML = `
+URL: ${window.location.origin}
+Último commit: 695c9b3
+Data: 23/02/2026
+        `;
+        
+        // Verifica status do servidor
+        fetch(window.location.origin)
+            .then(() => {
+                document.getElementById('server-status').className = 'status sucesso';
+                document.getElementById('server-status').innerHTML = '✅ Servidor online e respondendo';
+            })
+            .catch(() => {
+                document.getElementById('server-status').className = 'status erro';
+                document.getElementById('server-status').innerHTML = '❌ Servidor não está respondendo';
+            });
+
+        // Função para testar API
+        async function testarAPI() {
+            const div = document.getElementById('api-result');
+            div.innerHTML = '<div class="status info">⏳ Testando API...</div>';
+            
+            try {
+                const res = await fetch('/api/teste');
+                if (res.ok) {
+                    const data = await res.json();
+                    div.innerHTML = `<div class="status sucesso">✅ API funcionando! Resposta: ${JSON.stringify(data)}</div>`;
+                } else {
+                    div.innerHTML = `<div class="status erro">❌ API retornou erro ${res.status}</div>`;
+                }
+            } catch (error) {
+                div.innerHTML = `<div class="status erro">❌ Erro de conexão: ${error.message}</div>`;
+            }
+        }
+
+        // Função para testar login admin
+        async function testarLogin() {
+            const div = document.getElementById('api-result');
+            div.innerHTML = '<div class="status info">⏳ Testando login admin...</div>';
+            
+            try {
+                const res = await fetch('/api/admin-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@nexus.com', password: 'admin123' })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    div.innerHTML = `<div class="status sucesso">✅ Login admin funcionou! ${JSON.stringify(data)}</div>`;
+                } else {
+                    const data = await res.json();
+                    div.innerHTML = `<div class="status erro">❌ Login falhou: ${data.error || res.status}</div>`;
+                }
+            } catch (error) {
+                div.innerHTML = `<div class="status erro">❌ Erro de conexão: ${error.message}</div>`;
+            }
+        }
+
+        // Função para criar admin via SQL direto (usando uma rota especial)
+        async function criarAdmin() {
+            const div = document.getElementById('admin-result');
+            div.innerHTML = '<div class="status info">⏦ Criando admin...</div>';
+            
+            try {
+                // Tenta criar via API (se existir)
+                const res = await fetch('/api/criar-admin-agora');
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    div.innerHTML = `<div class="status sucesso">✅ ${data.message || 'Admin criado!'}</div>`;
+                } else {
+                    // Se não existir a rota, mostra instruções
+                    div.innerHTML = `
+                        <div class="status erro">
+                            ❌ API de criação não disponível.<br><br>
+                            <strong>Instruções para criar admin manualmente:</strong><br>
+                            1. Acesse o arquivo backend/servidor.js no GitHub<br>
+                            2. Adicione esta rota no final (antes do app.listen):<br>
+                            <pre style="text-align:left;">
+app.get('/api/criar-admin-agora', (req, res) => {
+    const email = 'admin@nexus.com';
+    const password = 'admin123';
+    db.run("INSERT OR REPLACE INTO users (name, email, password, status) VALUES (?, ?, ?, ?)",
+        ['Administrador', email, password, 'Admin'],
+        function(err) {
+            if (err) res.json({ error: err.message });
+            else res.json({ success: true, message: 'Admin criado!' });
+        }
+    );
+});
+                            </pre>
+                            3. Faça deploy e depois acesse esta mesma página novamente
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                div.innerHTML = `<div class="status erro">❌ Erro: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
