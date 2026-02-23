@@ -796,12 +796,43 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
         res.json({ message: 'Configurações salvas com sucesso!' });
     });
 });
-
+// ROTA TEMPORÁRIA PARA CRIAR ADMIN - REMOVA DEPOIS DE USAR
+app.get('/api/criar-admin/:senha', (req, res) => {
+    const senha = req.params.senha;
+    
+    // Senha de segurança para não criar admin qualquer um
+    if (senha !== 'criaradmin123') {
+        return res.status(403).json({ error: 'Senha incorreta' });
+    }
+    
+    const email = 'admin@nexus.com';
+    const password = 'admin123';
+    const name = 'Administrador';
+    
+    db.run('INSERT OR REPLACE INTO users (name, email, password, status) VALUES (?, ?, ?, ?)',
+        [name, email, password, 'Admin'],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: 'Erro ao criar admin: ' + err.message });
+            } else {
+                res.json({ 
+                    success: true, 
+                    message: '✅ Admin criado/atualizado com sucesso!',
+                    credentials: {
+                        email: 'admin@nexus.com',
+                        password: 'admin123'
+                    }
+                });
+            }
+        }
+    );
+});
 // Inicia o servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📁 Servindo arquivos de: ${path.join(__dirname, '../frontend')}`);
     console.log(`🔗 Acesse: http://localhost:${PORT}`);
 });
+
 
 
