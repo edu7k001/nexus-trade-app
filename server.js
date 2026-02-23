@@ -17,7 +17,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
     else {
         console.log('✅ Banco de dados conectado');
         
-        // Criar tabelas (SEM DADOS FICTÍCIOS)
+        // Criar todas as tabelas
         db.exec(`
             CREATE TABLE IF NOT EXISTS admins (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,7 +81,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
             );
         `);
 
-        // Criar admin padrão (SÓ O ADMIN, SEM OUTROS DADOS)
+        // Criar admin padrão
         const adminEmail = 'edu7k001@gmail.com';
         const adminPassword = bcrypt.hashSync('@Carlos1998', 10);
         
@@ -93,7 +93,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
             }
         });
 
-        // Configurações dos jogos (SÓ CONFIGURAÇÕES, SEM DADOS DE TESTE)
+        // Configurações dos jogos
         const games = [
             ['fortune-ox', 96.75, 5, 1000],
             ['fortune-tiger', 96.75, 5, 1000],
@@ -117,12 +117,10 @@ const db = new sqlite3.Database('./database.db', (err) => {
 
 // ==================== ROTAS PÚBLICAS ====================
 
-// Página inicial
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Páginas HTML
 app.get('/:page.html', (req, res) => {
     const page = req.params.page;
     const filePath = path.join(__dirname, `${page}.html`);
@@ -133,7 +131,6 @@ app.get('/:page.html', (req, res) => {
 
 // ==================== ROTAS DE ADMIN ====================
 
-// Login admin
 app.post('/api/admin-login', (req, res) => {
     const { email, password } = req.body;
     
@@ -145,7 +142,6 @@ app.post('/api/admin-login', (req, res) => {
     });
 });
 
-// Estatísticas
 app.get('/api/admin/stats', (req, res) => {
     db.get('SELECT COUNT(*) as total_users FROM users', (err, users) => {
         db.get('SELECT COUNT(*) as pending_deposits FROM deposits WHERE status = "pending"', (err, deposits) => {
@@ -164,7 +160,6 @@ app.get('/api/admin/stats', (req, res) => {
     });
 });
 
-// Listar usuários
 app.get('/api/admin/users', (req, res) => {
     db.all('SELECT id, name, email, balance, bonus_balance, rollover, status, rtp_individual, created_at FROM users ORDER BY id DESC', [], (err, users) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -172,7 +167,6 @@ app.get('/api/admin/users', (req, res) => {
     });
 });
 
-// Atualizar usuário
 app.post('/api/admin/user/:id/update', (req, res) => {
     const { id } = req.params;
     const { balance, bonus_balance, rollover, status, rtp_individual } = req.body;
@@ -187,7 +181,6 @@ app.post('/api/admin/user/:id/update', (req, res) => {
     );
 });
 
-// Depósitos pendentes
 app.get('/api/admin/deposits', (req, res) => {
     db.all('SELECT d.*, u.name FROM deposits d JOIN users u ON d.user_id = u.id WHERE d.status = "pending" ORDER BY d.created_at DESC', [], (err, deposits) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -195,7 +188,6 @@ app.get('/api/admin/deposits', (req, res) => {
     });
 });
 
-// Confirmar depósito
 app.post('/api/admin/confirm-deposit/:id', (req, res) => {
     const { id } = req.params;
     const { amount, bonus } = req.body;
@@ -212,7 +204,6 @@ app.post('/api/admin/confirm-deposit/:id', (req, res) => {
     });
 });
 
-// Saques pendentes
 app.get('/api/admin/withdraws', (req, res) => {
     db.all('SELECT w.*, u.name FROM withdraws w JOIN users u ON w.user_id = u.id WHERE w.status = "pending" ORDER BY w.created_at DESC', [], (err, withdraws) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -220,14 +211,12 @@ app.get('/api/admin/withdraws', (req, res) => {
     });
 });
 
-// Aprovar saque
 app.post('/api/admin/approve-withdraw/:id', (req, res) => {
     const { id } = req.params;
     db.run('UPDATE withdraws SET status = "approved" WHERE id = ?', [id]);
     res.json({ success: true });
 });
 
-// Rejeitar saque (devolve saldo)
 app.post('/api/admin/reject-withdraw/:id', (req, res) => {
     const { id } = req.params;
     
@@ -240,7 +229,6 @@ app.post('/api/admin/reject-withdraw/:id', (req, res) => {
     });
 });
 
-// Configurações dos jogos
 app.get('/api/admin/games', (req, res) => {
     db.all('SELECT * FROM games ORDER BY id', [], (err, games) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -248,7 +236,6 @@ app.get('/api/admin/games', (req, res) => {
     });
 });
 
-// Salvar configuração do jogo
 app.post('/api/admin/game/:name', (req, res) => {
     const { name } = req.params;
     const { rtp, min_bet, max_bet, active } = req.body;
@@ -265,7 +252,6 @@ app.post('/api/admin/game/:name', (req, res) => {
 
 // ==================== ROTAS DE USUÁRIO ====================
 
-// Registrar novo usuário
 app.post('/api/register', (req, res) => {
     const { name, email, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);
@@ -279,7 +265,6 @@ app.post('/api/register', (req, res) => {
     );
 });
 
-// ==================== ROTA DE LOGIN CORRIGIDA (COM REDIRECIONAMENTO) ====================
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     
@@ -296,12 +281,11 @@ app.post('/api/login', (req, res) => {
                 balance: user.balance,
                 bonus_balance: user.bonus_balance
             },
-            redirect: '/dashboard.html'  // ← AGORA REDIRECIONA PARA O DASHBOARD
+            redirect: '/dashboard.html'
         });
     });
 });
 
-// Saldo do usuário
 app.get('/api/user/:id/balance', (req, res) => {
     db.get('SELECT balance, bonus_balance, rollover, status FROM users WHERE id = ?', [req.params.id], (err, user) => {
         if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -309,7 +293,6 @@ app.get('/api/user/:id/balance', (req, res) => {
     });
 });
 
-// Solicitar depósito
 app.post('/api/request-deposit', (req, res) => {
     const { user_id, amount } = req.body;
     
@@ -322,7 +305,6 @@ app.post('/api/request-deposit', (req, res) => {
     );
 });
 
-// Solicitar saque
 app.post('/api/request-withdraw', (req, res) => {
     const { user_id, amount, pix_key } = req.body;
     
@@ -341,19 +323,16 @@ app.post('/api/request-withdraw', (req, res) => {
 
 // ==================== ROTAS DE JOGOS ====================
 
-// Função para processar aposta
 function processBet(userId, gameName, betAmount, winAmount) {
     return new Promise((resolve, reject) => {
         db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
             if (!user) return reject('Usuário não encontrado');
             
-            // Aplicar RTP individual se existir
             let finalWin = winAmount;
             if (user.rtp_individual) {
                 finalWin = winAmount * (user.rtp_individual / 100);
             }
             
-            // Usar saldo de bônus primeiro
             let newBalance = user.balance;
             let newBonus = user.bonus_balance;
             
@@ -379,7 +358,6 @@ function processBet(userId, gameName, betAmount, winAmount) {
     });
 }
 
-// Fortune Ox
 app.post('/api/game/fortune-ox', async (req, res) => {
     const { userId, betAmount } = req.body;
     
@@ -410,6 +388,41 @@ app.post('/api/game/fortune-ox', async (req, res) => {
     });
 });
 
+app.post('/api/game/tumble', async (req, res) => {
+    const { userId, betAmount } = req.body;
+    
+    db.get('SELECT * FROM games WHERE name = "tumble"', async (err, game) => {
+        if (!game?.active) return res.status(400).json({ error: 'Jogo indisponível' });
+        
+        const symbols = ['💎', '💰', '⭐', '7️⃣', '🍀'];
+        const grid = [];
+        let winAmount = 0;
+        
+        for (let i = 0; i < 5; i++) {
+            const row = [];
+            for (let j = 0; j < 5; j++) {
+                row.push(symbols[Math.floor(Math.random() * symbols.length)]);
+            }
+            grid.push(row);
+        }
+        
+        for (let i = 0; i < 5; i++) {
+            if (grid[i][0] === grid[i][1] && grid[i][1] === grid[i][2] && grid[i][2] === grid[i][3] && grid[i][3] === grid[i][4]) {
+                winAmount += betAmount * 10;
+            }
+        }
+        
+        winAmount = Math.floor(winAmount * (game.rtp / 100));
+        
+        try {
+            const data = await processBet(userId, 'tumble', betAmount, winAmount);
+            res.json({ success: true, grid, winAmount, newBalance: data.newBalance });
+        } catch (error) {
+            res.status(500).json({ error });
+        }
+    });
+});
+
 // ==================== INICIAR SERVIDOR ====================
 
 app.listen(PORT, () => {
@@ -418,7 +431,6 @@ app.listen(PORT, () => {
     console.log('=================================');
     console.log(`📡 Porta: ${PORT}`);
     console.log(`👑 Admin: edu7k001@gmail.com`);
-    console.log(`📦 Sem dados fictícios - sistema limpo`);
-    console.log(`🔄 Login redireciona para dashboard`);
+    console.log(`📦 Sistema 100% real - sem dados fictícios`);
     console.log('=================================\n');
 });
