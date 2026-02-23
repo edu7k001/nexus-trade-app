@@ -11,69 +11,91 @@
             color: white;
             font-family: 'Segoe UI', sans-serif;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
-            background: rgba(0,0,0,0.5);
-            border-bottom: 2px solid #ffd700;
+            padding: 20px 5%;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 3px solid #ffd700;
         }
-        .logo { font-size: 2rem; font-weight: bold; color: #ffd700; }
-        .balance { background: #000; border: 2px solid #ffd700; border-radius: 50px; padding: 10px 30px; color: #ffd700; font-weight: 700; }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .balance {
+            background: #000;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            padding: 10px 30px;
+            color: #ffd700;
+            font-weight: bold;
+        }
         .game-wrapper {
             display: flex;
             justify-content: space-between;
             padding: 40px;
-            flex: 1;
+            gap: 20px;
         }
-        .left-panel { width: 25%; }
-        .left-panel h1 { color: #ffd700; margin-bottom: 20px; }
+        .left-panel {
+            width: 25%;
+        }
+        .left-panel h1 {
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
         .bet-box {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
         }
-        input {
+        .bet-box input {
             padding: 10px;
             border-radius: 6px;
             border: none;
-            width: 100px;
-            background: #333;
+            width: 120px;
+            background: #1f2937;
             color: white;
-            font-size: 1rem;
+            border: 1px solid #ffd700;
         }
-        button {
+        .bet-box button {
             background: #22c55e;
             border: none;
             padding: 10px 20px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 6px;
-            transition: 0.3s;
+            color: black;
         }
-        button:hover { background: #16a34a; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #status { margin-top: 20px; font-size: 1.2rem; color: #ffd700; }
+        .bet-box button:hover {
+            background: #16a34a;
+        }
+        #status {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
         .arena {
             display: flex;
             gap: 60px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .cup {
             width: 120px;
             height: 160px;
-            background: linear-gradient(180deg,#ef4444,#7f1d1d);
+            background: linear-gradient(180deg, #ef4444, #7f1d1d);
             border-radius: 60px 60px 20px 20px;
             transition: all 0.4s ease;
             cursor: pointer;
             box-shadow: 0 0 20px rgba(255,0,0,0.4);
-            position: relative;
         }
-        .cup:hover { transform: translateY(-15px); }
+        .cup:hover {
+            transform: translateY(-15px);
+        }
         .cup.win {
             background: gold;
             box-shadow: 0 0 30px gold;
@@ -85,41 +107,59 @@
             border-radius: 10px;
             border: 1px solid #ffd700;
         }
-        .history h3 { color: #ffd700; margin-bottom: 10px; }
+        .history h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
         #historyList {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
         }
-        .history-item {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        #historyList span {
+            background: #1f2937;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #ffd700;
             font-weight: bold;
         }
-        .history-item.win { background: #22c55e; color: black; }
-        .history-item.lose { background: #ef4444; color: white; }
-        .multiplier { color: #ffd700; font-size: 1.1rem; margin-top: 10px; }
+        .acoes {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn-sacar {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-sacar:hover {
+            background: #2563eb;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">MEGABET777</div>
+        <div class="logo">🎩 THIMBLES</div>
         <div class="balance" id="balance">R$ 0,00</div>
     </div>
 
     <div class="game-wrapper">
         <div class="left-panel">
-            <h1>🎩 THIMBLES</h1>
+            <h1>THIMBLES</h1>
             <div class="bet-box">
                 <input type="number" id="bet" placeholder="Valor" min="5" value="10" step="5">
                 <button id="startBtn">JOGAR</button>
             </div>
-            <div class="multiplier">Multiplicador: 2.88x</div>
             <div id="status">Aguardando rodada</div>
+            <div id="acoes" class="acoes" style="display: none;">
+                <button class="btn-sacar" id="sacarBtn">💰 SACAR</button>
+                <button class="btn-sacar" id="continuarBtn">🔄 CONTINUAR</button>
+            </div>
         </div>
 
         <div class="arena">
@@ -135,104 +175,67 @@
     </div>
 
     <script>
+        // Dados do usuário
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!user.id) {
-            window.location.href = '/login.html';
-        }
+        if (!user.id) window.location.href = '/login.html';
 
-        let active = false;
+        // Estado do jogo
         let winningCup = null;
-        const multiplier = 2.88;
-        const historyList = document.getElementById('historyList');
-        const startBtn = document.getElementById('startBtn');
-        const betInput = document.getElementById('bet');
-        const statusDiv = document.getElementById('status');
+        let active = false;
+        let valorAcumulado = 0; // usado na mecânica de continuar (opcional)
+        let ultimoResultado = null;
 
-        // Carregar saldo inicial
-        async function loadBalance() {
-            try {
-                const res = await fetch(`/api/user/${user.id}/balance`);
-                const data = await res.json();
-                user.balance = data.balance;
-                user.bonus_balance = data.bonus_balance;
-                document.getElementById('balance').innerText = `R$ ${(data.balance + data.bonus_balance).toFixed(2)}`;
-            } catch (e) {
-                console.error('Erro ao carregar saldo');
-            }
+        const historyList = document.getElementById("historyList");
+        const statusDiv = document.getElementById("status");
+        const startBtn = document.getElementById("startBtn");
+        const sacarBtn = document.getElementById("sacarBtn");
+        const continuarBtn = document.getElementById("continuarBtn");
+        const acoesDiv = document.getElementById("acoes");
+        const betInput = document.getElementById("bet");
+
+        // Atualizar saldo na tela
+        async function atualizarSaldo() {
+            const res = await fetch(`/api/user/${user.id}/balance`);
+            const data = await res.json();
+            user.balance = data.balance;
+            user.bonus_balance = data.bonus_balance;
+            document.getElementById('balance').innerText = `R$ ${(data.balance + data.bonus_balance).toFixed(2)}`;
         }
-        loadBalance();
+        atualizarSaldo();
 
-        // Animação de embaralhamento
-        function shuffleAnimation() {
-            document.querySelectorAll('.cup').forEach(cup => {
-                cup.style.transform = 'translateX(' + (Math.random() * 60 - 30) + 'px)';
-            });
-            setTimeout(() => {
-                document.querySelectorAll('.cup').forEach(cup => {
-                    cup.style.transform = 'translateX(0)';
-                });
-            }, 600);
-        }
-
-        // Revelar o copo vencedor
-        function reveal(winningId) {
-            document.querySelectorAll('.cup').forEach(cup => {
-                if (parseInt(cup.dataset.id) === winningId) {
-                    cup.classList.add('win');
-                }
-            });
-        }
-
-        // Resetar os copos
-        function resetCups() {
-            document.querySelectorAll('.cup').forEach(cup => {
-                cup.classList.remove('win');
-            });
-        }
-
-        // Adicionar ao histórico
-        function addHistory(result) {
-            const item = document.createElement('div');
-            item.className = `history-item ${result === 'G' ? 'win' : 'lose'}`;
-            item.innerText = result;
-            historyList.prepend(item);
-            // Manter apenas os últimos 10
-            if (historyList.children.length > 10) {
-                historyList.removeChild(historyList.lastChild);
-            }
-        }
-
-        // Evento do botão JOGAR
-        startBtn.addEventListener('click', async () => {
+        // Iniciar rodada
+        startBtn.addEventListener("click", () => {
             if (active) return;
-
             const bet = parseFloat(betInput.value);
-            if (isNaN(bet) || bet < 5) {
-                alert('Aposta mínima: R$5');
+            if (bet < 5) {
+                alert("Aposta mínima: R$5");
                 return;
             }
-
-            // Verificar saldo antes de jogar
-            const total = user.balance + user.bonus_balance;
+            // Verifica saldo localmente (backend também verifica)
+            const total = (user.balance || 0) + (user.bonus_balance || 0);
             if (total < bet) {
-                alert('Saldo insuficiente!');
+                alert("Saldo insuficiente!");
                 return;
             }
 
             active = true;
-            startBtn.disabled = true;
-            resetCups();
-            statusDiv.innerText = 'Escolha um copo...';
+            statusDiv.innerText = "Escolha um dedal";
             shuffleAnimation();
+            // Esconde botões de ação
+            acoesDiv.style.display = "none";
+            ultimoResultado = null;
         });
 
-        // Evento de clique nos copos
-        document.querySelectorAll('.cup').forEach(cup => {
-            cup.addEventListener('click', async function () {
+        // Clique nos copos
+        document.querySelectorAll(".cup").forEach(cup => {
+            cup.addEventListener("click", async function () {
                 if (!active) return;
 
+                const selected = parseInt(this.dataset.id);
                 const bet = parseFloat(betInput.value);
-                const choice = parseInt(this.dataset.id);
+
+                // Desabilita novos cliques enquanto processa
+                active = false;
 
                 try {
                     const res = await fetch('/api/game/thimbles', {
@@ -241,47 +244,113 @@
                         body: JSON.stringify({
                             userId: user.id,
                             betAmount: bet,
-                            escolha: choice
+                            escolha: selected
                         })
                     });
-
                     const data = await res.json();
                     if (!res.ok) {
-                        alert(data.error || 'Erro no jogo');
-                        active = false;
-                        startBtn.disabled = false;
+                        alert(data.error);
+                        active = true;
                         return;
                     }
 
                     winningCup = data.posicaoCorreta;
+                    ultimoResultado = data;
+
+                    // Revelar todos os copos
                     reveal(winningCup);
 
                     if (data.ganhou) {
                         statusDiv.innerText = `🎉 GANHOU: R$ ${data.winAmount.toFixed(2)}`;
-                        addHistory('G');
+                        valorAcumulado = data.winAmount;
+                        // Mostra botões de sacar/continuar
+                        acoesDiv.style.display = "flex";
                     } else {
-                        statusDiv.innerText = `😢 Perdeu! Estava no copo ${winningCup + 1}`;
-                        addHistory('P');
+                        statusDiv.innerText = `😢 Perdeu! A bolinha estava no copo ${data.posicaoCorreta+1}`;
+                        valorAcumulado = 0;
+                        acoesDiv.style.display = "none";
+                        // Aguarda 1.5s e reseta para nova rodada
+                        setTimeout(() => {
+                            resetarCopos();
+                            active = true;
+                        }, 1500);
                     }
 
-                    // Atualizar saldo
-                    user.balance = data.newBalance; // o backend retorna newBalance (soma real + bonus)
+                    // Atualiza saldo
+                    user.balance = data.newBalance; // simplificado, mas o backend retorna o novo saldo
                     document.getElementById('balance').innerText = `R$ ${data.newBalance.toFixed(2)}`;
 
-                    active = false;
-                    startBtn.disabled = false;
+                    // Adiciona ao histórico
+                    addHistory(data.ganhou ? "G" : "P");
 
                 } catch (error) {
-                    console.error('Erro:', error);
-                    alert('Erro de conexão');
-                    active = false;
-                    startBtn.disabled = false;
+                    alert("Erro na comunicação com o servidor");
+                    active = true;
                 }
             });
         });
 
-        // Atualizar saldo periodicamente (opcional)
-        setInterval(loadBalance, 10000);
+        // Botão sacar
+        sacarBtn.addEventListener("click", async () => {
+            if (!ultimoResultado || !ultimoResultado.ganhou) return;
+            // Aqui você pode implementar uma rota para sacar o valor acumulado
+            // Como exemplo, vamos apenas adicionar ao saldo real (já foi adicionado na jogada)
+            // Mas se quiser uma lógica de "acumular", precisaria de estado no backend.
+            // Por simplicidade, vamos apenas resetar.
+            alert("Valor já creditado no saldo!");
+            acoesDiv.style.display = "none";
+            resetarCopos();
+            active = true;
+            ultimoResultado = null;
+        });
+
+        // Botão continuar (aposta o valor acumulado)
+        continuarBtn.addEventListener("click", () => {
+            if (!ultimoResultado || !ultimoResultado.ganhou) return;
+            // Define a aposta como o valor acumulado
+            betInput.value = valorAcumulado.toFixed(2);
+            acoesDiv.style.display = "none";
+            resetarCopos();
+            active = true;
+            // Inicia nova rodada automaticamente? O usuário precisará clicar em JOGAR novamente
+            // Mas podemos chamar start automático se quiser.
+            statusDiv.innerText = "Aposte o valor acumulado";
+        });
+
+        function reveal(winningCup) {
+            document.querySelectorAll(".cup").forEach(cup => {
+                if (parseInt(cup.dataset.id) === winningCup) {
+                    cup.classList.add("win");
+                }
+            });
+        }
+
+        function resetarCopos() {
+            document.querySelectorAll(".cup").forEach(cup => {
+                cup.classList.remove("win");
+            });
+        }
+
+        function addHistory(result) {
+            let span = document.createElement("span");
+            span.innerText = result;
+            historyList.prepend(span);
+            // Limitar histórico a 20 itens
+            if (historyList.children.length > 20) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        function shuffleAnimation() {
+            document.querySelectorAll(".cup").forEach(cup => {
+                cup.style.transform = "translateX(" + (Math.random() * 60 - 30) + "px)";
+            });
+            setTimeout(() => {
+                document.querySelectorAll(".cup").forEach(cup => {
+                    cup.style.transform = "translateX(0)";
+                });
+            }, 600);
+        }
     </script>
 </body>
 </html>
