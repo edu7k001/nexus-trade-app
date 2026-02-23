@@ -1,14 +1,13 @@
 {
   "name": "megabet777",
-  "version": "3.0.0",
-  "description": "Plataforma de jogos estilo chinês",
-  "main": "server.js",
+  "version": "1.0.0",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "sqlite3": "^5.1.6",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "qrcode": "^1.5.3"
   }
 }
