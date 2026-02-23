@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - MEGABET777</title>
+    <title>Admin Login – MEGABET777</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -15,6 +15,45 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .lanterna {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(145deg, #c49a1f, #ffd700);
+            border-radius: 25px 25px 5px 5px;
+            box-shadow: 0 0 20px #ffd700;
+            animation: balanco 3s infinite;
+        }
+        .lanterna::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+        }
+        .lanterna::after {
+            content: '福';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            color: #8b0000;
+            font-weight: bold;
+        }
+        .lanterna.dir { left: auto; right: 20px; }
+        @keyframes balanco {
+            0%,100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
         }
         .login-card {
             background: rgba(0,0,0,0.85);
@@ -26,6 +65,7 @@
             max-width: 90%;
             text-align: center;
             box-shadow: 0 0 50px rgba(255,215,0,0.3);
+            z-index: 10;
         }
         h1 {
             font-size: 2.5rem;
@@ -91,9 +131,22 @@
             border: 1px solid #0f0;
             color: #0f0;
         }
+        .dragon-bg {
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            font-size: 15rem;
+            color: #ffd700;
+            opacity: 0.1;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
+    <div class="lanterna"></div>
+    <div class="lanterna dir"></div>
+    <div class="dragon-bg"><i class="fas fa-dragon"></i></div>
+
     <div class="login-card">
         <h1><i class="fas fa-crown"></i> ADMIN</h1>
         <div class="input-group">
@@ -130,9 +183,9 @@
                     msgDiv.className = 'message error';
                     msgDiv.innerHTML = '❌ ' + (data.error || 'Erro no login');
                 }
-            } catch (error) {
+            } catch (e) {
                 msgDiv.className = 'message error';
-                msgDiv.innerHTML = '❌ Erro de conexão com o servidor';
+                msgDiv.innerHTML = '❌ Erro de conexão';
             }
         }
     </script>
