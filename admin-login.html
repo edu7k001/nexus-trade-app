@@ -23,7 +23,6 @@
 
         .login-container {
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
             border: 3px solid gold;
             border-radius: 30px;
             padding: 50px;
@@ -37,7 +36,6 @@
             text-align: center;
             margin-bottom: 30px;
             font-size: 36px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
         .input-group {
@@ -59,13 +57,11 @@
             background: rgba(0, 0, 0, 0.5);
             color: white;
             font-size: 16px;
-            transition: all 0.3s;
         }
 
         input:focus {
             outline: none;
             box-shadow: 0 0 20px gold;
-            transform: scale(1.02);
         }
 
         button {
@@ -92,7 +88,6 @@
             padding: 15px;
             border-radius: 10px;
             text-align: center;
-            font-weight: bold;
             display: none;
         }
 
@@ -139,37 +134,36 @@
     </div>
 
     <script>
-        function login() {
-            const email = document.getElementById('email').value.trim();
+        async function login() {
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const msgDiv = document.getElementById('message');
-
-            // LOGIN FIXO - FUNCIONA DIRETO NO NAVEGADOR
-            if (email === 'edu7k001@gmail.com' && password === '@Carlos1998') {
-                msgDiv.className = 'message success';
-                msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
+            
+            try {
+                const response = await fetch('/api/admin-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
                 
-                // Salvar dados
-                localStorage.setItem('admin', JSON.stringify({ 
-                    email: email,
-                    name: 'Administrador'
-                }));
+                const data = await response.json();
                 
-                setTimeout(() => {
-                    window.location.href = '/admin.html';
-                }, 1000);
-            } else {
+                if (response.ok) {
+                    localStorage.setItem('admin', JSON.stringify(data.admin));
+                    msgDiv.className = 'message success';
+                    msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = '/admin.html';
+                    }, 1000);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.innerHTML = '❌ ' + (data.error || 'Erro no login');
+                }
+            } catch (error) {
                 msgDiv.className = 'message error';
-                msgDiv.innerHTML = '❌ E-mail ou senha incorretos';
+                msgDiv.innerHTML = '❌ Erro de conexão';
             }
         }
-
-        // Permitir login com Enter
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                login();
-            }
-        });
     </script>
 </body>
 </html>
