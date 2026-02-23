@@ -768,7 +768,8 @@ app.get('/api/admin/config', checkAdmin, (req, res) => {
         res.json(config);
     });
 });
-
+// Servir arquivos da pasta admin
+app.use('/admin', express.static(path.join(__dirname, '../frontend/admin')));
 // Salvar configurações
 app.post('/api/admin/config', checkAdmin, (req, res) => {
     const config = req.body;
@@ -802,4 +803,5 @@ app.listen(PORT, () => {
     console.log(`📁 Servindo arquivos de: ${path.join(__dirname, '../frontend')}`);
     console.log(`🔗 Acesse: http://localhost:${PORT}`);
 });
+
 
