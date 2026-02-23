@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cadastro - MEGABET777</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #8b0000, #4a0000);
+            color: white;
+            font-family: Arial;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .box {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid gold;
+            border-radius: 20px;
+            padding: 40px;
+            width: 300px;
+        }
+        h1 { color: gold; text-align: center; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid gold;
+            background: rgba(0,0,0,0.3);
+            color: white;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: gold;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>📝 CADASTRO</h1>
+        <input type="text" id="name" placeholder="Nome">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="register()">Cadastrar</button>
+        <p style="text-align:center; margin-top:20px;">
+            <a href="/login.html" style="color:gold;">Já tenho conta</a>
+        </p>
+    </div>
+    <script>
+        async function register() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            
+            if (res.ok) {
+                alert('Cadastro realizado!');
+                window.location.href = '/login.html';
+            } else {
+                alert('Erro no cadastro');
+            }
+        }
+    </script>
+</body>
+</html>
