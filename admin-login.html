@@ -110,13 +110,6 @@
             color: #ff0000;
         }
 
-        .message.info {
-            display: block;
-            background: rgba(255, 215, 0, 0.2);
-            border: 1px solid gold;
-            color: gold;
-        }
-
         .info-text {
             text-align: center;
             margin-top: 20px;
@@ -146,49 +139,28 @@
     </div>
 
     <script>
-        async function login() {
+        function login() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const msgDiv = document.getElementById('message');
 
-            if (!email || !password) {
+            // LOGIN FIXO - FUNCIONA DIRETO NO NAVEGADOR
+            if (email === 'edu7k001@gmail.com' && password === '@Carlos1998') {
+                msgDiv.className = 'message success';
+                msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
+                
+                // Salvar dados
+                localStorage.setItem('admin', JSON.stringify({ 
+                    email: email,
+                    name: 'Administrador'
+                }));
+                
+                setTimeout(() => {
+                    window.location.href = '/admin.html';
+                }, 1000);
+            } else {
                 msgDiv.className = 'message error';
-                msgDiv.innerHTML = '❌ Preencha todos os campos';
-                return;
-            }
-
-            msgDiv.className = 'message info';
-            msgDiv.innerHTML = '⏳ Verificando credenciais...';
-
-            try {
-                const response = await fetch('/api/admin-login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    msgDiv.className = 'message success';
-                    msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
-                    
-                    // Salvar dados do admin
-                    localStorage.setItem('admin', JSON.stringify(data.admin));
-                    
-                    setTimeout(() => {
-                        window.location.href = '/admin.html';
-                    }, 1000);
-                } else {
-                    msgDiv.className = 'message error';
-                    msgDiv.innerHTML = '❌ ' + (data.error || 'Erro no login');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                msgDiv.className = 'message error';
-                msgDiv.innerHTML = '❌ Erro de conexão com o servidor';
+                msgDiv.innerHTML = '❌ E-mail ou senha incorretos';
             }
         }
 
