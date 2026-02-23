@@ -1,149 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - MEGABET777</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #8b0000, #4a0000);
             color: white;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .login-box {
-            background: rgba(0,0,0,0.7);
+
+        .login-container {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
             border: 3px solid gold;
             border-radius: 30px;
             padding: 50px;
-            width: 350px;
-            text-align: center;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
         }
+
         h1 {
             color: gold;
-            font-size: 32px;
+            text-align: center;
             margin-bottom: 30px;
+            font-size: 36px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: gold;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
         input {
             width: 100%;
             padding: 15px;
-            margin: 10px 0;
             border: 2px solid gold;
             border-radius: 50px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             color: white;
             font-size: 16px;
-            box-sizing: border-box;
+            transition: all 0.3s;
         }
+
         input:focus {
             outline: none;
-            box-shadow: 0 0 10px gold;
+            box-shadow: 0 0 20px gold;
+            transform: scale(1.02);
         }
+
         button {
             width: 100%;
             padding: 15px;
-            background: gold;
+            background: linear-gradient(135deg, gold, #ff8c00);
             border: none;
             border-radius: 50px;
             color: #4a0000;
             font-weight: bold;
             font-size: 18px;
             cursor: pointer;
+            transition: all 0.3s;
             margin-top: 20px;
         }
+
         button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px gold;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px gold;
         }
-        #message {
+
+        .message {
             margin-top: 20px;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
             display: none;
         }
-        .success {
-            background: rgba(0,255,0,0.2);
+
+        .message.success {
+            display: block;
+            background: rgba(0, 255, 0, 0.2);
             border: 1px solid #00ff00;
             color: #00ff00;
-            display: block !important;
         }
-        .error {
-            background: rgba(255,0,0,0.2);
+
+        .message.error {
+            display: block;
+            background: rgba(255, 0, 0, 0.2);
             border: 1px solid #ff0000;
             color: #ff0000;
-            display: block !important;
+        }
+
+        .message.info {
+            display: block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid gold;
+            color: gold;
+        }
+
+        .info-text {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="login-box">
+    <div class="login-container">
         <h1>👑 ADMIN LOGIN</h1>
-        
-        <input type="email" id="email" placeholder="Email" value="edu7k001@gmail.com">
-        <input type="password" id="password" placeholder="Senha" value="@Carlos1998">
-        
+
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" id="email" value="edu7k001@gmail.com">
+        </div>
+
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="password" value="@Carlos1998">
+        </div>
+
         <button onclick="login()">ENTRAR</button>
-        
-        <div id="message"></div>
+
+        <div id="message" class="message"></div>
+        <div class="info-text">Área restrita - apenas administradores</div>
     </div>
 
     <script>
         async function login() {
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const msgDiv = document.getElementById('message');
-            
-            msgDiv.innerHTML = '⏳ Verificando...';
-            msgDiv.className = '';
-            
+
+            if (!email || !password) {
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Preencha todos os campos';
+                return;
+            }
+
+            msgDiv.className = 'message info';
+            msgDiv.innerHTML = '⏳ Verificando credenciais...';
+
             try {
-                console.log('Enviando:', { email, password });
-                
                 const response = await fetch('/api/admin-login', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({ email, password })
                 });
-                
-                console.log('Status:', response.status);
-                
-                // Primeiro verifica se a resposta é OK
-                if (!response.ok) {
-                    const text = await response.text();
-                    console.log('Resposta de erro:', text);
-                    msgDiv.className = 'error';
-                    msgDiv.innerHTML = '❌ Erro no servidor: ' + response.status;
-                    return;
-                }
-                
-                // Tenta pegar o JSON
+
                 const data = await response.json();
-                console.log('Dados recebidos:', data);
-                
-                if (data.success) {
-                    msgDiv.className = 'success';
+
+                if (response.ok && data.success) {
+                    msgDiv.className = 'message success';
                     msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
+                    
+                    // Salvar dados do admin
+                    localStorage.setItem('admin', JSON.stringify(data.admin));
                     
                     setTimeout(() => {
                         window.location.href = '/admin.html';
                     }, 1000);
                 } else {
-                    msgDiv.className = 'error';
+                    msgDiv.className = 'message error';
                     msgDiv.innerHTML = '❌ ' + (data.error || 'Erro no login');
                 }
-                
             } catch (error) {
-                console.error('Erro completo:', error);
-                msgDiv.className = 'error';
-                msgDiv.innerHTML = '❌ Erro de conexão: ' + error.message;
+                console.error('Erro:', error);
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Erro de conexão com o servidor';
             }
         }
+
+        // Permitir login com Enter
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
     </script>
 </body>
 </html>
