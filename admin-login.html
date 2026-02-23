@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin Login</title></head>
+<body>
+    <h2>Login Admin</h2>
+    <input id="email" value="edu7k001@gmail.com"><br>
+    <input id="password" type="password" value="@Carlos1998"><br>
+    <button onclick="login()">Entrar</button>
+    <script>
+        async function login() {
+            const res = await fetch('/api/admin-login', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({email: email.value, password: password.value})
+            });
+            if (res.ok) window.location.href = '/admin.html';
+            else alert('Erro');
+        }
+    </script>
+</body>
+</html>
