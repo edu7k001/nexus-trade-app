@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nexus-trade
+    runtime: node
+    repo: https://github.com/edu7k001/nexus-trade-app
+    branch: main
+    buildCommand: npm install
+    startCommand: node backend/server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18
