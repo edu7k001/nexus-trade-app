@@ -10,35 +10,36 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(145deg, #1a0000, #4a0000);
-            color: #fff;
+            color: #ffd700;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
         .login-card {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             backdrop-filter: blur(10px);
             border: 3px solid #ffd700;
             border-radius: 40px;
             padding: 50px;
             width: 400px;
             max-width: 90%;
+            text-align: center;
             box-shadow: 0 0 50px rgba(255,215,0,0.3);
         }
         h1 {
-            color: #ffd700;
-            text-align: center;
-            margin-bottom: 30px;
             font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #ffd700;
         }
         .input-group {
             margin-bottom: 25px;
+            text-align: left;
         }
         label {
             display: block;
+            margin-bottom: 5px;
             color: #ffd700;
-            margin-bottom: 8px;
             font-weight: 600;
         }
         input {
@@ -47,7 +48,7 @@
             border: 2px solid #ffd700;
             border-radius: 50px;
             background: rgba(0,0,0,0.5);
-            color: white;
+            color: #fff;
             font-size: 1rem;
         }
         input:focus {
@@ -57,7 +58,7 @@
         button {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(45deg, #ffd700, #ffb347);
+            background: #ffd700;
             border: none;
             border-radius: 50px;
             color: #1a0000;
@@ -65,19 +66,31 @@
             font-size: 1.2rem;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 20px;
         }
         button:hover {
+            background: #ffa500;
             transform: translateY(-3px);
             box-shadow: 0 10px 25px #ffd700;
         }
         .message {
             margin-top: 20px;
+            padding: 12px;
+            border-radius: 50px;
             text-align: center;
             display: none;
         }
-        .message.success { color: #0f0; display: block; }
-        .message.error { color: #f00; display: block; }
+        .message.error {
+            display: block;
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #f00;
+            color: #f00;
+        }
+        .message.success {
+            display: block;
+            background: rgba(0,255,0,0.2);
+            border: 1px solid #0f0;
+            color: #0f0;
+        }
     </style>
 </head>
 <body>
@@ -94,30 +107,32 @@
         <button onclick="login()">ENTRAR</button>
         <div id="message" class="message"></div>
     </div>
+
     <script>
         async function login() {
             const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            const msg = document.getElementById('message');
+            const password = document.getElementById('password').value;
+            const msgDiv = document.getElementById('message');
+
             try {
                 const res = await fetch('/api/admin-login', {
                     method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({email, password: pass})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
                 if (res.ok) {
                     localStorage.setItem('admin', JSON.stringify(data.admin));
-                    msg.className = 'message success';
-                    msg.innerHTML = '✅ Login efetuado! Redirecionando...';
+                    msgDiv.className = 'message success';
+                    msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
                     setTimeout(() => window.location.href = '/admin.html', 1000);
                 } else {
-                    msg.className = 'message error';
-                    msg.innerHTML = '❌ ' + data.error;
+                    msgDiv.className = 'message error';
+                    msgDiv.innerHTML = '❌ ' + (data.error || 'Erro no login');
                 }
-            } catch (e) {
-                msg.className = 'message error';
-                msg.innerHTML = '❌ Erro de conexão';
+            } catch (error) {
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Erro de conexão com o servidor';
             }
         }
     </script>
