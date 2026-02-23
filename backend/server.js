@@ -246,7 +246,7 @@ app.get('/api/user/:id', (req, res) => {
 // Rota para gerar QR Code
 app.get('/api/pix-qrcode', async (req, res) => {
     db.get('SELECT pix_key FROM admin_config WHERE id = 1', async (err, row) => {
-        if (err || !row || row.pix_key === 'SUA_CHAVE_PIX_AQUI') {
+        if (err || !row || row.pix_key === '1c5c21fc-fcbc-4b28-b285-74156c727917') {
             return res.status(500).json({ error: 'Chave PIX não configurada no servidor.' });
         }
         try {
@@ -802,3 +802,4 @@ app.listen(PORT, () => {
     console.log(`📁 Servindo arquivos de: ${path.join(__dirname, '../frontend')}`);
     console.log(`🔗 Acesse: http://localhost:${PORT}`);
 });
+
