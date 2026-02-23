@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard</title></head>
+<body>
+    <h1>Bem-vindo, <span id="nome"></span></h1>
+    <p>Saldo: R$ <span id="saldo"></span></p>
+    <a href="/">Sair</a>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) window.location.href = '/login.html';
+        document.getElementById('nome').innerText = user.name;
+        fetch(`/api/user/${user.id}/balance`).then(r=>r.json()).then(d=> {
+            document.getElementById('saldo').innerText = (d.balance + d.bonus_balance).toFixed(2);
+        });
+    </script>
+</body>
+</html>
