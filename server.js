@@ -143,54 +143,7 @@ function criarTabelas() {
     });
 }
 
-// ==================== FUNÇÕES AUXILIARES ====================
-
-// Gerar resultado para Fortune Ox/Tiger/Mouse (3 símbolos)
-function gerarResultadoFortune() {
-    const symbols = ['🐂', '🐅', '🐭', '🪙', '🧧', '💰', '🧨', '🍊', '🎆'];
-    return [
-        symbols[Math.floor(Math.random() * symbols.length)],
-        symbols[Math.floor(Math.random() * symbols.length)],
-        symbols[Math.floor(Math.random() * symbols.length)]
-    ];
-}
-
-// Calcular ganho para Fortune (genérico)
-function calcularGanhoFortune(resultado, aposta, rtp, multiplicador = 20) {
-    let win = 0;
-    if (resultado[0] === resultado[1] && resultado[1] === resultado[2]) {
-        win = aposta * multiplicador;
-    }
-    return Math.floor(win * (rtp / 100));
-}
-
-// Gerar grade para Tumble (5x5)
-function gerarGradeTumble() {
-    const symbols = ['💎', '💰', '⭐', '7️⃣', '🍀', '🔥', '💧'];
-    const grade = [];
-    for (let i = 0; i < 5; i++) {
-        const linha = [];
-        for (let j = 0; j < 5; j++) {
-            linha.push(symbols[Math.floor(Math.random() * symbols.length)]);
-        }
-        grade.push(linha);
-    }
-    return grade;
-}
-
-// Calcular ganho Tumble (linhas completas)
-function calcularGanhoTumble(grade, aposta, rtp) {
-    let win = 0;
-    for (let i = 0; i < 5; i++) {
-        if (grade[i][0] === grade[i][1] && grade[i][1] === grade[i][2] && grade[i][2] === grade[i][3] && grade[i][3] === grade[i][4]) {
-            win += aposta * 10;
-        }
-    }
-    return Math.floor(win * (rtp / 100));
-}
-
 // ==================== ROTAS PÚBLICAS ====================
-
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
@@ -362,13 +315,14 @@ function checkAdmin(req, res, next) {
     }
     const base64 = auth.split(' ')[1];
     const [email, password] = Buffer.from(base64, 'base64').toString().split(':');
+    // Aqui você pode verificar no banco, mas para simplificar, vamos usar fixo
     if (email !== 'edu7k001@gmail.com' || password !== '@Carlos1998') {
         return res.status(403).json({ error: 'Acesso negado' });
     }
     next();
 }
 
-// Login admin
+// Login admin (rota sem autenticação)
 app.post('/api/admin-login', (req, res) => {
     const { email, password } = req.body;
     if (email === 'edu7k001@gmail.com' && password === '@Carlos1998') {
@@ -420,7 +374,8 @@ app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
 
 // Depósitos pendentes
 app.get('/api/admin/deposits', checkAdmin, (req, res) => {
-    db.all('SELECT d.*, u.name FROM deposits d JOIN users u ON d.user_id = u.id WHERE d.status = "pending"', [], (err, deposits) => {
+    db.all('SELECT d.*, u.name FROM deposits d JOIN users u ON d.user_id = u.id WHERE d.status = "pending" ORDER BY d.created_at DESC', [], (err, deposits) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(deposits);
     });
 });
@@ -443,7 +398,8 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
 
 // Saques pendentes
 app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
-    db.all('SELECT w.*, u.name FROM withdraws w JOIN users u ON w.user_id = u.id WHERE w.status = "pending"', [], (err, withdraws) => {
+    db.all('SELECT w.*, u.name FROM withdraws w JOIN users u ON w.user_id = u.id WHERE w.status = "pending" ORDER BY w.created_at DESC', [], (err, withdraws) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(withdraws);
     });
 });
@@ -469,7 +425,8 @@ app.post('/api/admin/reject-withdraw/:id', checkAdmin, (req, res) => {
 
 // Listar jogos (configurações)
 app.get('/api/admin/games', checkAdmin, (req, res) => {
-    db.all('SELECT * FROM games', [], (err, games) => {
+    db.all('SELECT * FROM games ORDER BY id', [], (err, games) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(games);
     });
 });
@@ -488,14 +445,15 @@ app.post('/api/admin/game/:name', checkAdmin, (req, res) => {
     );
 });
 
-// Obter configurações (admin)
+// Obter configurações gerais
 app.get('/api/admin/config', checkAdmin, (req, res) => {
     db.get('SELECT * FROM config WHERE id = 1', (err, config) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(config);
     });
 });
 
-// Salvar configurações (admin)
+// Salvar configurações gerais
 app.post('/api/admin/config', checkAdmin, (req, res) => {
     const { pix_key, min_deposit, bonus_deposit, min_withdraw, max_withdraw, withdraw_fee } = req.body;
     db.run(
@@ -509,6 +467,47 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
 });
 
 // ==================== ROTAS DE JOGOS ====================
+
+// Funções auxiliares para jogos
+function gerarResultadoFortune() {
+    const symbols = ['🐂', '🐅', '🐭', '🪙', '🧧', '💰', '🧨', '🍊', '🎆'];
+    return [
+        symbols[Math.floor(Math.random() * symbols.length)],
+        symbols[Math.floor(Math.random() * symbols.length)],
+        symbols[Math.floor(Math.random() * symbols.length)]
+    ];
+}
+
+function calcularGanhoFortune(resultado, aposta, rtp, multiplicador = 20) {
+    let win = 0;
+    if (resultado[0] === resultado[1] && resultado[1] === resultado[2]) {
+        win = aposta * multiplicador;
+    }
+    return Math.floor(win * (rtp / 100));
+}
+
+function gerarGradeTumble() {
+    const symbols = ['💎', '💰', '⭐', '7️⃣', '🍀', '🔥', '💧'];
+    const grade = [];
+    for (let i = 0; i < 5; i++) {
+        const linha = [];
+        for (let j = 0; j < 5; j++) {
+            linha.push(symbols[Math.floor(Math.random() * symbols.length)]);
+        }
+        grade.push(linha);
+    }
+    return grade;
+}
+
+function calcularGanhoTumble(grade, aposta, rtp) {
+    let win = 0;
+    for (let i = 0; i < 5; i++) {
+        if (grade[i][0] === grade[i][1] && grade[i][1] === grade[i][2] && grade[i][2] === grade[i][3] && grade[i][3] === grade[i][4]) {
+            win += aposta * 10;
+        }
+    }
+    return Math.floor(win * (rtp / 100));
+}
 
 // Fortune Ox
 app.post('/api/game/fortune-ox', (req, res) => {
@@ -556,56 +555,92 @@ app.post('/api/game/fortune-ox', (req, res) => {
     });
 });
 
-// Fortune Tiger (idêntico ao Ox, mas com nome diferente)
+// Fortune Tiger
 app.post('/api/game/fortune-tiger', (req, res) => {
     const { userId, betAmount } = req.body;
-    if (!userId || !betAmount || betAmount < 5) return res.status(400).json({ error: 'Aposta inválida' });
+    if (!userId || !betAmount || betAmount < 5) {
+        return res.status(400).json({ error: 'Aposta inválida' });
+    }
     db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
         if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
         const total = user.balance + user.bonus_balance;
         if (total < betAmount) return res.status(400).json({ error: 'Saldo insuficiente' });
+
         db.get('SELECT * FROM games WHERE name = "fortune-tiger"', (err, game) => {
             if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
+
             const resultado = gerarResultadoFortune();
             const winAmount = calcularGanhoFortune(resultado, betAmount, game.rtp, 20);
-            let newBalance = user.balance, newBonus = user.bonus_balance;
-            if (user.bonus_balance >= betAmount) newBonus -= betAmount;
-            else { newBalance -= (betAmount - user.bonus_balance); newBonus = 0; }
+
+            let newBalance = user.balance;
+            let newBonus = user.bonus_balance;
+            if (user.bonus_balance >= betAmount) {
+                newBonus -= betAmount;
+            } else {
+                newBalance -= (betAmount - user.bonus_balance);
+                newBonus = 0;
+            }
             if (winAmount > 0) newBalance += winAmount;
-            db.run('UPDATE users SET balance = ?, bonus_balance = ? WHERE id = ?', [newBalance, newBonus, userId], (err) => {
-                if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
-                db.run('INSERT INTO game_history (user_id, game, bet_amount, win_amount, result) VALUES (?, ?, ?, ?, ?)',
-                    [userId, 'fortune-tiger', betAmount, winAmount, winAmount > 0 ? 'win' : 'lose']);
-                res.json({ success: true, result: resultado, winAmount, newBalance: newBalance + newBonus,
-                    message: winAmount > 0 ? `🎉 Ganhou R$ ${winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${betAmount.toFixed(2)}` });
-            });
+
+            db.run('UPDATE users SET balance = ?, bonus_balance = ? WHERE id = ?',
+                [newBalance, newBonus, userId], (err) => {
+                    if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
+                    db.run('INSERT INTO game_history (user_id, game, bet_amount, win_amount, result) VALUES (?, ?, ?, ?, ?)',
+                        [userId, 'fortune-tiger', betAmount, winAmount, winAmount > 0 ? 'win' : 'lose']);
+                    res.json({
+                        success: true,
+                        result: resultado,
+                        winAmount,
+                        newBalance: newBalance + newBonus,
+                        message: winAmount > 0 ? `🎉 Ganhou R$ ${winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${betAmount.toFixed(2)}`
+                    });
+                }
+            );
         });
     });
 });
 
-// Fortune Mouse (idêntico)
+// Fortune Mouse
 app.post('/api/game/fortune-mouse', (req, res) => {
     const { userId, betAmount } = req.body;
-    if (!userId || !betAmount || betAmount < 5) return res.status(400).json({ error: 'Aposta inválida' });
+    if (!userId || !betAmount || betAmount < 5) {
+        return res.status(400).json({ error: 'Aposta inválida' });
+    }
     db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
         if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
         const total = user.balance + user.bonus_balance;
         if (total < betAmount) return res.status(400).json({ error: 'Saldo insuficiente' });
+
         db.get('SELECT * FROM games WHERE name = "fortune-mouse"', (err, game) => {
             if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
+
             const resultado = gerarResultadoFortune();
             const winAmount = calcularGanhoFortune(resultado, betAmount, game.rtp, 20);
-            let newBalance = user.balance, newBonus = user.bonus_balance;
-            if (user.bonus_balance >= betAmount) newBonus -= betAmount;
-            else { newBalance -= (betAmount - user.bonus_balance); newBonus = 0; }
+
+            let newBalance = user.balance;
+            let newBonus = user.bonus_balance;
+            if (user.bonus_balance >= betAmount) {
+                newBonus -= betAmount;
+            } else {
+                newBalance -= (betAmount - user.bonus_balance);
+                newBonus = 0;
+            }
             if (winAmount > 0) newBalance += winAmount;
-            db.run('UPDATE users SET balance = ?, bonus_balance = ? WHERE id = ?', [newBalance, newBonus, userId], (err) => {
-                if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
-                db.run('INSERT INTO game_history (user_id, game, bet_amount, win_amount, result) VALUES (?, ?, ?, ?, ?)',
-                    [userId, 'fortune-mouse', betAmount, winAmount, winAmount > 0 ? 'win' : 'lose']);
-                res.json({ success: true, result: resultado, winAmount, newBalance: newBalance + newBonus,
-                    message: winAmount > 0 ? `🎉 Ganhou R$ ${winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${betAmount.toFixed(2)}` });
-            });
+
+            db.run('UPDATE users SET balance = ?, bonus_balance = ? WHERE id = ?',
+                [newBalance, newBonus, userId], (err) => {
+                    if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
+                    db.run('INSERT INTO game_history (user_id, game, bet_amount, win_amount, result) VALUES (?, ?, ?, ?, ?)',
+                        [userId, 'fortune-mouse', betAmount, winAmount, winAmount > 0 ? 'win' : 'lose']);
+                    res.json({
+                        success: true,
+                        result: resultado,
+                        winAmount,
+                        newBalance: newBalance + newBonus,
+                        message: winAmount > 0 ? `🎉 Ganhou R$ ${winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${betAmount.toFixed(2)}`
+                    });
+                }
+            );
         });
     });
 });
@@ -613,26 +648,44 @@ app.post('/api/game/fortune-mouse', (req, res) => {
 // Tumble
 app.post('/api/game/tumble', (req, res) => {
     const { userId, betAmount } = req.body;
-    if (!userId || !betAmount || betAmount < 5) return res.status(400).json({ error: 'Aposta inválida' });
+    if (!userId || !betAmount || betAmount < 5) {
+        return res.status(400).json({ error: 'Aposta inválida' });
+    }
     db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
         if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
         const total = user.balance + user.bonus_balance;
         if (total < betAmount) return res.status(400).json({ error: 'Saldo insuficiente' });
+
         db.get('SELECT * FROM games WHERE name = "tumble"', (err, game) => {
             if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
+
             const grade = gerarGradeTumble();
             const winAmount = calcularGanhoTumble(grade, betAmount, game.rtp);
-            let newBalance = user.balance, newBonus = user.bonus_balance;
-            if (user.bonus_balance >= betAmount) newBonus -= betAmount;
-            else { newBalance -= (betAmount - user.bonus_balance); newBonus = 0; }
+
+            let newBalance = user.balance;
+            let newBonus = user.bonus_balance;
+            if (user.bonus_balance >= betAmount) {
+                newBonus -= betAmount;
+            } else {
+                newBalance -= (betAmount - user.bonus_balance);
+                newBonus = 0;
+            }
             if (winAmount > 0) newBalance += winAmount;
-            db.run('UPDATE users SET balance = ?, bonus_balance = ? WHERE id = ?', [newBalance, newBonus, userId], (err) => {
-                if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
-                db.run('INSERT INTO game_history (user_id, game, bet_amount, win_amount, result) VALUES (?, ?, ?, ?, ?)',
-                    [userId, 'tumble', betAmount, winAmount, winAmount > 0 ? 'win' : 'lose']);
-                res.json({ success: true, grid: grade, winAmount, newBalance: newBalance + newBonus,
-                    message: winAmount > 0 ? `🎉 Ganhou R$ ${winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${betAmount.toFixed(2)}` });
-            });
+
+            db.run('UPDATE users SET balance = ?, bonus_balance = ? WHERE id = ?',
+                [newBalance, newBonus, userId], (err) => {
+                    if (err) return res.status(500).json({ error: 'Erro ao atualizar saldo' });
+                    db.run('INSERT INTO game_history (user_id, game, bet_amount, win_amount, result) VALUES (?, ?, ?, ?, ?)',
+                        [userId, 'tumble', betAmount, winAmount, winAmount > 0 ? 'win' : 'lose']);
+                    res.json({
+                        success: true,
+                        grid: grade,
+                        winAmount,
+                        newBalance: newBalance + newBonus,
+                        message: winAmount > 0 ? `🎉 Ganhou R$ ${winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${betAmount.toFixed(2)}`
+                    });
+                }
+            );
         });
     });
 });
@@ -643,6 +696,5 @@ app.listen(PORT, () => {
     console.log(`🚀 MEGABET777 rodando na porta ${PORT}`);
     console.log(`📁 Servindo arquivos da raiz`);
     console.log(`👑 Admin: edu7k001@gmail.com / @Carlos1998`);
-    console.log(`🔗 Teste a API: /api/teste`);
     console.log('=================================\n');
 });
