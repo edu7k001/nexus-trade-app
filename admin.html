@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Trade - Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos adicionais para feedback */
+        .loading { text-align: center; padding: 20px; color: var(--gray); }
+        .error-message { color: #ff6b6b; padding: 10px; border-radius: 8px; background: rgba(255,0,0,0.1); margin: 10px 0; }
+        .success-message { color: #51cf66; padding: 10px; border-radius: 8px; background: rgba(0,255,0,0.1); margin: 10px 0; }
+        .config-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .config-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
+        .config-item label { display: block; margin-bottom: 5px; color: var(--primary); font-weight: bold; }
+        .config-item input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: white; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .tab { padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 50px; cursor: pointer; color: white; }
+        .tab.active { background: var(--primary); color: black; font-weight: bold; }
+        table { width: 100%; background: var(--card-bg); border-radius: 15px; overflow: hidden; margin-top: 20px; }
+        th { background: var(--primary); color: black; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .btn { padding: 8px 15px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--primary); color: black; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .search-input { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: white; }
+        #user-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; }
+        .modal-content { background: var(--card-bg); max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://via.placeholder.com/120x40/1e293b/f5b342?text=ADMIN" alt="Nexus Trade">
+                <span>PAINEL ADMIN</span>
+            </div>
+            <div class="user-area">
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">A</div>
+                    <span class="user-name" id="user-name">Admin</span>
+                    <i class="fas fa-sign-out-alt logout-btn" onclick="logout()"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Abas de navegação -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('deposits', this)">💰 Depósitos</button>
+            <button class="tab" onclick="showTab('withdraws', this)">💸 Saques</button>
+            <button class="tab" onclick="showTab('users', this)">👥 Usuários</button>
+            <button class="tab" onclick="showTab('history', this)">📜 Histórico</button>
+            <button class="tab" onclick="showTab('config', this)">⚙️ Configurações</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div style="color:var(--gray);">Usuários Totais</div>
+                    <div style="font-size:32px; color:var(--primary);" id="total-users">0</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color:var(--gray);">Saldo Total</div>
+                    <div style="font-size:32px; color:var(--primary);" id="total-balance">R$ 0</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color:var(--gray);">Depósitos Pendentes</div>
+                    <div style="font-size:32px; color:var(--primary);" id="pending-deposits">0</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color:var(--gray);">Saques Pendentes</div>
+                    <div style="font-size:32px; color:var(--primary);" id="pending-withdraws">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Depósitos -->
+        <div id="deposits-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Depósitos Pendentes</h2>
+            <div id="deposits-loading" class="loading">Carregando...</div>
+            <table id="deposits-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="deposits-list"></tbody>
+            </table>
+        </div>
+
+        <!-- Saques -->
+        <div id="withdraws-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Saques Pendentes</h2>
+            <div id="withdraws-loading" class="loading">Carregando...</div>
+            <table id="withdraws-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Valor</th>
+                        <th>Chave PIX</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="withdraws-list"></tbody>
+            </table>
+        </div>
+
+        <!-- Usuários -->
+        <div id="users-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Usuários</h2>
+            <input type="text" id="user-search" class="search-input" placeholder="Buscar por nome ou email...">
+            <div id="users-loading" class="loading">Carregando...</div>
+            <table id="users-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Saldo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="users-list"></tbody>
+            </table>
+        </div>
+
+        <!-- Histórico -->
+        <div id="history-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Histórico de Jogadas</h2>
+            <div id="history-loading" class="loading">Carregando...</div>
+            <table id="history-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Jogo</th>
+                        <th>Aposta</th>
+                        <th>Resultado</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody id="history-list"></tbody>
+            </table>
+        </div>
+
+        <!-- Configurações -->
+        <div id="config-tab" class="tab-content" style="display:none;">
+            <h2 style="color:var(--primary);">Configurações</h2>
+            <div style="background:var(--card-bg); padding:30px; border-radius:15px;">
+                <div class="config-group">
+                    <!-- Configurações Gerais -->
+                    <div class="config-item">
+                        <label>Chave PIX da Empresa</label>
+                        <input type="text" id="pix_key" placeholder="Ex: 11999999999">
+                    </div>
+                    <div class="config-item">
+                        <label>Depósito Mínimo (R$)</label>
+                        <input type="number" id="min_deposit" step="0.01" min="0">
+                    </div>
+                    <div class="config-item">
+                        <label>Bônus sobre Depósito (R$)</label>
+                        <input type="number" id="bonus_amount" step="0.01" min="0">
+                    </div>
+                    <div class="config-item">
+                        <label>Saque Mínimo (R$)</label>
+                        <input type="number" id="min_withdraw" step="0.01" min="0">
+                    </div>
+                    <div class="config-item">
+                        <label>Saque Máximo (R$)</label>
+                        <input type="number" id="max_withdraw" step="0.01" min="0">
+                    </div>
+                    <div class="config-item">
+                        <label>Taxa de Saque (%)</label>
+                        <input type="number" id="withdraw_fee" step="0.1" min="0" max="100">
+                    </div>
+                    
+                    <!-- Configurações de metas e bônus -->
+                    <div class="config-item" style="border-left: 3px solid #f5b342;">
+                        <label>🎁 Bônus Inicial (R$) - sem depósito</label>
+                        <input type="number" id="initial_bonus" step="0.01" min="0" value="20">
+                        <small style="color:var(--gray);">Valor creditado ao cadastrar</small>
+                    </div>
+                    <div class="config-item" style="border-left: 3px solid #f5b342;">
+                        <label>🎯 Meta Inicial (R$)</label>
+                        <input type="number" id="initial_goal" step="0.01" min="0" value="100">
+                        <small style="color:var(--gray);">Ao atingir, trava e pede depósito</small>
+                    </div>
+                    <div class="config-item" style="border-left: 3px solid #f5b342;">
+                        <label>💰 Depósito Obrigatório Mínimo (R$)</label>
+                        <input type="number" id="required_deposit" step="0.01" min="0" value="50">
+                        <small style="color:var(--gray);">Valor mínimo a depositar para liberar</small>
+                    </div>
+                    <div class="config-item" style="border-left: 3px solid #f5b342;">
+                        <label>🎯 Meta Pós-Depósito (R$)</label>
+                        <input type="number" id="post_deposit_goal" step="0.01" min="0" value="500">
+                        <small style="color:var(--gray);">Atingir para liberar saque</small>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:30px;" onclick="saveConfig()">Salvar Configurações</button>
+                <div id="config-message" style="margin-top:15px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de edição de usuário -->
+    <div id="user-modal">
+        <div class="modal-content">
+            <h3 style="color:var(--primary);">Editar Usuário</h3>
+            <div id="user-form"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-primary" onclick="closeUserModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== AUTENTICAÇÃO ====================
+        let adminData = {};
+        try {
+            adminData = JSON.parse(localStorage.getItem('user') || '{}');
+        } catch (e) {
+            console.error('Erro ao ler localStorage', e);
+        }
+
+        // Verifica se está logado como admin
+        if (!adminData.id || adminData.status !== 'Admin') {
+            window.location.href = '/admin-login.html';
+        }
+
+        document.getElementById('user-name').textContent = adminData.name || 'Admin';
+        document.getElementById('user-avatar').textContent = (adminData.name || 'A').charAt(0).toUpperCase();
+
+        // ==================== FUNÇÕES AUXILIARES ====================
+        function getAuthHeader() {
+            return 'Basic ' + btoa(`${adminData.email}:admin123`);
+        }
+
+        async function apiFetch(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Authorization': getAuthHeader(),
+                    'Content-Type': 'application/json',
+                },
+            };
+            const merged = { ...defaultOptions, ...options };
+            merged.headers = { ...defaultOptions.headers, ...options.headers };
+
+            try {
+                const res = await fetch(url, merged);
+                if (!res.ok) {
+                    let errorText = await res.text();
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorText = errorJson.message || errorText;
+                    } catch (e) {}
+                    throw new Error(`Erro ${res.status}: ${errorText}`);
+                }
+                return await res.json();
+            } catch (error) {
+                console.error(`Erro em ${url}:`, error);
+                throw error;
+            }
+        }
+
+        function showTab(tabName, element) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            element.classList.add('active');
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            switch(tabName) {
+                case 'dashboard': loadStats(); break;
+                case 'deposits': loadDeposits(); break;
+                case 'withdraws': loadWithdraws(); break;
+                case 'users': loadUsers(); break;
+                case 'history': loadHistory(); break;
+                case 'config': loadConfig(); break;
+            }
+        }
+
+        // ==================== DASHBOARD ====================
+        async function loadStats() {
+            try {
+                const data = await apiFetch('/api/admin/stats');
+                document.getElementById('total-users').textContent = data.total_users || 0;
+                document.getElementById('total-balance').textContent = `R$ ${(data.total_balance || 0).toFixed(2)}`;
+                document.getElementById('pending-deposits').textContent = data.pending_deposits || 0;
+                document.getElementById('pending-withdraws').textContent = data.pending_withdraws || 0;
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // ==================== DEPÓSITOS ====================
+        async function loadDeposits() {
+            document.getElementById('deposits-loading').style.display = 'block';
+            document.getElementById('deposits-table').style.display = 'none';
+            try {
+                const data = await apiFetch('/api/admin/deposits');
+                const tbody = document.getElementById('deposits-list');
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum depósito pendente</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(d => `
+                        <tr>
+                            <td>#${d.id}</td>
+                            <td>${d.name}</td>
+                            <td>R$ ${parseFloat(d.amount).toFixed(2)}</td>
+                            <td>${new Date(d.created_at).toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-success" onclick="confirmDeposit(${d.id})">Confirmar</button>
+                                <button class="btn btn-danger" onclick="rejectDeposit(${d.id})">Rejeitar</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                document.getElementById('deposits-table').style.display = 'table';
+            } catch (error) {
+                document.getElementById('deposits-list').innerHTML = `<tr><td colspan="5" style="color:red;">Erro: ${error.message}</td></tr>`;
+                document.getElementById('deposits-table').style.display = 'table';
+            } finally {
+                document.getElementById('deposits-loading').style.display = 'none';
+            }
+        }
+
+        async function confirmDeposit(id) {
+            const amount = prompt('Valor a creditar (com bônus):');
+            if (!amount) return;
+            try {
+                const data = await apiFetch(`/api/admin/confirm-deposit/${id}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+                alert(data.message || 'Depósito confirmado!');
+                loadDeposits();
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        async function rejectDeposit(id) {
+            if (!confirm('Rejeitar este depósito?')) return;
+            try {
+                await apiFetch(`/api/admin/reject-deposit/${id}`, { method: 'POST' });
+                alert('Depósito rejeitado.');
+                loadDeposits();
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        // ==================== SAQUES ====================
+        async function loadWithdraws() {
+            document.getElementById('withdraws-loading').style.display = 'block';
+            document.getElementById('withdraws-table').style.display = 'none';
+            try {
+                const data = await apiFetch('/api/admin/withdraws');
+                const tbody = document.getElementById('withdraws-list');
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum saque pendente</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(w => `
+                        <tr>
+                            <td>#${w.id}</td>
+                            <td>${w.user_name}</td>
+                            <td>R$ ${parseFloat(w.amount).toFixed(2)}</td>
+                            <td>${w.pix_key}</td>
+                            <td>${new Date(w.created_at).toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-success" onclick="approveWithdraw(${w.id})">Aprovar</button>
+                                <button class="btn btn-danger" onclick="rejectWithdraw(${w.id})">Rejeitar</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                document.getElementById('withdraws-table').style.display = 'table';
+            } catch (error) {
+                document.getElementById('withdraws-list').innerHTML = `<tr><td colspan="6" style="color:red;">Erro: ${error.message}</td></tr>`;
+                document.getElementById('withdraws-table').style.display = 'table';
+            } finally {
+                document.getElementById('withdraws-loading').style.display = 'none';
+            }
+        }
+
+        async function approveWithdraw(id) {
+            if (!confirm('Aprovar saque?')) return;
+            try {
+                const data = await apiFetch(`/api/admin/withdraw/${id}/approve`, { method: 'POST' });
+                alert(data.message || 'Saque aprovado!');
+                loadWithdraws();
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        async function rejectWithdraw(id) {
+            const reason = prompt('Motivo da rejeição (opcional):');
+            try {
+                const data = await apiFetch(`/api/admin/withdraw/${id}/reject`, {
+                    method: 'POST',
+                    body: JSON.stringify({ reason })
+                });
+                alert(data.message || 'Saque rejeitado.');
+                loadWithdraws();
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        // ==================== USUÁRIOS ====================
+        async function loadUsers() {
+            document.getElementById('users-loading').style.display = 'block';
+            document.getElementById('users-table').style.display = 'none';
+            try {
+                const data = await apiFetch('/api/admin/users');
+                const tbody = document.getElementById('users-list');
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum usuário</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(u => `
+                        <tr>
+                            <td>#${u.id}</td>
+                            <td>${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>R$ ${parseFloat(u.balance).toFixed(2)}</td>
+                            <td>${u.status}</td>
+                            <td><button class="btn btn-primary" onclick="editUser(${u.id})">Editar</button></td>
+                        </tr>
+                    `).join('');
+                }
+                document.getElementById('users-table').style.display = 'table';
+            } catch (error) {
+                document.getElementById('users-list').innerHTML = `<tr><td colspan="6" style="color:red;">Erro: ${error.message}</td></tr>`;
+                document.getElementById('users-table').style.display = 'table';
+            } finally {
+                document.getElementById('users-loading').style.display = 'none';
+            }
+        }
+
+        // Busca de usuários
+        document.getElementById('user-search').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#users-list tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        });
+
+        async function editUser(id) {
+            try {
+                const user = await apiFetch(`/api/admin/user/${id}`);
+                const form = document.getElementById('user-form');
+                form.innerHTML = `
+                    <div style="margin-bottom:10px;">
+                        <label>Nome</label>
+                        <input type="text" id="edit-name" class="bet-input" value="${user.name || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Email</label>
+                        <input type="email" id="edit-email" class="bet-input" value="${user.email || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>CPF</label>
+                        <input type="text" id="edit-cpf" class="bet-input" value="${user.cpf || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Telefone</label>
+                        <input type="text" id="edit-phone" class="bet-input" value="${user.phone || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Chave PIX</label>
+                        <input type="text" id="edit-pix" class="bet-input" value="${user.pix_key || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Saldo</label>
+                        <input type="number" id="edit-balance" class="bet-input" value="${user.balance || 0}" step="0.01">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Status</label>
+                        <select id="edit-status" class="bet-input">
+                            <option value="Pendente" ${user.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Ativo" ${user.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
+                            <option value="Bloqueado" ${user.status === 'Bloqueado' ? 'selected' : ''}>Bloqueado</option>
+                            <option value="Aguardando Depósito" ${user.status === 'Aguardando Depósito' ? 'selected' : ''}>Aguardando Depósito</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateUser(${user.id})">Salvar</button>
+                `;
+                document.getElementById('user-modal').style.display = 'block';
+            } catch (error) {
+                alert('Erro ao carregar usuário: ' + error.message);
+            }
+        }
+
+        async function updateUser(id) {
+            const updates = {
+                name: document.getElementById('edit-name').value,
+                email: document.getElementById('edit-email').value,
+                cpf: document.getElementById('edit-cpf').value,
+                phone: document.getElementById('edit-phone').value,
+                pix_key: document.getElementById('edit-pix').value,
+                balance: parseFloat(document.getElementById('edit-balance').value),
+                status: document.getElementById('edit-status').value
+            };
+            try {
+                const data = await apiFetch(`/api/admin/user/${id}/update`, {
+                    method: 'POST',
+                    body: JSON.stringify(updates)
+                });
+                alert(data.message || 'Usuário atualizado!');
+                closeUserModal();
+                loadUsers();
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').style.display = 'none';
+        }
+
+        // ==================== HISTÓRICO ====================
+        async function loadHistory() {
+            document.getElementById('history-loading').style.display = 'block';
+            document.getElementById('history-table').style.display = 'none';
+            try {
+                const data = await apiFetch('/api/admin/recent-history');
+                const tbody = document.getElementById('history-list');
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum histórico</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(h => `
+                        <tr>
+                            <td>#${h.id}</td>
+                            <td>${h.name}</td>
+                            <td>${h.game}</td>
+                            <td>R$ ${parseFloat(h.bet_amount).toFixed(2)}</td>
+                            <td>${h.result}</td>
+                            <td>${new Date(h.created_at).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+                document.getElementById('history-table').style.display = 'table';
+            } catch (error) {
+                document.getElementById('history-list').innerHTML = `<tr><td colspan="6" style="color:red;">Erro: ${error.message}</td></tr>`;
+                document.getElementById('history-table').style.display = 'table';
+            } finally {
+                document.getElementById('history-loading').style.display = 'none';
+            }
+        }
+
+        // ==================== CONFIGURAÇÕES ====================
+        async function loadConfig() {
+            try {
+                const config = await apiFetch('/api/admin/config');
+                document.getElementById('pix_key').value = config.pix_key || '';
+                document.getElementById('min_deposit').value = config.min_deposit || 20;
+                document.getElementById('bonus_amount').value = config.bonus_amount || 30;
+                document.getElementById('min_withdraw').value = config.min_withdraw || 150;
+                document.getElementById('max_withdraw').value = config.max_withdraw || 5000;
+                document.getElementById('withdraw_fee').value = config.withdraw_fee || 0;
+                document.getElementById('initial_bonus').value = config.initial_bonus || 20;
+                document.getElementById('initial_goal').value = config.initial_goal || 100;
+                document.getElementById('required_deposit').value = config.required_deposit || 50;
+                document.getElementById('post_deposit_goal').value = config.post_deposit_goal || 500;
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+            }
+        }
+
+        async function saveConfig() {
+            const config = {
+                pix_key: document.getElementById('pix_key').value,
+                min_deposit: parseFloat(document.getElementById('min_deposit').value),
+                bonus_amount: parseFloat(document.getElementById('bonus_amount').value),
+                min_withdraw: parseFloat(document.getElementById('min_withdraw').value),
+                max_withdraw: parseFloat(document.getElementById('max_withdraw').value),
+                withdraw_fee: parseFloat(document.getElementById('withdraw_fee').value),
+                initial_bonus: parseFloat(document.getElementById('initial_bonus').value),
+                initial_goal: parseFloat(document.getElementById('initial_goal').value),
+                required_deposit: parseFloat(document.getElementById('required_deposit').value),
+                post_deposit_goal: parseFloat(document.getElementById('post_deposit_goal').value)
+            };
+
+            try {
+                const data = await apiFetch('/api/admin/config', {
+                    method: 'POST',
+                    body: JSON.stringify(config)
+                });
+                document.getElementById('config-message').innerHTML = `<div class="success-message">${data.message || 'Configurações salvas!'}</div>`;
+            } catch (error) {
+                document.getElementById('config-message').innerHTML = `<div class="error-message">Erro ao salvar: ${error.message}</div>`;
+            }
+        }
+
+        // ==================== LOGOUT ====================
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/admin-login.html';
+        }
+
+        // Inicializa carregando a primeira aba
+        loadStats();
+    </script>
+</body>
+</html>
