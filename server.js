@@ -4,33 +4,35 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Middleware para processar JSON
 app.use(express.json());
+// Servir arquivos estáticos da raiz
 app.use(express.static(path.join(__dirname)));
 
-// ===== ROTAS DA API =====
+// ==================== ROTAS DA API ====================
 app.get('/api/teste', (req, res) => {
-    res.json({ mensagem: 'API funcionando perfeitamente!' });
+    res.json({ sucesso: true, mensagem: 'API funcionando!' });
 });
 
 app.post('/api/login', (req, res) => {
     const { email } = req.body;
-    // Aceita qualquer login
+    // Aceita qualquer login para teste
     res.json({
-        success: true,
-        user: { id: 1, name: 'Usuário Teste', email, balance: 1000, bonus_balance: 0 },
-        redirect: '/dashboard.html'
+        sucesso: true,
+        usuario: { id: 1, nome: 'Teste', email, saldo: 1000, bonus: 0 },
+        redirecionar: '/dashboard.html'
     });
 });
 
 app.post('/api/register', (req, res) => {
-    res.json({ success: true });
+    res.json({ sucesso: true });
 });
 
 app.get('/api/user/:id/balance', (req, res) => {
-    res.json({ balance: 1000, bonus_balance: 0 });
+    res.json({ saldo: 1000, bonus: 0 });
 });
 
-// ===== ROTAS DE PÁGINAS =====
+// ==================== ROTAS DE PÁGINAS ====================
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
@@ -38,7 +40,8 @@ app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'dash
 app.get('/admin-login.html', (req, res) => res.sendFile(path.join(__dirname, 'admin-login.html')));
 app.get('/admin.html', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
+// Inicia o servidor
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`✅ Teste a API em /api/teste`);
+    console.log(`✅ Servidor rodando na porta ${PORT}`);
+    console.log(`🔗 Teste a API em /api/teste`);
 });
