@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - MEGABET777</title>
+    <title>Painel Admin – MEGABET777</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* mesmo estilo do admin anterior – mantive igual */
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -21,16 +22,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ffd700;
-        }
-        .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .logo { font-size: 2rem; font-weight: bold; color: #ffd700; }
+        .admin-info { display: flex; align-items: center; gap: 20px; }
         .logout-btn {
             padding: 10px 25px;
             background: transparent;
@@ -39,15 +32,8 @@
             color: #ffd700;
             cursor: pointer;
         }
-        .logout-btn:hover {
-            background: #ffd700;
-            color: #1a0000;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
+        .logout-btn:hover { background: #ffd700; color: #1a0000; }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
         .tabs {
             display: flex;
             gap: 10px;
@@ -63,14 +49,8 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .tab:hover {
-            background: rgba(255,215,0,0.2);
-        }
-        .tab.active {
-            background: #ffd700;
-            color: #1a0000;
-            font-weight: 600;
-        }
+        .tab:hover { background: rgba(255,215,0,0.2); }
+        .tab.active { background: #ffd700; color: #1a0000; font-weight: 600; }
         .section {
             display: none;
             background: rgba(0,0,0,0.7);
@@ -78,9 +58,8 @@
             border-radius: 20px;
             padding: 25px;
         }
-        .section.active {
-            display: block;
-        }
+        .section.active { display: block; }
+        h2 { color: #ffd700; margin-bottom: 20px; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -106,9 +85,7 @@
         .btn-success { background: #00c851; color: white; }
         .btn-danger { background: #ff4444; color: white; }
         .btn-warning { background: #ffbb33; color: black; }
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-group { margin-bottom: 15px; }
         .form-group label {
             display: block;
             color: #ffd700;
@@ -128,33 +105,15 @@
             border-radius: 5px;
             display: none;
         }
-        .message.success {
-            display: block;
-            background: rgba(0,255,0,0.2);
-            border: 1px solid #0f0;
-            color: #0f0;
-        }
-        .message.error {
-            display: block;
-            background: rgba(255,0,0,0.2);
-            border: 1px solid #f00;
-            color: #f00;
-        }
+        .message.success { display: block; background: rgba(0,255,0,0.2); border: 1px solid #0f0; color: #0f0; }
+        .message.error { display: block; background: rgba(255,0,0,0.2); border: 1px solid #f00; color: #f00; }
         .status-badge {
             padding: 5px 12px;
             border-radius: 50px;
             font-size: 0.9rem;
         }
-        .status-pending {
-            background: rgba(255,165,0,0.2);
-            border: 1px solid orange;
-            color: orange;
-        }
-        .status-active {
-            background: rgba(0,255,0,0.2);
-            border: 1px solid #0f0;
-            color: #0f0;
-        }
+        .status-pending { background: rgba(255,165,0,0.2); border: 1px solid orange; color: orange; }
+        .status-active { background: rgba(0,255,0,0.2); border: 1px solid #0f0; color: #0f0; }
     </style>
 </head>
 <body>
@@ -184,8 +143,8 @@
         <div id="users" class="section">
             <h2>👥 Usuários</h2>
             <table>
-                <thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Saldo</th><th>Bônus</th><th>Status</th><th>Ações</th></tr></thead>
-                <tbody id="usersTable"><tr><td colspan="7">Carregando...</td></tr></tbody>
+                <thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Saldo</th><th>Bônus</th><th>Rollover</th><th>RTP Ind.</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="usersTable"><tr><td colspan="9">Carregando...</td></tr></tbody>
             </table>
         </div>
 
@@ -208,7 +167,7 @@
         <div id="games" class="section">
             <h2>🎮 Configuração de Jogos</h2>
             <table>
-                <thead><tr><th>Jogo</th><th>RTP</th><th>Min</th><th>Max</th><th>Ativo</th><th>Ações</th></tr></thead>
+                <thead><tr><th>Jogo</th><th>RTP (%)</th><th>Min</th><th>Max</th><th>Ativo</th><th>Ações</th></tr></thead>
                 <tbody id="gamesTable"><tr><td colspan="6">Carregando...</td></tr></tbody>
             </table>
         </div>
@@ -244,6 +203,15 @@
         </div>
     </div>
 
+    <!-- Modal de Edição de Usuário -->
+    <div id="userModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000;">
+        <div style="background:#1e1e1e; max-width:500px; margin:50px auto; padding:30px; border-radius:20px; border:2px solid #ffd700;">
+            <h2 style="color:#ffd700; margin-bottom:20px;">Editar Usuário</h2>
+            <div id="userForm"></div>
+            <button class="btn btn-warning" onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
+
     <script>
         const admin = JSON.parse(localStorage.getItem('admin') || '{}');
         if (!admin.email) window.location.href = '/admin-login.html';
@@ -265,6 +233,7 @@
             if (tab === 'config') loadConfig();
         }
 
+        // ==================== USUÁRIOS ====================
         async function loadUsers() {
             const res = await fetch('/api/admin/users', { headers: { 'Authorization': getAuthHeader() } });
             const users = await res.json();
@@ -274,15 +243,75 @@
                     <td>#${u.id}</td>
                     <td>${u.name}</td>
                     <td>${u.email}</td>
-                    <td>R$ ${(u.balance||0).toFixed(2)}</td>
-                    <td>R$ ${(u.bonus_balance||0).toFixed(2)}</td>
-                    <td><span class="status-badge status-${u.status === 'Ativo' ? 'active' : 'pending'}">${u.status}</span></td>
-                    <td><button class="btn btn-warning" onclick="editarUsuario(${u.id})">✏️</button></td>
+                    <td>R$ ${(u.balance || 0).toFixed(2)}</td>
+                    <td>R$ ${(u.bonus_balance || 0).toFixed(2)}</td>
+                    <td>R$ ${(u.rollover || 0).toFixed(2)}</td>
+                    <td>${u.rtp_individual ? u.rtp_individual + '%' : 'Padrão'}</td>
+                    <td><span class="status-badge ${u.status === 'Ativo' ? 'status-active' : 'status-pending'}">${u.status}</span></td>
+                    <td><button class="btn btn-warning" onclick="editarUsuario(${u.id})">✏️ Editar</button></td>
                 </tr>`;
             });
             document.getElementById('usersTable').innerHTML = html;
         }
 
+        async function editarUsuario(id) {
+            const res = await fetch('/api/admin/users', { headers: { 'Authorization': getAuthHeader() } });
+            const users = await res.json();
+            const u = users.find(u => u.id == id);
+            const form = document.getElementById('userForm');
+            form.innerHTML = `
+                <div class="form-group">
+                    <label>Saldo Real (R$)</label>
+                    <input type="number" id="editBalance" value="${u.balance || 0}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Saldo Bônus (R$)</label>
+                    <input type="number" id="editBonus" value="${u.bonus_balance || 0}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Rollover Restante (R$)</label>
+                    <input type="number" id="editRollover" value="${u.rollover || 0}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>RTP Individual (%)</label>
+                    <input type="number" id="editRTP" value="${u.rtp_individual || ''}" step="0.1" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editStatus">
+                        <option value="Ativo" ${u.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
+                        <option value="Pendente" ${u.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                        <option value="Bloqueado" ${u.status === 'Bloqueado' ? 'selected' : ''}>Bloqueado</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="atualizarUsuario(${u.id})">Salvar</button>
+            `;
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        async function atualizarUsuario(id) {
+            const data = {
+                balance: parseFloat(document.getElementById('editBalance').value),
+                bonus_balance: parseFloat(document.getElementById('editBonus').value),
+                rollover: parseFloat(document.getElementById('editRollover').value),
+                status: document.getElementById('editStatus').value,
+                rtp_individual: document.getElementById('editRTP').value ? parseFloat(document.getElementById('editRTP').value) : null
+            };
+            await fetch(`/api/admin/user/${id}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': getAuthHeader() },
+                body: JSON.stringify(data)
+            });
+            alert('Usuário atualizado!');
+            fecharModal();
+            loadUsers();
+        }
+
+        function fecharModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // ==================== DEPÓSITOS ====================
         async function loadDeposits() {
             const res = await fetch('/api/admin/deposits', { headers: { 'Authorization': getAuthHeader() } });
             const deposits = await res.json();
@@ -296,9 +325,22 @@
                     <td><button class="btn btn-success" onclick="confirmarDeposito(${d.id})">✅</button></td>
                 </tr>`;
             });
-            document.getElementById('depositsTable').innerHTML = html;
+            document.getElementById('depositsTable').innerHTML = html || '<tr><td colspan="5">Nenhum depósito pendente</td></tr>';
         }
 
+        window.confirmarDeposito = async function(id) {
+            const amount = prompt('Valor a creditar (R$):');
+            const bonus = prompt('Bônus (R$):');
+            if (!amount || !bonus) return;
+            await fetch(`/api/admin/confirm-deposit/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': getAuthHeader() },
+                body: JSON.stringify({ amount: parseFloat(amount), bonus: parseFloat(bonus) })
+            });
+            loadDeposits();
+        };
+
+        // ==================== SAQUES ====================
         async function loadWithdraws() {
             const res = await fetch('/api/admin/withdraws', { headers: { 'Authorization': getAuthHeader() } });
             const withdraws = await res.json();
@@ -310,12 +352,25 @@
                     <td>R$ ${w.amount}</td>
                     <td>${w.pix_key}</td>
                     <td>${new Date(w.created_at).toLocaleString()}</td>
-                    <td><button class="btn btn-success" onclick="aprovarSaque(${w.id})">✅</button> <button class="btn btn-danger" onclick="rejeitarSaque(${w.id})">❌</button></td>
+                    <td>
+                        <button class="btn btn-success" onclick="aprovarSaque(${w.id})">✅</button>
+                        <button class="btn btn-danger" onclick="rejeitarSaque(${w.id})">❌</button>
+                    </td>
                 </tr>`;
             });
-            document.getElementById('withdrawsTable').innerHTML = html;
+            document.getElementById('withdrawsTable').innerHTML = html || '<tr><td colspan="6">Nenhum saque pendente</td></tr>';
         }
 
+        window.aprovarSaque = async function(id) {
+            await fetch(`/api/admin/approve-withdraw/${id}`, { method: 'POST', headers: { 'Authorization': getAuthHeader() } });
+            loadWithdraws();
+        };
+        window.rejeitarSaque = async function(id) {
+            await fetch(`/api/admin/reject-withdraw/${id}`, { method: 'POST', headers: { 'Authorization': getAuthHeader() } });
+            loadWithdraws();
+        };
+
+        // ==================== JOGOS ====================
         async function loadGames() {
             const res = await fetch('/api/admin/games', { headers: { 'Authorization': getAuthHeader() } });
             const games = await res.json();
@@ -326,13 +381,32 @@
                     <td><input type="number" id="rtp_${g.name}" value="${g.rtp}" step="0.1" style="width:70px;"></td>
                     <td><input type="number" id="min_${g.name}" value="${g.min_bet}" step="0.01" style="width:70px;"></td>
                     <td><input type="number" id="max_${g.name}" value="${g.max_bet}" step="0.01" style="width:70px;"></td>
-                    <td><select id="active_${g.name}"><option value="1" ${g.active?'selected':''}>Ativo</option><option value="0">Inativo</option></select></td>
+                    <td>
+                        <select id="active_${g.name}">
+                            <option value="1" ${g.active ? 'selected' : ''}>Ativo</option>
+                            <option value="0" ${!g.active ? 'selected' : ''}>Inativo</option>
+                        </select>
+                    </td>
                     <td><button class="btn btn-warning" onclick="salvarJogo('${g.name}')">Salvar</button></td>
                 </tr>`;
             });
             document.getElementById('gamesTable').innerHTML = html;
         }
 
+        window.salvarJogo = async function(name) {
+            const rtp = document.getElementById(`rtp_${name}`).value;
+            const min = document.getElementById(`min_${name}`).value;
+            const max = document.getElementById(`max_${name}`).value;
+            const active = document.getElementById(`active_${name}`).value;
+            await fetch(`/api/admin/game/${name}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': getAuthHeader() },
+                body: JSON.stringify({ rtp, min_bet: parseFloat(min), max_bet: parseFloat(max), active: parseInt(active) })
+            });
+            alert('Jogo atualizado!');
+        };
+
+        // ==================== CONFIGURAÇÕES ====================
         async function loadConfig() {
             const res = await fetch('/api/admin/config', { headers: { 'Authorization': getAuthHeader() } });
             const config = await res.json();
@@ -344,7 +418,7 @@
             document.getElementById('withdraw_fee').value = config.withdraw_fee || 0;
         }
 
-        async function salvarConfig() {
+        window.salvarConfig = async function() {
             const config = {
                 pix_key: document.getElementById('pix_key').value,
                 min_deposit: parseFloat(document.getElementById('min_deposit').value),
@@ -360,44 +434,15 @@
             });
             const data = await res.json();
             const msg = document.getElementById('configMessage');
-            msg.className = data.success ? 'message success' : 'message error';
-            msg.innerHTML = data.success ? 'Configurações salvas!' : 'Erro ao salvar';
-        }
-
-        async function confirmarDeposito(id) {
-            const amount = prompt('Valor a creditar:');
-            const bonus = prompt('Bônus:');
-            if (!amount || !bonus) return;
-            await fetch(`/api/admin/confirm-deposit/${id}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': getAuthHeader() },
-                body: JSON.stringify({ amount: parseFloat(amount), bonus: parseFloat(bonus) })
-            });
-            loadDeposits();
-        }
-
-        async function aprovarSaque(id) {
-            await fetch(`/api/admin/approve-withdraw/${id}`, { method: 'POST', headers: { 'Authorization': getAuthHeader() } });
-            loadWithdraws();
-        }
-
-        async function rejeitarSaque(id) {
-            await fetch(`/api/admin/reject-withdraw/${id}`, { method: 'POST', headers: { 'Authorization': getAuthHeader() } });
-            loadWithdraws();
-        }
-
-        async function salvarJogo(name) {
-            const rtp = document.getElementById(`rtp_${name}`).value;
-            const min = document.getElementById(`min_${name}`).value;
-            const max = document.getElementById(`max_${name}`).value;
-            const active = document.getElementById(`active_${name}`).value;
-            await fetch(`/api/admin/game/${name}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': getAuthHeader() },
-                body: JSON.stringify({ rtp, min_bet: min, max_bet: max, active: parseInt(active) })
-            });
-            alert('Jogo atualizado!');
-        }
+            if (data.success) {
+                msg.className = 'message success';
+                msg.innerHTML = 'Configurações salvas!';
+            } else {
+                msg.className = 'message error';
+                msg.innerHTML = 'Erro ao salvar';
+            }
+            setTimeout(() => msg.innerHTML = '', 3000);
+        };
 
         function logout() {
             localStorage.removeItem('admin');
