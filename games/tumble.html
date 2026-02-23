@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tumble - MEGABET777</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8b0000, #4a0000);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-bottom: 2px solid #ffd700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .balance {
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid #ffd700;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        .game-area {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(255,215,0,0.1);
+            border: 1px solid #ffd700;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            transition: all 0.3s;
+        }
+
+        .cell.highlight {
+            background: rgba(255,215,0,0.3);
+            transform: scale(1.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid #ffd700;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            width: 150px;
+        }
+
+        button {
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border: none;
+            border-radius: 50px;
+            color: #4a0000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.win {
+            display: block;
+            background: rgba(0,255,0,0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .result.lose {
+            display: block;
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">MEGABET777</div>
+        <div class="balance" id="balance">R$ 0,00</div>
+    </div>
+
+    <div class="container">
+        <h1>💎 TUMBLE - QUEDA DE PEDRAS</h1>
+
+        <div class="game-area">
+            <div class="grid" id="grid"></div>
+
+            <div class="controls">
+                <input type="number" id="bet" min="5" value="10" step="5">
+                <button onclick="play()">GIRAR</button>
+            </div>
+
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let token = localStorage.getItem('token');
+
+        async function loadBalance() {
+            try {
+                const res = await fetch('/api/user/balance', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                document.getElementById('balance').textContent = `R$ ${data.total.toFixed(2)}`;
+            } catch (error) {
+                console.error('Erro ao carregar saldo');
+            }
+        }
+
+        function createGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${i}`;
+                grid.appendChild(cell);
+            }
+        }
+
+        function updateGrid(symbols) {
+            for (let i = 0; i < 25; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                cell.textContent = symbols[i];
+            }
+        }
+
+        async function play() {
+            const bet = document.getElementById('bet').value;
+            
+            try {
+                const res = await fetch('/api/game/tumble', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ userId: user.id, betAmount: parseFloat(bet) })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    // Achatar o grid 5x5
+                    const symbols = data.grid.flat();
+                    updateGrid(symbols);
+                    
+                    document.getElementById('balance').textContent = `R$ ${data.newBalance.toFixed(2)}`;
+                    
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.className = `result ${data.winAmount > 0 ? 'win' : 'lose'}`;
+                    resultDiv.textContent = data.message;
+                }
+            } catch (error) {
+                alert('Erro ao jogar');
+            }
+        }
+
+        createGrid();
+        loadBalance();
+    </script>
+</body>
+</html>
