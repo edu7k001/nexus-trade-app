@@ -381,4 +381,339 @@
         <!-- Saques -->
         <div id="withdraws" class="section">
             <div class="card">
-                <div class
+                <div class="card-title">💸 Saques Pendentes</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Valor</th>
+                            <th>PIX</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawsTable">
+                        <tr><td colspan="6">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Jogos -->
+        <div id="games" class="section">
+            <div class="card">
+                <div class="card-title">🎮 Configuração dos Jogos</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jogo</th>
+                            <th>RTP (%)</th>
+                            <th>Min</th>
+                            <th>Max</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gamesTable">
+                        <tr><td colspan="6">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Usuário -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Editar Usuário</h2>
+            <div id="userForm"></div>
+            <button class="btn btn-warning" onclick="closeUserModal()" style="margin-top:20px;">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Depósito -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Confirmar Depósito</h2>
+            <div id="depositForm"></div>
+            <button class="btn btn-warning" onclick="closeDepositModal()" style="margin-top:20px;">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        // Verificar se está logado
+        const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+        if (!admin.email) {
+            window.location.href = '/admin-login.html';
+        }
+        document.getElementById('adminEmail').textContent = admin.email;
+
+        // ==================== FUNÇÕES ====================
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'users') loadUsers();
+            if (tabName === 'deposits') loadDeposits();
+            if (tabName === 'withdraws') loadWithdraws();
+            if (tabName === 'games') loadGames();
+        }
+
+        // Carregar usuários
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users');
+            const users = await res.json();
+            
+            const tbody = document.getElementById('usersTable');
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">Nenhum usuário</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>#${u.id}</td>
+                    <td>${u.name || '-'}</td>
+                    <td>${u.email}</td>
+                    <td>R$ ${(u.balance || 0).toFixed(2)}</td>
+                    <td>R$ ${(u.bonus_balance || 0).toFixed(2)}</td>
+                    <td><span class="status-badge status-${u.status === 'Ativo' ? 'active' : 'pending'}">${u.status || 'Ativo'}</span></td>
+                    <td>
+                        <button class="btn btn-warning" onclick="editUser(${u.id})">✏️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Editar usuário
+        async function editUser(id) {
+            const res = await fetch('/api/admin/users');
+            const users = await res.json();
+            const user = users.find(u => u.id == id);
+            
+            document.getElementById('userForm').innerHTML = `
+                <div class="form-group">
+                    <label>Saldo Real (R$)</label>
+                    <input type="number" id="editBalance" value="${user.balance || 0}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Saldo Bônus (R$)</label>
+                    <input type="number" id="editBonus" value="${user.bonus_balance || 0}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Rollover (R$)</label>
+                    <input type="number" id="editRollover" value="${user.rollover || 0}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>RTP Individual (%)</label>
+                    <input type="number" id="editRTP" value="${user.rtp_individual || ''}" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editStatus">
+                        <option value="Ativo" ${user.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
+                        <option value="Pendente" ${user.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                        <option value="Bloqueado" ${user.status === 'Bloqueado' ? 'selected' : ''}>Bloqueado</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="updateUser(${id})" style="margin-top:10px;">Salvar</button>
+            `;
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        async function updateUser(id) {
+            const data = {
+                balance: parseFloat(document.getElementById('editBalance').value),
+                bonus_balance: parseFloat(document.getElementById('editBonus').value),
+                rollover: parseFloat(document.getElementById('editRollover').value),
+                status: document.getElementById('editStatus').value,
+                rtp_individual: document.getElementById('editRTP').value ? parseFloat(document.getElementById('editRTP').value) : null
+            };
+            
+            await fetch(`/api/admin/user/${id}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            alert('Usuário atualizado!');
+            closeUserModal();
+            loadUsers();
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // Carregar depósitos
+        async function loadDeposits() {
+            const res = await fetch('/api/admin/deposits');
+            const deposits = await res.json();
+            
+            const tbody = document.getElementById('depositsTable');
+            if (deposits.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Nenhum depósito pendente</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = deposits.map(d => `
+                <tr>
+                    <td>#${d.id}</td>
+                    <td>${d.name}</td>
+                    <td>R$ ${d.amount}</td>
+                    <td>${new Date(d.created_at).toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="showConfirmDeposit(${d.id}, ${d.amount})">✅</button>
+                        <button class="btn btn-danger" onclick="rejectDeposit(${d.id})">❌</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showConfirmDeposit(id, amount) {
+            document.getElementById('depositForm').innerHTML = `
+                <div class="form-group">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="depositAmount" value="${amount}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Bônus (R$)</label>
+                    <input type="number" id="depositBonus" value="30" step="0.01">
+                </div>
+                <button class="btn btn-success" onclick="confirmDeposit(${id})">Confirmar</button>
+            `;
+            document.getElementById('depositModal').style.display = 'block';
+        }
+
+        async function confirmDeposit(id) {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            const bonus = parseFloat(document.getElementById('depositBonus').value);
+            
+            await fetch(`/api/admin/confirm-deposit/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, bonus })
+            });
+            
+            alert('Depósito confirmado!');
+            closeDepositModal();
+            loadDeposits();
+        }
+
+        async function rejectDeposit(id) {
+            if (confirm('Rejeitar depósito?')) {
+                await fetch(`/api/admin/reject-deposit/${id}`, { method: 'POST' });
+                loadDeposits();
+            }
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').style.display = 'none';
+        }
+
+        // Carregar saques
+        async function loadWithdraws() {
+            const res = await fetch('/api/admin/withdraws');
+            const withdraws = await res.json();
+            
+            const tbody = document.getElementById('withdrawsTable');
+            if (withdraws.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">Nenhum saque pendente</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = withdraws.map(w => `
+                <tr>
+                    <td>#${w.id}</td>
+                    <td>${w.name}</td>
+                    <td>R$ ${w.amount}</td>
+                    <td>${w.pix_key}</td>
+                    <td>${new Date(w.created_at).toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="approveWithdraw(${w.id})">✅</button>
+                        <button class="btn btn-danger" onclick="rejectWithdraw(${w.id})">❌</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function approveWithdraw(id) {
+            if (confirm('Aprovar saque?')) {
+                await fetch(`/api/admin/approve-withdraw/${id}`, { method: 'POST' });
+                loadWithdraws();
+            }
+        }
+
+        async function rejectWithdraw(id) {
+            if (confirm('Rejeitar saque?')) {
+                await fetch(`/api/admin/reject-withdraw/${id}`, { method: 'POST' });
+                loadWithdraws();
+            }
+        }
+
+        // Carregar jogos
+        async function loadGames() {
+            const res = await fetch('/api/admin/games');
+            const games = await res.json();
+            
+            const tbody = document.getElementById('gamesTable');
+            if (games.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">Nenhum jogo configurado</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = games.map(g => `
+                <tr>
+                    <td>${g.name}</td>
+                    <td><input type="number" id="rtp_${g.name}" value="${g.rtp}" step="0.1" style="width:70px;"></td>
+                    <td><input type="number" id="min_${g.name}" value="${g.min_bet}" step="0.01" style="width:70px;"></td>
+                    <td><input type="number" id="max_${g.name}" value="${g.max_bet}" step="0.01" style="width:70px;"></td>
+                    <td>
+                        <select id="active_${g.name}">
+                            <option value="1" ${g.active ? 'selected' : ''}>Ativo</option>
+                            <option value="0" ${!g.active ? 'selected' : ''}>Inativo</option>
+                        </select>
+                    </td>
+                    <td><button class="btn btn-warning" onclick="saveGame('${g.name}')">Salvar</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveGame(name) {
+            const rtp = document.getElementById(`rtp_${name}`).value;
+            const min = document.getElementById(`min_${name}`).value;
+            const max = document.getElementById(`max_${name}`).value;
+            const active = document.getElementById(`active_${name}`).value;
+            
+            await fetch(`/api/admin/game/${name}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rtp, min_bet: min, max_bet: max, active: parseInt(active) })
+            });
+            
+            alert('Configuração salva!');
+        }
+
+        function logout() {
+            localStorage.removeItem('admin');
+            window.location.href = '/admin-login.html';
+        }
+
+        // Carregar dados iniciais
+        async function loadStats() {
+            const res = await fetch('/api/admin/stats');
+            const stats = await res.json();
+            document.getElementById('totalUsers').textContent = stats.total_users || 0;
+            document.getElementById('totalBalance').textContent = `R$ ${(stats.total_balance || 0).toFixed(2)}`;
+            document.getElementById('pendingDeposits').textContent = stats.pending_deposits || 0;
+            document.getElementById('pendingWithdraws').textContent = stats.pending_withdraws || 0;
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
