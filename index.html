@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MEGABET777</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #8b0000, #4a0000);
             color: white;
             min-height: 100vh;
@@ -16,48 +20,94 @@
             justify-content: center;
             align-items: center;
         }
+
         .container {
             text-align: center;
-            padding: 40px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            border: 2px solid gold;
+            padding: 60px 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid gold;
+            border-radius: 30px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
         }
+
         h1 {
             color: gold;
-            font-size: 48px;
+            font-size: 52px;
             margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         }
+
         .status {
-            background: rgba(0,255,0,0.2);
-            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
             color: #00ff00;
             padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
+            border-radius: 50px;
+            margin: 30px 0;
+            font-size: 18px;
+            font-weight: bold;
         }
+
+        .date {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+
         button {
             padding: 15px 40px;
-            background: gold;
+            background: linear-gradient(135deg, gold, #ff8c00);
             border: none;
             border-radius: 50px;
             color: #4a0000;
             font-weight: bold;
             font-size: 18px;
             cursor: pointer;
+            transition: all 0.3s;
             margin: 10px;
         }
+
         button:hover {
-            transform: scale(1.05);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px gold;
+        }
+
+        .links {
+            margin-top: 30px;
+        }
+
+        .links a {
+            color: gold;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚀 MEGABET777</h1>
+        
         <div class="status">✅ SITE FUNCIONANDO!</div>
-        <p>Data: <script>document.write(new Date().toLocaleString());</script></p>
-        <button onclick="location.href='/admin.html'">👑 ACESSAR ADMIN</button>
+        
+        <div class="date" id="currentDate"></div>
+        
+        <button onclick="location.href='/admin-login.html'">👑 ACESSAR ADMIN</button>
+        
+        <div class="links">
+            <a href="/login.html">Login</a>
+            <a href="/register.html">Cadastro</a>
+            <a href="/games/fortune-ox.html">Jogos</a>
+        </div>
     </div>
+
+    <script>
+        document.getElementById('currentDate').innerHTML = 'Data: ' + new Date().toLocaleString();
+    </script>
 </body>
 </html>
