@@ -124,7 +124,7 @@ function criarTabelas() {
             });
             // Inserir configuração padrão
             db.run('INSERT OR IGNORE INTO config (id) VALUES (1)');
-            // Inserir apenas os jogos que queremos (Fortune Ox e Thimbles)
+            // Inserir apenas os jogos que queremos
             const jogos = [
                 ['fortune-ox', 96.75, 5, 1000],
                 ['thimbles', 97, 5, 1000]
@@ -348,7 +348,7 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
     });
 });
 
-// Atualizar usuário (incluindo rollover e rtp_individual)
+// Atualizar usuário (inclui rollover e rtp_individual)
 app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
     const { id } = req.params;
     const { balance, bonus_balance, rollover, status, rtp_individual } = req.body;
@@ -461,7 +461,11 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
 function processarAposta(userId, gameName, betAmount, winAmountBase, rtpGlobal, callback) {
     db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
         if (err || !user) return callback('Usuário não encontrado');
-        
+
+        // Validar saldo
+        const total = user.balance + user.bonus_balance;
+        if (total < betAmount) return callback('Saldo insuficiente');
+
         // Aplicar RTP individual se existir
         let winAmount = winAmountBase;
         if (user.rtp_individual) {
@@ -469,25 +473,19 @@ function processarAposta(userId, gameName, betAmount, winAmountBase, rtpGlobal, 
         } else {
             winAmount = Math.floor(winAmountBase * (rtpGlobal / 100));
         }
-        
-        // Verificar saldo total
-        const total = user.balance + user.bonus_balance;
-        if (total < betAmount) {
-            return callback('Saldo insuficiente');
-        }
-        
+
         // Usar saldo de bônus primeiro
         let newBalance = user.balance;
         let newBonus = user.bonus_balance;
         let novoRollover = user.rollover;
-        
+
         if (user.bonus_balance >= betAmount) {
             newBonus -= betAmount;
         } else {
             newBalance -= (betAmount - user.bonus_balance);
             newBonus = 0;
         }
-        
+
         if (winAmount > 0) {
             newBalance += winAmount;
             // Se tem rollover, reduz o valor apostado do rollover
@@ -495,7 +493,7 @@ function processarAposta(userId, gameName, betAmount, winAmountBase, rtpGlobal, 
                 novoRollover = Math.max(0, novoRollover - betAmount);
             }
         }
-        
+
         db.run(
             'UPDATE users SET balance = ?, bonus_balance = ?, rollover = ? WHERE id = ?',
             [newBalance, newBonus, novoRollover, userId],
@@ -517,24 +515,23 @@ app.post('/api/game/fortune-ox', (req, res) => {
     if (!userId || !betAmount || betAmount < 5) {
         return res.status(400).json({ error: 'Aposta inválida' });
     }
-    
+
     db.get('SELECT * FROM games WHERE name = "fortune-ox"', (err, game) => {
         if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
-        
-        // Simular resultado
+
         const symbols = ['🐂', '🪙', '🧧', '💰', '🧨', '🍊', '🎆'];
         const resultado = [
             symbols[Math.floor(Math.random() * symbols.length)],
             symbols[Math.floor(Math.random() * symbols.length)],
             symbols[Math.floor(Math.random() * symbols.length)]
         ];
-        
+
         let winBase = 0;
         if (resultado[0] === resultado[1] && resultado[1] === resultado[2]) {
             if (resultado[0] === '🐂') winBase = betAmount * 20;
             else winBase = betAmount * 5;
         }
-        
+
         processarAposta(userId, 'fortune-ox', betAmount, winBase, game.rtp, (err, data) => {
             if (err) return res.status(400).json({ error: err });
             res.json({
@@ -548,36 +545,36 @@ app.post('/api/game/fortune-ox', (req, res) => {
     });
 });
 
-// Thimbles (achar a bolinha)
+// Thimbles (com multiplicador 2.88 e backend)
 app.post('/api/game/thimbles', (req, res) => {
-    const { userId, betAmount, escolha } = req.body; // escolha: 1, 2 ou 3 (posição da bolinha)
-    if (!userId || !betAmount || betAmount < 5 || ![1,2,3].includes(escolha)) {
+    const { userId, betAmount, escolha } = req.body; // escolha: 0, 1, 2 (índice do copo)
+    if (!userId || !betAmount || betAmount < 5 || ![0, 1, 2].includes(escolha)) {
         return res.status(400).json({ error: 'Aposta inválida' });
     }
-    
+
     db.get('SELECT * FROM games WHERE name = "thimbles"', (err, game) => {
         if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
-        
-        const posicaoCorreta = Math.floor(Math.random() * 3) + 1; // 1, 2 ou 3
+
+        const posicaoCorreta = Math.floor(Math.random() * 3); // 0, 1 ou 2
         const ganhou = (posicaoCorreta === escolha);
-        const winBase = ganhou ? betAmount * 2 : 0; // paga 2x se acertar
-        
+        const multiplicador = 2.88; // Fixo, mas poderia vir do banco
+        const winBase = ganhou ? betAmount * multiplicador : 0;
+
         processarAposta(userId, 'thimbles', betAmount, winBase, game.rtp, (err, data) => {
             if (err) return res.status(400).json({ error: err });
             res.json({
                 success: true,
                 posicaoCorreta,
-                escolha,
                 ganhou,
                 winAmount: data.winAmount,
                 newBalance: data.newBalance,
-                message: ganhou ? `🎉 Acertou! Ganhou R$ ${data.winAmount.toFixed(2)}!` : `😢 Errou! A bolinha estava no copo ${posicaoCorreta}.`
+                message: ganhou ? `🎉 Acertou! Ganhou R$ ${data.winAmount.toFixed(2)}!` : `😢 Errou! A bolinha estava no copo ${posicaoCorreta+1}.`
             });
         });
     });
 });
 
-// Sacar valor acumulado no Thimbles (usado quando o jogador opta por parar)
+// Rota para sacar o valor acumulado (se houver)
 app.post('/api/game/thimbles/sacar', (req, res) => {
     const { userId, amount } = req.body;
     if (!userId || !amount || amount <= 0) {
@@ -585,13 +582,8 @@ app.post('/api/game/thimbles/sacar', (req, res) => {
     }
     db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
         if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
-        // Adiciona ao saldo real (o valor já foi creditado anteriormente? Na verdade, o valor acumulado ainda não foi adicionado ao saldo real, pois está em "estado" no frontend.
-        // Aqui consideramos que o valor veio do frontend e deve ser adicionado ao saldo real.
         db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, userId], (err) => {
             if (err) return res.status(500).json({ error: 'Erro ao creditar' });
-            // Registrar transação
-            db.run('INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
-                [userId, 'win', amount, 'Saque de ganhos do Thimbles']);
             res.json({ success: true, newBalance: user.balance + amount });
         });
     });
