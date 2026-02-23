@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Depósito - MEGABET777</title>
+    <title>Depósito – MEGABET777</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -98,7 +98,6 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user.id) window.location.href = '/login.html';
 
-        // Carregar QR Code e chave PIX
         async function carregarPix() {
             try {
                 const res = await fetch('/api/pix/qrcode');
