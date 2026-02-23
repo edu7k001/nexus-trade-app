@@ -470,6 +470,12 @@ function processarAposta(userId, gameName, betAmount, winAmountBase, rtpGlobal, 
             winAmount = Math.floor(winAmountBase * (rtpGlobal / 100));
         }
         
+        // Verificar saldo total
+        const total = user.balance + user.bonus_balance;
+        if (total < betAmount) {
+            return callback('Saldo insuficiente');
+        }
+        
         // Usar saldo de bônus primeiro
         let newBalance = user.balance;
         let newBonus = user.bonus_balance;
@@ -530,7 +536,7 @@ app.post('/api/game/fortune-ox', (req, res) => {
         }
         
         processarAposta(userId, 'fortune-ox', betAmount, winBase, game.rtp, (err, data) => {
-            if (err) return res.status(500).json({ error: err });
+            if (err) return res.status(400).json({ error: err });
             res.json({
                 success: true,
                 result: resultado,
@@ -557,7 +563,7 @@ app.post('/api/game/thimbles', (req, res) => {
         const winBase = ganhou ? betAmount * 2 : 0; // paga 2x se acertar
         
         processarAposta(userId, 'thimbles', betAmount, winBase, game.rtp, (err, data) => {
-            if (err) return res.status(500).json({ error: err });
+            if (err) return res.status(400).json({ error: err });
             res.json({
                 success: true,
                 posicaoCorreta,
@@ -567,6 +573,26 @@ app.post('/api/game/thimbles', (req, res) => {
                 newBalance: data.newBalance,
                 message: ganhou ? `🎉 Acertou! Ganhou R$ ${data.winAmount.toFixed(2)}!` : `😢 Errou! A bolinha estava no copo ${posicaoCorreta}.`
             });
+        });
+    });
+});
+
+// Sacar valor acumulado no Thimbles (usado quando o jogador opta por parar)
+app.post('/api/game/thimbles/sacar', (req, res) => {
+    const { userId, amount } = req.body;
+    if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ error: 'Valor inválido' });
+    }
+    db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
+        if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
+        // Adiciona ao saldo real (o valor já foi creditado anteriormente? Na verdade, o valor acumulado ainda não foi adicionado ao saldo real, pois está em "estado" no frontend.
+        // Aqui consideramos que o valor veio do frontend e deve ser adicionado ao saldo real.
+        db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, userId], (err) => {
+            if (err) return res.status(500).json({ error: 'Erro ao creditar' });
+            // Registrar transação
+            db.run('INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
+                [userId, 'win', amount, 'Saque de ganhos do Thimbles']);
+            res.json({ success: true, newBalance: user.balance + amount });
         });
     });
 });
