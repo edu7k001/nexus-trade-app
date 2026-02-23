@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depósito - MEGABET777</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #8b0000, #4a0000);
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(0,0,0,0.7);
+            border: 3px solid gold;
+            border-radius: 30px;
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+        }
+        h1 { color: gold; text-align: center; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { color: gold; display: block; margin-bottom: 5px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid gold;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: gold;
+            border: none;
+            border-radius: 10px;
+            color: #4a0000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 DEPÓSITO</h1>
+        <div class="form-group">
+            <label>Valor (R$)</label>
+            <input type="number" id="amount" min="20" value="100" step="10">
+        </div>
+        <button onclick="deposit()">SOLICITAR DEPÓSITO</button>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) window.location.href = '/login.html';
+
+        async function deposit() {
+            const amount = document.getElementById('amount').value;
+            const msg = document.getElementById('message');
+            
+            const response = await fetch('/api/request-deposit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, amount: parseFloat(amount) })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                msg.style.color = '#00ff00';
+                msg.innerHTML = '✅ Solicitação enviada! Aguarde confirmação.';
+            } else {
+                msg.style.color = '#ff0000';
+                msg.innerHTML = '❌ ' + (data.error || 'Erro');
+            }
+        }
+    </script>
+</body>
+</html>
