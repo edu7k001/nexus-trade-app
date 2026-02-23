@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - MEGABET777</title>
     <style>
         body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #8b0000, #4a0000);
             color: white;
+            font-family: Arial;
+            margin: 0;
+            padding: 20px;
         }
         .header {
             background: rgba(0,0,0,0.5);
@@ -22,23 +20,20 @@
             align-items: center;
             margin-bottom: 20px;
         }
-        h1 {
-            color: gold;
-            margin: 0;
-        }
+        h1 { color: gold; margin: 0; }
         button {
             padding: 10px 20px;
             background: gold;
             border: none;
             border-radius: 10px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
         }
         .card {
             background: rgba(0,0,0,0.5);
             border: 1px solid gold;
             border-radius: 20px;
-            padding: 30px;
+            padding: 40px;
             text-align: center;
         }
         .success {
@@ -46,18 +41,24 @@
             font-size: 24px;
             margin-bottom: 20px;
         }
+        .info {
+            color: gold;
+            font-size: 18px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>👑 PAINEL ADMIN</h1>
+        <h1>👑 PAINEL ADMIN MEGABET777</h1>
         <button onclick="logout()">Sair</button>
     </div>
     
     <div class="card">
-        <div class="success">✅ ACESSO CONCEDIDO!</div>
-        <p>Sistema funcionando perfeitamente.</p>
-        <p><strong>edu7k001@gmail.com</strong></p>
+        <div class="success">✅ LOGIN REALIZADO COM SUCESSO!</div>
+        <div class="info">edu7k001@gmail.com</div>
+        <div class="info">@Carlos1998</div>
+        <p style="margin-top: 30px;">Sistema funcionando perfeitamente!</p>
     </div>
 
     <script>
