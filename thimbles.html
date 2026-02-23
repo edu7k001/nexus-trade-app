@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thimbles – MEGABET777</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #1a0000, #3a0000);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 3px solid #ffd700;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .balance {
+            background: #000;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            padding: 10px 30px;
+            color: #ffd700;
+            font-weight: 700;
+        }
+        .game-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(0,0,0,0.7);
+            border: 3px solid #ffd700;
+            border-radius: 40px;
+            text-align: center;
+        }
+        h1 {
+            color: #ffd700;
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .copos {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        .copo {
+            width: 120px;
+            height: 150px;
+            background: #8b4513;
+            border: 3px solid #ffd700;
+            border-radius: 0 0 50% 50%;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            font-size: 3rem;
+            padding-bottom: 10px;
+            position: relative;
+        }
+        .copo:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px #ffd700;
+        }
+        .copo.selecionado {
+            border: 4px solid #ffa500;
+            box-shadow: 0 0 30px orange;
+        }
+        .copo.revelado {
+            background: #cd853f;
+        }
+        .copo.revelado::after {
+            content: '⚪';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+        .controls {
+            margin: 30px 0;
+        }
+        input {
+            padding: 15px;
+            width: 150px;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            background: transparent;
+            color: #fff;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-right: 15px;
+        }
+        button {
+            padding: 15px 40px;
+            background: #ffd700;
+            border: none;
+            border-radius: 50px;
+            color: #1a0000;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ffa500;
+        }
+        #result {
+            margin-top: 30px;
+            font-size: 1.5rem;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎩 THIMBLES</div>
+        <div class="balance" id="balance">R$ 0,00</div>
+    </div>
+
+    <div class="game-container">
+        <h1>Ache a bolinha!</h1>
+        <div class="copos">
+            <div class="copo" id="copo1" onclick="selecionar(1)">🥤</div>
+            <div class="copo" id="copo2" onclick="selecionar(2)">🥤</div>
+            <div class="copo" id="copo3" onclick="selecionar(3)">🥤</div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" min="5" value="10" step="5">
+            <button onclick="jogar()">APOSTAR</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) window.location.href = '/login.html';
+
+        let copoSelecionado = null;
+
+        function selecionar(copo) {
+            document.querySelectorAll('.copo').forEach(c => c.classList.remove('selecionado'));
+            document.getElementById(`copo${copo}`).classList.add('selecionado');
+            copoSelecionado = copo;
+        }
+
+        async function jogar() {
+            if (!copoSelecionado) {
+                alert('Selecione um copo primeiro!');
+                return;
+            }
+            const bet = document.getElementById('betAmount').value;
+            const res = await fetch('/api/game/thimbles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, betAmount: parseFloat(bet), escolha: copoSelecionado })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Revelar todos os copos
+                for (let i = 1; i <= 3; i++) {
+                    const copo = document.getElementById(`copo${i}`);
+                    copo.classList.add('revelado');
+                    if (i === data.posicaoCorreta) {
+                        copo.style.backgroundColor = '#ffd700';
+                    }
+                }
+                document.getElementById('balance').innerText = `R$ ${data.newBalance.toFixed(2)}`;
+                document.getElementById('result').innerText = data.message;
+                copoSelecionado = null;
+                document.querySelectorAll('.copo').forEach(c => c.classList.remove('selecionado'));
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function loadBalance() {
+            const res = await fetch(`/api/user/${user.id}/balance`);
+            const data = await res.json();
+            document.getElementById('balance').innerText = `R$ ${(data.balance + data.bonus_balance).toFixed(2)}`;
+        }
+
+        loadBalance();
+    </script>
+</body>
+</html>
