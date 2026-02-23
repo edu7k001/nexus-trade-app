@@ -400,4 +400,240 @@
                         <div style="color: rgba(255,255,255,0.6);">Jogos Ativos</div>
                     </div>
                     <div style="text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 15px;">
+                        <div style="font-size: 24px; color: #ffd700;">👑</div>
+                        <div style="font-size: 20px; font-weight: bold;">3</div>
+                        <div style="color: rgba(255,255,255,0.6);">Administradores</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 15px;">
+                        <div style="font-size: 24px; color: #ffd700;">💰</div>
+                        <div style="font-size: 20px; font-weight: bold;">R$ 12.345</div>
+                        <div style="color: rgba(255,255,255,0.6);">Volume Hoje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users-tab" class="tab-content" style="display: none;">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-users"></i>
+                    Gerenciar Usuários
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Saldo</th>
+                                <th>Bônus</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-list">
+                            <tr>
+                                <td>#001</td>
+                                <td>João Silva</td>
+                                <td>joao@email.com</td>
+                                <td>R$ 1.500</td>
+                                <td>R$ 50</td>
+                                <td><span class="status-badge status-active">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm">✏️</button>
+                                    <button class="btn btn-danger btn-sm">🔒</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#002</td>
+                                <td>Maria Santos</td>
+                                <td>maria@email.com</td>
+                                <td>R$ 2.300</td>
+                                <td>R$ 20</td>
+                                <td><span class="status-badge status-pending">Pendente</span></td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm">✏️</button>
+                                    <button class="btn btn-danger btn-sm">🔒</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deposits Tab -->
+        <div id="deposits-tab" class="tab-content" style="display: none;">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-arrow-down"></i>
+                    Depósitos Pendentes
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuário</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#101</td>
+                                <td>João Silva</td>
+                                <td>R$ 100</td>
+                                <td>23/02/2026 14:30</td>
+                                <td>
+                                    <button class="btn btn-success">✅ Confirmar</button>
+                                    <button class="btn btn-danger">❌ Rejeitar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdraws Tab -->
+        <div id="withdraws-tab" class="tab-content" style="display: none;">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-arrow-up"></i>
+                    Saques Pendentes
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuário</th>
+                                <th>Valor</th>
+                                <th>Chave PIX</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#201</td>
+                                <td>Maria Santos</td>
+                                <td>R$ 200</td>
+                                <td>11999999999</td>
+                                <td>23/02/2026 15:45</td>
+                                <td>
+                                    <button class="btn btn-success">✅ Aprovar</button>
+                                    <button class="btn btn-danger">❌ Rejeitar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Games Tab -->
+        <div id="games-tab" class="tab-content" style="display: none;">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-dice"></i>
+                    Gerenciar Jogos
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jogo</th>
+                                <th>Provedor</th>
+                                <th>RTP</th>
+                                <th>Aposta Mín</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>🐂 Fortune Ox</td>
+                                <td>PG Soft</td>
+                                <td>96.75%</td>
+                                <td>R$ 5</td>
+                                <td><span class="status-badge status-active">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-warning">⚙️</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config Tab -->
+        <div id="config-tab" class="tab-content" style="display: none;">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-cog"></i>
+                    Configurações do Sistema
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h3 style="color: #ffd700; margin-bottom: 15px;">💰 Depósitos</h3>
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 5px;">Valor Mínimo</label>
+                            <input type="number" value="20" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ffd700; background: rgba(0,0,0,0.3); color: white;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 5px;">Bônus Depósito</label>
+                            <input type="number" value="30" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ffd700; background: rgba(0,0,0,0.3); color: white;">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: #ffd700; margin-bottom: 15px;">💸 Saques</h3>
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 5px;">Valor Mínimo</label>
+                            <input type="number" value="50" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ffd700; background: rgba(0,0,0,0.3); color: white;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 5px;">Taxa (%)</label>
+                            <input type="number" value="0" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ffd700; background: rgba(0,0,0,0.3); color: white;">
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-success" style="padding: 15px 40px;">💾 Salvar Configurações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Esconder todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remover classe active de todos os botões
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar a tab selecionada
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Adicionar classe active ao botão clicado
+            event.target.classList.add('active');
+        }
+
+        function logout() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
+                    <div style="text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 15px;">
                         <
