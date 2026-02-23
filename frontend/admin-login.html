@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Nexus Trade</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0b0f17, #1a1f2e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid #f5b342;
+            border-radius: 30px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            color: #f5b342;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f5b342;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f5b342;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #f5b342, #f97316);
+            border: none;
+            border-radius: 50px;
+            color: #0b0f17;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245,179,66,0.3);
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(239,68,68,0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(16,185,129,0.2);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🔐 ADMIN LOGIN</h1>
+        
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" id="email" value="admin@nexus.com">
+        </div>
+        
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="password" value="admin123">
+        </div>
+        
+        <button onclick="login()">ENTRAR</button>
+        
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msgDiv = document.getElementById('message');
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok && data.user.is_admin === 1) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    msgDiv.className = 'message success';
+                    msgDiv.innerHTML = '✅ Login realizado! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = '/admin.html';
+                    }, 1000);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.innerHTML = '❌ Acesso negado. Credenciais inválidas.';
+                }
+            } catch (error) {
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Erro de conexão com o servidor';
+            }
+        }
+    </script>
+</body>
+</html>
