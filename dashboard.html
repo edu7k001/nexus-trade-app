@@ -20,7 +20,6 @@
 
         .header {
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
             border-bottom: 3px solid gold;
             padding: 20px 40px;
             display: flex;
@@ -45,8 +44,8 @@
             border: 2px solid gold;
             border-radius: 50px;
             padding: 10px 25px;
-            font-weight: bold;
             color: gold;
+            font-weight: bold;
         }
 
         .logout-btn {
@@ -56,7 +55,6 @@
             border-radius: 50px;
             color: gold;
             cursor: pointer;
-            transition: all 0.3s;
         }
 
         .logout-btn:hover {
@@ -163,6 +161,28 @@
             font-size: 24px;
             margin: 40px 0 20px;
         }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            background: transparent;
+            border: 2px solid gold;
+            border-radius: 50px;
+            color: gold;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .action-btn:hover {
+            background: gold;
+            color: #4a0000;
+        }
     </style>
 </head>
 <body>
@@ -193,6 +213,11 @@
                 <div class="stat-value" id="totalBalance">R$ 0</div>
                 <div class="stat-label">Saldo Total</div>
             </div>
+        </div>
+
+        <div class="actions">
+            <a href="/deposit.html" class="action-btn">💰 Depositar</a>
+            <a href="/withdraw.html" class="action-btn">💸 Sacar</a>
         </div>
 
         <h2 class="section-title">🎮 Jogos Disponíveis</h2>
@@ -233,20 +258,33 @@
                 <div class="game-name">Dados</div>
                 <div class="game-provider">Clássico</div>
             </a>
+
+            <a href="/games/crash.html" class="game-card">
+                <div class="game-icon">✈️</div>
+                <div class="game-name">Aviãozinho</div>
+                <div class="game-provider">Crash</div>
+            </a>
+
+            <a href="/games/roulette.html" class="game-card">
+                <div class="game-icon">🎡</div>
+                <div class="game-name">Roleta</div>
+                <div class="game-provider">Clássico</div>
+            </a>
+
+            <a href="/games/blackjack.html" class="game-card">
+                <div class="game-icon">🃏</div>
+                <div class="game-name">Blackjack</div>
+                <div class="game-provider">Clássico</div>
+            </a>
         </div>
     </div>
 
     <script>
-        // Pegar dados do usuário logado
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        if (!user.id) {
-            window.location.href = '/login.html';
-        }
+        if (!user.id) window.location.href = '/login.html';
 
         document.getElementById('userEmail').textContent = user.email;
 
-        // Carregar saldo do usuário
         async function loadBalance() {
             try {
                 const response = await fetch(`/api/user/${user.id}/balance`);
@@ -267,7 +305,6 @@
         }
 
         loadBalance();
-        // Atualizar saldo a cada 30 segundos
         setInterval(loadBalance, 30000);
     </script>
 </body>
