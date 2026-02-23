@@ -279,7 +279,7 @@ app.post('/api/register', (req, res) => {
     );
 });
 
-// Login usuário
+// ==================== ROTA DE LOGIN CORRIGIDA (COM REDIRECIONAMENTO) ====================
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     
@@ -287,7 +287,17 @@ app.post('/api/login', (req, res) => {
         if (!user || !bcrypt.compareSync(password, user.password)) {
             return res.status(401).json({ error: 'Credenciais inválidas' });
         }
-        res.json({ success: true, user });
+        res.json({ 
+            success: true, 
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                balance: user.balance,
+                bonus_balance: user.bonus_balance
+            },
+            redirect: '/dashboard.html'  // ← AGORA REDIRECIONA PARA O DASHBOARD
+        });
     });
 });
 
@@ -409,5 +419,6 @@ app.listen(PORT, () => {
     console.log(`📡 Porta: ${PORT}`);
     console.log(`👑 Admin: edu7k001@gmail.com`);
     console.log(`📦 Sem dados fictícios - sistema limpo`);
+    console.log(`🔄 Login redireciona para dashboard`);
     console.log('=================================\n');
 });
