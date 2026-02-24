@@ -83,13 +83,13 @@
 <body>
     <div class="container">
         <h1><i class="fas fa-qrcode"></i> DEPÓSITO</h1>
-        <div id="pixInfo" class="pix-info">
+        <div id="pixInfo" class="pix-info" style="display: none;">
             <p>Escaneie o QR Code ou copie a chave PIX abaixo:</p>
             <div id="qrcode" class="qrcode"></div>
-            <div id="pixKey" class="pix-key">Carregando...</div>
+            <div id="pixKey" class="pix-key"></div>
         </div>
-        <input type="number" id="amount" placeholder="Valor (R$)" min="20" step="5" value="50">
-        <button onclick="solicitarDeposito()">SOLICITAR DEPÓSITO</button>
+        <input type="number" id="amount" placeholder="Valor (R$)" min="5" step="5" value="50">
+        <button id="generateBtn">GERAR PIX</button>
         <div id="message" class="message"></div>
         <a href="/dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Voltar</a>
     </div>
@@ -98,46 +98,59 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user.id) window.location.href = '/login.html';
 
-        async function carregarPix() {
-            try {
-                const res = await fetch('/api/pix/qrcode');
-                const data = await res.json();
-                document.getElementById('qrcode').innerHTML = `<img src="${data.qrcode}" alt="QR Code PIX">`;
-                document.getElementById('pixKey').innerText = data.pix_key;
-            } catch (e) {
-                document.getElementById('pixKey').innerText = 'Erro ao carregar PIX';
-            }
-        }
-
-        async function solicitarDeposito() {
+        document.getElementById('generateBtn').addEventListener('click', async () => {
             const amount = parseFloat(document.getElementById('amount').value);
             const msgDiv = document.getElementById('message');
-            if (amount < 20) {
+            const pixInfo = document.getElementById('pixInfo');
+
+            if (amount < 5) {
                 msgDiv.className = 'message error';
-                msgDiv.innerText = 'Valor mínimo: R$20';
+                msgDiv.innerText = 'Valor mínimo: R$5';
                 return;
             }
+
+            // Verifica se o usuário tem os dados necessários
+            if (!user.name || !user.email || !user.phone) {
+                msgDiv.className = 'message error';
+                msgDiv.innerText = 'Dados do cliente incompletos. Atualize seu perfil.';
+                return;
+            }
+
             try {
-                const res = await fetch('/api/deposit/request', {
+                const response = await fetch('/api/cashinpay/deposit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, amount })
+                    body: JSON.stringify({
+                        userId: user.id,
+                        amount: amount,
+                        customerName: user.name,
+                        customerEmail: user.email,
+                        customerPhone: user.phone
+                    })
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    msgDiv.className = 'message success';
-                    msgDiv.innerText = data.message;
-                } else {
-                    msgDiv.className = 'message error';
-                    msgDiv.innerText = data.error || 'Erro';
-                }
-            } catch (e) {
-                msgDiv.className = 'message error';
-                msgDiv.innerText = 'Erro de conexão';
-            }
-        }
 
-        carregarPix();
+                const data = await response.json();
+                if (!response.ok) {
+                    msgDiv.className = 'message error';
+                    msgDiv.innerText = data.error || 'Erro ao gerar PIX';
+                    return;
+                }
+
+                // Exibe o QR Code e o código PIX
+                // Se o qrcode for base64, use data:image/png;base64,
+                document.getElementById('qrcode').innerHTML = `<img src="data:image/png;base64,${data.qrCode}" alt="QR Code PIX">`;
+                document.getElementById('pixKey').innerText = data.copyPaste;
+                pixInfo.style.display = 'block';
+                msgDiv.className = 'message success';
+                msgDiv.innerText = 'Pagamento gerado! Escaneie o QR Code ou copie o código.';
+
+                // Opcional: fazer polling para verificar o pagamento
+                // Você pode usar setInterval para consultar o status periodicamente
+            } catch (error) {
+                msgDiv.className = 'message error';
+                msgDiv.innerText = 'Erro de conexão com o servidor';
+            }
+        });
     </script>
 </body>
 </html>
