@@ -3,7 +3,7 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const QRCode = require('qrcode');
-const cashinpayApi = require('./config/cashinpay'); // ← NOVO
+const cashinpayApi = require('./config/cashinpay'); // Importa a configuração da CashinPay
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -11,9 +11,9 @@ const PORT = process.env.PORT || 3001;
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname))); // serve arquivos estáticos da raiz
 
-// Banco de dados
+// ==================== BANCO DE DADOS ====================
 const db = new sqlite3.Database('./database.db', (err) => {
   if (err) {
     console.error('❌ Erro ao conectar ao banco:', err);
@@ -32,6 +32,7 @@ function criarTabelas() {
       name TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -46,6 +47,7 @@ function criarTabelas() {
       phone TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
     CREATE TABLE IF NOT EXISTS deposits (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -57,6 +59,7 @@ function criarTabelas() {
       confirmed_at DATETIME,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
     CREATE TABLE IF NOT EXISTS withdraws (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -67,6 +70,7 @@ function criarTabelas() {
       processed_at DATETIME,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
     CREATE TABLE IF NOT EXISTS games (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE NOT NULL,
@@ -75,6 +79,7 @@ function criarTabelas() {
       max_bet REAL DEFAULT 1000,
       active INTEGER DEFAULT 1
     );
+
     CREATE TABLE IF NOT EXISTS game_history (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -85,6 +90,7 @@ function criarTabelas() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
     CREATE TABLE IF NOT EXISTS transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -94,6 +100,7 @@ function criarTabelas() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
     CREATE TABLE IF NOT EXISTS config (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       pix_key TEXT DEFAULT 'chave_pix_admin',
@@ -109,6 +116,7 @@ function criarTabelas() {
     } else {
       console.log('✅ Tabelas verificadas/criadas.');
       
+      // Inserir admin padrão
       const adminEmail = 'edu7k001@gmail.com';
       const adminPassword = bcrypt.hashSync('@Carlos1998', 10);
       db.get('SELECT * FROM admins WHERE email = ?', [adminEmail], (err, admin) => {
@@ -119,8 +127,10 @@ function criarTabelas() {
         }
       });
       
+      // Inserir configuração padrão
       db.run('INSERT OR IGNORE INTO config (id) VALUES (1)');
       
+      // Inserir jogos (apenas os que queremos)
       const jogos = [
         ['fortune-ox', 96.75, 5, 1000],
         ['thimbles', 97, 5, 1000]
@@ -145,14 +155,17 @@ app.get('/fortune-ox.html', (req, res) => res.sendFile(path.join(__dirname, 'for
 app.get('/thimbles.html', (req, res) => res.sendFile(path.join(__dirname, 'thimbles.html')));
 
 // ==================== ROTAS DE API ====================
+
+// Teste
 app.get('/api/teste', (req, res) => {
   res.json({ success: true, message: 'API funcionando perfeitamente!' });
 });
 
+// Registro de usuário (incluindo telefone)
 app.post('/api/register', (req, res) => {
   const { name, email, password, pix_key, phone } = req.body;
   if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    return res.status(400).json({ error: 'Nome, e-mail e senha são obrigatórios' });
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
   db.run('INSERT INTO users (name, email, password, pix_key, phone) VALUES (?, ?, ?, ?, ?)',
@@ -162,6 +175,7 @@ app.post('/api/register', (req, res) => {
         if (err.message.includes('UNIQUE')) {
           return res.status(400).json({ error: 'E-mail já cadastrado' });
         }
+        console.error(err);
         return res.status(500).json({ error: 'Erro interno' });
       }
       res.json({ success: true, message: 'Cadastro realizado com sucesso' });
@@ -169,6 +183,7 @@ app.post('/api/register', (req, res) => {
   );
 });
 
+// Login de usuário (retorna phone)
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
@@ -191,6 +206,7 @@ app.post('/api/login', (req, res) => {
   });
 });
 
+// Saldo do usuário
 app.get('/api/user/:id/balance', (req, res) => {
   db.get('SELECT balance, bonus_balance FROM users WHERE id = ?', [req.params.id], (err, user) => {
     if (err || !user) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -198,7 +214,7 @@ app.get('/api/user/:id/balance', (req, res) => {
   });
 });
 
-// ==================== ROTAS DE DEPÓSITO ====================
+// ==================== ROTAS DE DEPÓSITO COM CASHINPAY ====================
 
 // Rota para criar transação PIX via CashinPay
 app.post('/api/cashinpay/deposit', async (req, res) => {
@@ -245,7 +261,7 @@ app.post('/api/cashinpay/deposit', async (req, res) => {
   }
 });
 
-// Webhook da CashinPay
+// Webhook da CashinPay para confirmação de pagamento
 app.post('/api/cashinpay/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   let event;
   try {
@@ -283,7 +299,7 @@ app.post('/api/cashinpay/webhook', express.raw({ type: 'application/json' }), as
   res.status(200).send('OK');
 });
 
-// ==================== ROTAS DE SAQUE ====================
+// ==================== ROTAS DE SAQUE (MANUAL, AGUARDANDO APROVAÇÃO ADMIN) ====================
 app.post('/api/withdraw/request', (req, res) => {
   const { user_id, amount, pix_key } = req.body;
   if (!user_id || !amount || !pix_key) {
@@ -303,7 +319,7 @@ app.post('/api/withdraw/request', (req, res) => {
         [user_id, amount, pix_key, 'pending'],
         function(err) {
           if (err) {
-            db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, user_id]);
+            db.run('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, user_id]); // rollback
             return res.status(500).json({ error: 'Erro ao registrar saque' });
           }
           res.json({ success: true, message: 'Saque solicitado com sucesso' });
@@ -314,6 +330,8 @@ app.post('/api/withdraw/request', (req, res) => {
 });
 
 // ==================== ROTAS ADMIN ====================
+
+// Middleware de autenticação admin (Basic Auth)
 function checkAdmin(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Basic ')) {
@@ -327,6 +345,7 @@ function checkAdmin(req, res, next) {
   next();
 }
 
+// Login admin (rota pública)
 app.post('/api/admin-login', (req, res) => {
   const { email, password } = req.body;
   if (email === 'edu7k001@gmail.com' && password === '@Carlos1998') {
@@ -335,6 +354,7 @@ app.post('/api/admin-login', (req, res) => {
   res.status(401).json({ error: 'Credenciais inválidas' });
 });
 
+// Estatísticas
 app.get('/api/admin/stats', checkAdmin, (req, res) => {
   db.get('SELECT COUNT(*) as total_users FROM users', (err, users) => {
     db.get('SELECT COUNT(*) as pending_deposits FROM deposits WHERE status = "pending"', (err, deposits) => {
@@ -353,6 +373,7 @@ app.get('/api/admin/stats', checkAdmin, (req, res) => {
   });
 });
 
+// Listar usuários
 app.get('/api/admin/users', checkAdmin, (req, res) => {
   db.all('SELECT id, name, email, balance, bonus_balance, rollover, status, rtp_individual, pix_key, phone FROM users', [], (err, users) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -360,6 +381,7 @@ app.get('/api/admin/users', checkAdmin, (req, res) => {
   });
 });
 
+// Atualizar usuário (incluindo rollover e rtp_individual)
 app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
   const { id } = req.params;
   const { balance, bonus_balance, rollover, status, rtp_individual } = req.body;
@@ -373,6 +395,7 @@ app.post('/api/admin/user/:id/update', checkAdmin, (req, res) => {
   );
 });
 
+// Depósitos pendentes
 app.get('/api/admin/deposits', checkAdmin, (req, res) => {
   db.all('SELECT d.*, u.name FROM deposits d JOIN users u ON d.user_id = u.id WHERE d.status = "pending" ORDER BY d.created_at DESC', [], (err, deposits) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -380,6 +403,7 @@ app.get('/api/admin/deposits', checkAdmin, (req, res) => {
   });
 });
 
+// Confirmar depósito (manual, caso queira manter)
 app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
   const { id } = req.params;
   const { amount, bonus } = req.body;
@@ -394,6 +418,7 @@ app.post('/api/admin/confirm-deposit/:id', checkAdmin, (req, res) => {
   });
 });
 
+// Saques pendentes
 app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
   db.all('SELECT w.*, u.name FROM withdraws w JOIN users u ON w.user_id = u.id WHERE w.status = "pending" ORDER BY w.created_at DESC', [], (err, withdraws) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -401,12 +426,14 @@ app.get('/api/admin/withdraws', checkAdmin, (req, res) => {
   });
 });
 
+// Aprovar saque
 app.post('/api/admin/approve-withdraw/:id', checkAdmin, (req, res) => {
   const { id } = req.params;
   db.run('UPDATE withdraws SET status = "approved", processed_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
   res.json({ success: true });
 });
 
+// Rejeitar saque (devolve saldo)
 app.post('/api/admin/reject-withdraw/:id', checkAdmin, (req, res) => {
   const { id } = req.params;
   db.get('SELECT user_id, amount FROM withdraws WHERE id = ?', [id], (err, withdraw) => {
@@ -418,6 +445,7 @@ app.post('/api/admin/reject-withdraw/:id', checkAdmin, (req, res) => {
   });
 });
 
+// Listar jogos (configurações)
 app.get('/api/admin/games', checkAdmin, (req, res) => {
   db.all('SELECT * FROM games ORDER BY id', [], (err, games) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -425,6 +453,7 @@ app.get('/api/admin/games', checkAdmin, (req, res) => {
   });
 });
 
+// Salvar configuração de um jogo
 app.post('/api/admin/game/:name', checkAdmin, (req, res) => {
   const { name } = req.params;
   const { rtp, min_bet, max_bet, active } = req.body;
@@ -438,6 +467,7 @@ app.post('/api/admin/game/:name', checkAdmin, (req, res) => {
   );
 });
 
+// Obter configurações gerais
 app.get('/api/admin/config', checkAdmin, (req, res) => {
   db.get('SELECT * FROM config WHERE id = 1', (err, config) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -445,6 +475,7 @@ app.get('/api/admin/config', checkAdmin, (req, res) => {
   });
 });
 
+// Salvar configurações gerais
 app.post('/api/admin/config', checkAdmin, (req, res) => {
   const { pix_key, min_deposit, bonus_deposit, min_withdraw, max_withdraw, withdraw_fee } = req.body;
   db.run(
@@ -458,38 +489,40 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
 });
 
 // ==================== ROTAS DE JOGOS ====================
+
+// Função auxiliar para processar aposta (considera RTP individual e rollover)
 function processarAposta(userId, gameName, betAmount, winAmountBase, rtpGlobal, callback) {
   db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
     if (err || !user) return callback('Usuário não encontrado');
-    
+
     const total = user.balance + user.bonus_balance;
     if (total < betAmount) return callback('Saldo insuficiente');
-    
+
     let winAmount = winAmountBase;
     if (user.rtp_individual) {
       winAmount = Math.floor(winAmountBase * (user.rtp_individual / 100));
     } else {
       winAmount = Math.floor(winAmountBase * (rtpGlobal / 100));
     }
-    
+
     let newBalance = user.balance;
     let newBonus = user.bonus_balance;
     let novoRollover = user.rollover;
-    
+
     if (user.bonus_balance >= betAmount) {
       newBonus -= betAmount;
     } else {
       newBalance -= (betAmount - user.bonus_balance);
       newBonus = 0;
     }
-    
+
     if (winAmount > 0) {
       newBalance += winAmount;
       if (novoRollover > 0) {
         novoRollover = Math.max(0, novoRollover - betAmount);
       }
     }
-    
+
     db.run(
       'UPDATE users SET balance = ?, bonus_balance = ?, rollover = ? WHERE id = ?',
       [newBalance, newBonus, novoRollover, userId],
@@ -505,27 +538,29 @@ function processarAposta(userId, gameName, betAmount, winAmountBase, rtpGlobal, 
   });
 }
 
+// Fortune Ox
 app.post('/api/game/fortune-ox', (req, res) => {
   const { userId, betAmount } = req.body;
   if (!userId || !betAmount || betAmount < 5) {
     return res.status(400).json({ error: 'Aposta inválida' });
   }
+
   db.get('SELECT * FROM games WHERE name = "fortune-ox"', (err, game) => {
     if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
-    
+
     const symbols = ['🐂', '🪙', '🧧', '💰', '🧨', '🍊', '🎆'];
     const resultado = [
       symbols[Math.floor(Math.random() * symbols.length)],
       symbols[Math.floor(Math.random() * symbols.length)],
       symbols[Math.floor(Math.random() * symbols.length)]
     ];
-    
+
     let winBase = 0;
     if (resultado[0] === resultado[1] && resultado[1] === resultado[2]) {
       if (resultado[0] === '🐂') winBase = betAmount * 20;
       else winBase = betAmount * 5;
     }
-    
+
     processarAposta(userId, 'fortune-ox', betAmount, winBase, game.rtp, (err, data) => {
       if (err) return res.status(400).json({ error: err });
       res.json({
@@ -539,18 +574,21 @@ app.post('/api/game/fortune-ox', (req, res) => {
   });
 });
 
+// Thimbles
 app.post('/api/game/thimbles', (req, res) => {
-  const { userId, betAmount, escolha } = req.body;
+  const { userId, betAmount, escolha } = req.body; // escolha: 0, 1, 2 (índice do copo)
   if (!userId || !betAmount || betAmount < 5 || ![0, 1, 2].includes(escolha)) {
     return res.status(400).json({ error: 'Aposta inválida' });
   }
+
   db.get('SELECT * FROM games WHERE name = "thimbles"', (err, game) => {
     if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
-    
+
     const posicaoCorreta = Math.floor(Math.random() * 3);
     const ganhou = (posicaoCorreta === escolha);
-    const winBase = ganhou ? betAmount * 2.88 : 0;
-    
+    const multiplicador = 2.88; // Pode vir do banco se quiser
+    const winBase = ganhou ? betAmount * multiplicador : 0;
+
     processarAposta(userId, 'thimbles', betAmount, winBase, game.rtp, (err, data) => {
       if (err) return res.status(400).json({ error: err });
       res.json({
