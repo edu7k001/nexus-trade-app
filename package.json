@@ -12,7 +12,3 @@
     "axios": "^1.6.2"
   }
 }
-"dependencies": {
-  "axios": "^1.6.2",
-  ... (outras dependências)
-}
