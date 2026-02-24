@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Depósito – MEGABET777</title>
+    <title>Depósito - MEGABET777</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -77,6 +77,7 @@
         }
         .success { background: rgba(0,255,0,0.2); border: 1px solid #0f0; color: #0f0; }
         .error { background: rgba(255,0,0,0.2); border: 1px solid #f00; color: #f00; }
+        .warning { background: rgba(255,165,0,0.2); border: 1px solid orange; color: orange; }
         .back-link { margin-top: 20px; display: block; color: #ffd700; text-decoration: none; }
     </style>
 </head>
@@ -89,7 +90,7 @@
             <div id="pixKey" class="pix-key"></div>
         </div>
         <input type="number" id="amount" placeholder="Valor (R$)" min="5" step="5" value="50">
-        <button id="generateBtn">GERAR PIX</button>
+        <button onclick="solicitarDeposito()">GERAR PIX</button>
         <div id="message" class="message"></div>
         <a href="/dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Voltar</a>
     </div>
@@ -98,22 +99,29 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user.id) window.location.href = '/login.html';
 
-        document.getElementById('generateBtn').addEventListener('click', async () => {
-            const amount = parseFloat(document.getElementById('amount').value);
+        async function solicitarDeposito() {
+            const amount = document.getElementById('amount').value;
             const msgDiv = document.getElementById('message');
             const pixInfo = document.getElementById('pixInfo');
-
+            
             if (amount < 5) {
                 msgDiv.className = 'message error';
                 msgDiv.innerText = 'Valor mínimo: R$5';
                 return;
             }
 
-            // Verifica se o usuário tem os dados necessários
-            if (!user.name || !user.email || !user.phone) {
+            // Verifica se o usuário tem nome e email
+            if (!user.name || !user.email) {
                 msgDiv.className = 'message error';
-                msgDiv.innerText = 'Dados do cliente incompletos. Atualize seu perfil.';
+                msgDiv.innerText = 'Dados do usuário incompletos. Faça login novamente.';
                 return;
+            }
+
+            // Se não tiver telefone, usa um padrão (mas avisa)
+            const phone = user.phone || '11999999999';
+            if (!user.phone) {
+                msgDiv.className = 'message warning';
+                msgDiv.innerText = 'Telefone não cadastrado. Usaremos um número padrão.';
             }
 
             try {
@@ -122,35 +130,33 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userId: user.id,
-                        amount: amount,
+                        amount: parseFloat(amount),
                         customerName: user.name,
                         customerEmail: user.email,
-                        customerPhone: user.phone
+                        customerPhone: phone
                     })
                 });
 
                 const data = await response.json();
-                if (!response.ok) {
+
+                if (response.ok && data.success) {
+                    // A CashinPay retorna o QR Code em base64 ou URL? Ajuste conforme necessário.
+                    // Na documentação, qrcode pode ser uma string base64 ou URL. Assumindo base64:
+                    document.getElementById('qrcode').innerHTML = `<img src="data:image/png;base64,${data.qrCode}" alt="QR Code PIX">`;
+                    document.getElementById('pixKey').innerText = data.copyPaste;
+                    pixInfo.style.display = 'block';
+                    msgDiv.className = 'message success';
+                    msgDiv.innerText = 'Pagamento gerado! Escaneie ou copie o código.';
+                } else {
                     msgDiv.className = 'message error';
-                    msgDiv.innerText = data.error || 'Erro ao gerar PIX';
-                    return;
+                    msgDiv.innerText = data.error || 'Erro ao gerar pagamento';
                 }
-
-                // Exibe o QR Code e o código PIX
-                // Se o qrcode for base64, use data:image/png;base64,
-                document.getElementById('qrcode').innerHTML = `<img src="data:image/png;base64,${data.qrCode}" alt="QR Code PIX">`;
-                document.getElementById('pixKey').innerText = data.copyPaste;
-                pixInfo.style.display = 'block';
-                msgDiv.className = 'message success';
-                msgDiv.innerText = 'Pagamento gerado! Escaneie o QR Code ou copie o código.';
-
-                // Opcional: fazer polling para verificar o pagamento
-                // Você pode usar setInterval para consultar o status periodicamente
             } catch (error) {
+                console.error('Erro:', error);
                 msgDiv.className = 'message error';
                 msgDiv.innerText = 'Erro de conexão com o servidor';
             }
-        });
+        }
     </script>
 </body>
 </html>
