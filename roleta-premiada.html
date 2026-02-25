@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta Premiata - MEGABET777</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #1a0000, #3a0000);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 3px solid #ffd700;
+        }
+        .logo { font-size: 2rem; font-weight: bold; color: #ffd700; }
+        .balance { background: #000; border: 2px solid #ffd700; border-radius: 50px; padding: 10px 30px; color: #ffd700; font-weight: 700; }
+        .game-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 30px;
+            background: rgba(0,0,0,0.7);
+            border: 3px solid #ffd700;
+            border-radius: 30px;
+            text-align: center;
+        }
+        h1 { color: #ffd700; font-size: 2.5rem; margin-bottom: 20px; }
+        .wheel {
+            margin: 30px 0;
+        }
+        .prize-display {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+        .prize-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        input {
+            padding: 15px;
+            width: 150px;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            background: transparent;
+            color: #fff;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        button {
+            padding: 15px 30px;
+            background: #ffd700;
+            border: none;
+            border-radius: 50px;
+            color: #1a0000;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .info {
+            font-size: 1.2rem;
+            margin: 15px 0;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎡 ROLETA PREMIADA</div>
+        <div class="balance" id="balance">R$ 0,00</div>
+    </div>
+    <div class="game-container">
+        <div class="wheel">
+            <div class="prize-display" id="prizeIcon">🎰</div>
+            <div class="prize-name" id="prizeName">?</div>
+        </div>
+        <div class="info" id="info">
+            Aposte e gire a roleta para ganhar prêmios incríveis!
+        </div>
+        <div class="controls">
+            <input type="number" id="betAmount" min="5" value="10" step="5">
+            <button onclick="girar()">GIRAR</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) window.location.href = '/login.html';
+
+        async function atualizarSaldo() {
+            const res = await fetch(`/api/user/${user.id}/balance`);
+            const data = await res.json();
+            user.balance = data.balance;
+            user.bonus_balance = data.bonus_balance;
+            document.getElementById('balance').innerText = `R$ ${(data.balance + data.bonus_balance).toFixed(2)}`;
+        }
+        atualizarSaldo();
+
+        async function girar() {
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            if (bet < 5) { alert('Aposta mínima: R$5'); return; }
+
+            const res = await fetch('/api/game/roulette-premiada', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, betAmount: bet })
+            });
+            const data = await res.json();
+            if (!res.ok) { alert(data.error); return; }
+
+            document.getElementById('prizeIcon').innerText = data.prize.icon || '🎁';
+            document.getElementById('prizeName').innerText = data.prize.name;
+            document.getElementById('result').innerText = data.message;
+            atualizarSaldo();
+        }
+    </script>
+</body>
+</html>
