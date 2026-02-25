@@ -1,59 +1,469 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortune Tiger - MEGABET777</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style> /* mesmo estilo do fortune-ox */ </style>
+    <style>
+        /* MESMO CSS DO FORTUNE OX (copiar o bloco de estilos inteiro) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #8b1e1e, #4a0c0c);
+            color: #ffd700;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .lantern {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 25px 25px 5px 5px;
+            box-shadow: 0 0 20px #ffd700;
+            z-index: 100;
+            animation: swing 3s infinite;
+        }
+        .lantern::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+        }
+        .lantern::after {
+            content: '福';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #8b0000;
+            font-weight: bold;
+        }
+        .lantern.right {
+            left: auto;
+            right: 20px;
+        }
+        @keyframes swing {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid #ffd700;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo i {
+            font-size: 2.5rem;
+            color: #ffd700;
+        }
+        .logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .balance {
+            background: #000;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            padding: 10px 25px;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .logout-btn {
+            padding: 10px 25px;
+            background: transparent;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            color: #ffd700;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .logout-btn:hover {
+            background: #ffd700;
+            color: #1a0000;
+        }
+        .game-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #ffd700;
+            border-radius: 40px;
+            text-align: center;
+        }
+        h2 {
+            color: #ffd700;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .reels-container {
+            background: linear-gradient(145deg, #2a1f1f, #1a1212);
+            border: 3px solid #ffd700;
+            border-radius: 30px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+        }
+        .reels {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .reel {
+            width: 100px;
+            height: 300px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 2px solid #ffd700;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+        .reel-symbol {
+            font-size: 3rem;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .reel-symbol.win-highlight {
+            animation: winPulse 0.5s infinite;
+        }
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 20px gold; }
+            50% { transform: scale(1.2); text-shadow: 0 0 40px gold; }
+        }
+        .reel.spinning .reel-symbol {
+            animation: spin 0.1s infinite linear;
+        }
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(30px); }
+        }
+        .bet-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .bet-input {
+            padding: 15px 20px;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            width: 150px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .play-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            border: none;
+            border-radius: 50px;
+            color: #1a0000;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .play-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #ffd700;
+        }
+        .play-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .win {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            animation: winMessage 0.5s infinite;
+        }
+        .lose {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+        }
+        @keyframes winMessage {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .multiplier-10x {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: gold;
+            color: red;
+            font-size: 3rem;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 50%;
+            transform: rotate(15deg);
+            box-shadow: 0 0 50px gold;
+            animation: pulse 0.5s infinite;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <div class="lantern"></div>
+    <div class="lantern right"></div>
+
     <div class="header">
-        <div class="logo">🐅 FORTUNE TIGER</div>
-        <div class="balance" id="balance">R$ 0,00</div>
+        <div class="logo">
+            <i class="fas fa-dragon"></i>
+            <h1>MEGABET777</h1>
+        </div>
+        <div class="user-info">
+            <div class="balance" id="balance">R$ 0,00</div>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
     </div>
+
     <div class="game-container">
-        <div class="reels">
-            <div class="reel" id="reel1">🐅</div>
-            <div class="reel" id="reel2">🐅</div>
-            <div class="reel" id="reel3">🐅</div>
+        <h2>🐅 FORTUNE TIGER</h2>
+        
+        <div class="reels-container" id="reelsContainer">
+            <div class="reels" id="reels">
+                <div class="reel" id="reel0">
+                    <div class="reel-symbol" id="reel0-sym0">🐅</div>
+                    <div class="reel-symbol" id="reel0-sym1">🪙</div>
+                    <div class="reel-symbol" id="reel0-sym2">🧧</div>
+                </div>
+                <div class="reel" id="reel1">
+                    <div class="reel-symbol" id="reel1-sym0">🐅</div>
+                    <div class="reel-symbol" id="reel1-sym1">🪙</div>
+                    <div class="reel-symbol" id="reel1-sym2">🧧</div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="reel-symbol" id="reel2-sym0">🐅</div>
+                    <div class="reel-symbol" id="reel2-sym1">🪙</div>
+                    <div class="reel-symbol" id="reel2-sym2">🧧</div>
+                </div>
+            </div>
+            <div id="multiplier10x" class="multiplier-10x hidden">10x</div>
         </div>
-        <div class="controls">
-            <input type="number" id="betAmount" min="5" value="10" step="5">
-            <button onclick="spin()">GIRAR</button>
+
+        <div class="bet-controls">
+            <input type="number" id="betAmount" class="bet-input" min="5" value="10" step="5">
+            <button class="play-btn" id="spinBtn" onclick="spin()">GIRAR</button>
         </div>
-        <div id="result"></div>
+
+        <div id="result" class="result-box hidden"></div>
     </div>
+
     <script>
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user.id) window.location.href = '/login.html';
 
-        async function spin() {
-            const bet = document.getElementById('betAmount').value;
-            const res = await fetch('/api/game/fortune-tiger', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id, betAmount: parseFloat(bet) })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                document.getElementById('reel1').innerText = data.result[0];
-                document.getElementById('reel2').innerText = data.result[1];
-                document.getElementById('reel3').innerText = data.result[2];
-                document.getElementById('balance').innerText = `R$ ${data.newBalance.toFixed(2)}`;
-                document.getElementById('result').innerText = data.message;
-            } else {
-                alert(data.error);
+        // Elementos DOM
+        const balanceEl = document.getElementById('balance');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultEl = document.getElementById('result');
+        const multiplier10x = document.getElementById('multiplier10x');
+        const betInput = document.getElementById('betAmount');
+        const reels = document.querySelectorAll('.reel');
+        const reelSymbols = document.querySelectorAll('.reel-symbol');
+
+        // Símbolos do jogo (para Tiger, use os mesmos símbolos, só muda o wild)
+        const symbols = ['🐅', '🪙', '🧧', '💰', '🧨', '🍊', '🎆'];
+        let spinning = false;
+
+        // Atualiza saldo do usuário
+        async function updateBalance() {
+            try {
+                const res = await fetch(`/api/user/${user.id}/balance`);
+                const data = await res.json();
+                user.balance = data.balance || 0;
+                user.bonus_balance = data.bonus_balance || 0;
+                balanceEl.innerText = `R$ ${(user.balance + user.bonus_balance).toFixed(2)}`;
+            } catch (e) {
+                console.error('Erro ao atualizar saldo', e);
+            }
+        }
+        updateBalance();
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        // Anima os rolos
+        function startSpinAnimation() {
+            reels.forEach(reel => reel.classList.add('spinning'));
+        }
+
+        function stopSpinAnimation() {
+            reels.forEach(reel => reel.classList.remove('spinning'));
+        }
+
+        // Atualiza os símbolos nos rolos
+        function updateReels(newSymbols) {
+            for (let r = 0; r < 3; r++) {
+                for (let s = 0; s < 3; s++) {
+                    document.getElementById(`reel${r}-sym${s}`).innerText = newSymbols[r][s];
+                }
             }
         }
 
-        async function loadBalance() {
-            const res = await fetch(`/api/user/${user.id}/balance`);
-            const data = await res.json();
-            document.getElementById('balance').innerText = `R$ ${(data.balance + data.bonus_balance).toFixed(2)}`;
+        // Remove todos os destaques de vitória
+        function removeHighlights() {
+            reelSymbols.forEach(el => el.classList.remove('win-highlight'));
         }
-        loadBalance();
+
+        // Função principal do jogo
+        async function spin() {
+            if (spinning) return;
+
+            const bet = parseFloat(betInput.value);
+            if (bet < 5) {
+                alert('Aposta mínima: R$5');
+                return;
+            }
+
+            const total = (user.balance || 0) + (user.bonus_balance || 0);
+            if (total < bet) {
+                alert('Saldo insuficiente');
+                return;
+            }
+
+            spinning = true;
+            spinBtn.disabled = true;
+            resultEl.classList.add('hidden');
+            multiplier10x.classList.add('hidden');
+            removeHighlights();
+
+            startSpinAnimation();
+
+            try {
+                // MUDANÇA: rota do Fortune Tiger
+                const res = await fetch('/api/game/fortune-tiger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        betAmount: bet
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    setTimeout(() => {
+                        stopSpinAnimation();
+                        
+                        const resultSymbols = data.result || data.symbols || [['🐅','🐅','🐅'], ['🪙','🪙','🪙'], ['🧧','🧧','🧧']];
+                        updateReels(resultSymbols);
+
+                        user.balance = data.newBalance;
+                        balanceEl.innerText = `R$ ${data.newBalance.toFixed(2)}`;
+
+                        resultEl.classList.remove('hidden', 'win', 'lose');
+                        resultEl.classList.add(data.winAmount > 0 ? 'win' : 'lose');
+                        resultEl.innerHTML = data.message || (data.winAmount > 0 ? `🎉 GANHOU R$ ${data.winAmount.toFixed(2)}!` : `😢 Perdeu R$ ${bet.toFixed(2)}`);
+
+                        if (data.winAmount > 0) {
+                            reelSymbols.forEach(el => el.classList.add('win-highlight'));
+                            if (data.winAmount >= bet * 10) {
+                                multiplier10x.classList.remove('hidden');
+                            }
+                            confettiEffect();
+                        }
+
+                        spinning = false;
+                        spinBtn.disabled = false;
+                    }, 1000);
+                } else {
+                    stopSpinAnimation();
+                    alert(data.error || 'Erro ao processar jogada');
+                    spinning = false;
+                    spinBtn.disabled = false;
+                }
+            } catch (error) {
+                stopSpinAnimation();
+                console.error('Erro:', error);
+                alert('Erro de conexão');
+                spinning = false;
+                spinBtn.disabled = false;
+            }
+        }
+
+        // Efeito de confete simples
+        function confettiEffect() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.zIndex = '1000';
+                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear`;
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 5000);
+            }
+
+            if (!document.querySelector('#confetti-style')) {
+                const style = document.createElement('style');
+                style.id = 'confetti-style';
+                style.innerHTML = `
+                    @keyframes fall {
+                        0% { transform: translateY(0) rotate(0deg); }
+                        100% { transform: translateY(100vh) rotate(720deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
     </script>
 </body>
 </html>
