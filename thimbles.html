@@ -220,7 +220,7 @@
                     return;
                 }
 
-                atualizarSaldo();
+                await atualizarSaldo();
 
                 resetarCopos();
                 document.getElementById(`copo${data.posicaoCorreta+1}`).classList.add('bolinha');
@@ -277,7 +277,7 @@
                     return;
                 }
 
-                atualizarSaldo();
+                await atualizarSaldo();
 
                 resetarCopos();
                 document.getElementById(`copo${data.posicaoCorreta+1}`).classList.add('bolinha');
