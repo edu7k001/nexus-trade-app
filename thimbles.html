@@ -300,19 +300,15 @@
 
         // Reseta o jogo visualmente
         function resetGame() {
-            // Para qualquer animação
             if (shuffleInterval) clearInterval(shuffleInterval);
             arena.classList.remove('shuffling');
-            // Esconde todas as bolas
             balls.forEach(b => b.classList.add('hidden'));
-            // Remove seleção
             cups.forEach(c => c.classList.remove('selected'));
-            // Volta os copos à posição original (sem transform)
             cups.forEach((cup, i) => {
                 cup.style.transform = '';
             });
             currentPositions = [0, 1, 2];
-            ballPosition = 0; // será definido após o shuffle
+            ballPosition = 0;
             selectedCup = null;
             gameActive = false;
             resultEl.innerHTML = '';
@@ -326,7 +322,6 @@
 
         // Função de embaralhamento: troca as posições dos copos aleatoriamente várias vezes
         function shuffleCups(callback) {
-            resetGame();
             let steps = 0;
             const totalSteps = 10; // número de trocas
             arena.classList.add('shuffling');
@@ -381,13 +376,22 @@
             currentBet = bet;
             resultEl.innerHTML = '';
 
-            // Embaralha e depois ativa os cliques
-            shuffleCups(() => {
-                // Ativa os cliques nos copos
-                cups.forEach(cup => {
-                    cup.onclick = handleCupClick;
+            // 1. Primeiro, mostra a bolinha sendo colocada sob um copo (por exemplo, o copo do meio)
+            resetGame(); // garante que tudo esteja limpo
+            infoEl.innerText = 'A bolinha está sendo colocada...';
+            // Mostra a bolinha no copo do meio (índice 1) por 1.5 segundos
+            balls[1].classList.remove('hidden');
+            // Aguarda 1.5 segundos, depois esconde a bolinha e começa o embaralhamento
+            setTimeout(() => {
+                balls[1].classList.add('hidden');
+                // Agora inicia o embaralhamento
+                shuffleCups(() => {
+                    // Ativa os cliques nos copos
+                    cups.forEach(cup => {
+                        cup.onclick = handleCupClick;
+                    });
                 });
-            });
+            }, 1500);
         }
 
         // Quando o usuário clica em um copo
@@ -435,17 +439,12 @@
 
                 // Mantém a possibilidade de jogar novamente
                 infoEl.innerText = 'Clique em APOSTAR para jogar novamente';
-                // Não resetamos automaticamente para que o usuário veja onde estava a bola
-                // Mas pode reiniciar com o botão
             } catch (error) {
                 console.error(error);
                 alert('Erro ao processar jogada');
                 resetGame();
             }
         }
-
-        // Botão de aposta também reseta o jogo se necessário
-        // O reset é feito no início do shuffle
     </script>
 </body>
 </html>
