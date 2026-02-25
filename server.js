@@ -689,15 +689,20 @@ app.post('/api/game/fortune-ox', (req, res) => {
     });
 });
 
-// Thimbles
+// ==================== JOGO THIMBLES (ATUALIZADO) ====================
 app.post('/api/game/thimbles', (req, res) => {
     const { userId, betAmount, escolha } = req.body;
-    if (!userId || !betAmount || betAmount < 5 || ![0,1,2].includes(escolha)) return res.status(400).json({ error: 'Aposta inválida' });
+    if (!userId || !betAmount || betAmount < 5 || ![0, 1, 2].includes(escolha)) {
+        return res.status(400).json({ error: 'Aposta inválida' });
+    }
     db.get('SELECT * FROM games WHERE name = "thimbles"', (err, game) => {
         if (!game || !game.active) return res.status(400).json({ error: 'Jogo indisponível' });
+
+        // Lógica simples: bolinha é posicionada aleatoriamente
         const posicaoCorreta = Math.floor(Math.random() * 3);
         const ganhou = (posicaoCorreta === escolha);
         const winBase = ganhou ? betAmount * 2.88 : 0;
+
         processarAposta(userId, 'thimbles', betAmount, winBase, game.rtp, (err, data) => {
             if (err) return res.status(400).json({ error: err });
             res.json({
