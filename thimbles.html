@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thimbles – MEGABET777</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            background: radial-gradient(circle at top, #111827, #000);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #1a0000, #3a0000);
+            color: #fff;
             min-height: 100vh;
         }
         .header {
@@ -20,126 +20,104 @@
             padding: 20px 5%;
             background: rgba(0,0,0,0.8);
             border-bottom: 3px solid #ffd700;
-        }
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ffd700;
-        }
-        .balance {
-            background: #000;
-            border: 2px solid #ffd700;
-            border-radius: 50px;
-            padding: 10px 30px;
-            color: #ffd700;
-            font-weight: bold;
-        }
-        .game-wrapper {
-            display: flex;
-            justify-content: space-between;
-            padding: 40px;
-            gap: 20px;
-        }
-        .left-panel {
-            width: 25%;
-        }
-        .left-panel h1 {
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-        .bet-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .bet-box input {
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-            width: 120px;
-            background: #1f2937;
-            color: white;
-            border: 1px solid #ffd700;
-        }
-        .bet-box button {
-            background: #22c55e;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 6px;
-            color: black;
-        }
-        .bet-box button:hover {
-            background: #16a34a;
-        }
-        #status {
-            color: #ffd700;
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-        .arena {
-            display: flex;
-            gap: 60px;
-            align-items: center;
             flex-wrap: wrap;
-            justify-content: center;
         }
-        .cup {
+        .logo { font-size: 2rem; font-weight: bold; color: #ffd700; }
+        .balance { background: #000; border: 2px solid #ffd700; border-radius: 50px; padding: 10px 30px; color: #ffd700; font-weight: 700; }
+        .game-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(0,0,0,0.7);
+            border: 3px solid #ffd700;
+            border-radius: 40px;
+            text-align: center;
+        }
+        h1 { color: #ffd700; font-size: 3rem; margin-bottom: 20px; }
+        .copos {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        .copo {
             width: 120px;
             height: 160px;
             background: linear-gradient(180deg, #ef4444, #7f1d1d);
             border-radius: 60px 60px 20px 20px;
-            transition: all 0.4s ease;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(255,0,0,0.4);
-        }
-        .cup:hover {
-            transform: translateY(-15px);
-        }
-        .cup.win {
-            background: gold;
-            box-shadow: 0 0 30px gold;
-        }
-        .history {
-            width: 20%;
-            background: #111;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #ffd700;
-        }
-        .history h3 {
-            color: #ffd700;
-            margin-bottom: 10px;
-        }
-        #historyList {
+            transition: all 0.2s ease;
             display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        #historyList span {
-            background: #1f2937;
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: #ffd700;
-            font-weight: bold;
-        }
-        .acoes {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
+            align-items: flex-end;
             justify-content: center;
+            font-size: 3rem;
+            padding-bottom: 10px;
+            box-shadow: 0 10px 0 #5a2e0e;
+            position: relative;
         }
-        .btn-sacar {
-            background: #3b82f6;
-            color: white;
+        .copo:hover { transform: translateY(-10px); box-shadow: 0 10px 30px #ffd700; }
+        .copo.selecionado { border: 4px solid #ffa500; box-shadow: 0 0 30px orange; }
+        .copo.revelado { background: #cd853f; }
+        .copo.revelado::after {
+            content: '⚪';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+        .copo.bolinha { background: #ffd700; }
+        .info { font-size: 1.2rem; margin: 20px 0; color: #ffd700; }
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .controls input, .controls button {
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.2rem;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+        }
+        .controls input {
+            width: 150px;
+            border: 2px solid #ffd700;
+            background: transparent;
+            color: #fff;
+            text-align: center;
+        }
+        .btn-primary {
+            background: #ffd700;
+            color: #1a0000;
+            font-weight: bold;
             cursor: pointer;
         }
-        .btn-sacar:hover {
-            background: #2563eb;
+        .btn-primary:hover { background: #ffa500; }
+        .btn-success { background: #00c851; color: white; }
+        .btn-danger { background: #ff4444; color: white; }
+        .btn-secondary { background: #33b5e5; color: white; }
+        #result { margin-top: 20px; font-size: 1.5rem; color: #ffd700; }
+        .hidden { display: none; }
+        .acoes {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Animação de embaralhamento */
+        @keyframes shuffle {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(30px) rotate(5deg); }
+            50% { transform: translateX(-30px) rotate(-5deg); }
+            75% { transform: translateX(20px) rotate(3deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+        .shuffling {
+            animation: shuffle 0.3s infinite alternate;
         }
     </style>
 </head>
@@ -149,52 +127,194 @@
         <div class="balance" id="balance">R$ 0,00</div>
     </div>
 
-    <div class="game-wrapper">
-        <div class="left-panel">
-            <h1>THIMBLES</h1>
-            <div class="bet-box">
-                <input type="number" id="bet" placeholder="Valor" min="5" value="10" step="5">
-                <button id="startBtn">JOGAR</button>
-            </div>
-            <div id="status">Aguardando rodada</div>
-            <div id="acoes" class="acoes" style="display: none;">
-                <button class="btn-sacar" id="sacarBtn">💰 SACAR</button>
-                <button class="btn-sacar" id="continuarBtn">🔄 CONTINUAR</button>
-            </div>
+    <div class="game-container">
+        <h1>Ache a bolinha!</h1>
+        <div class="copos" id="copos">
+            <div class="copo" id="copo1" onclick="selecionar(1)">🥤</div>
+            <div class="copo" id="copo2" onclick="selecionar(2)">🥤</div>
+            <div class="copo" id="copo3" onclick="selecionar(3)">🥤</div>
         </div>
 
-        <div class="arena">
-            <div class="cup" data-id="0"></div>
-            <div class="cup" data-id="1"></div>
-            <div class="cup" data-id="2"></div>
+        <div class="info" id="info">Clique em um copo para apostar</div>
+
+        <div class="controls" id="controles">
+            <input type="number" id="betAmount" min="5" value="10" step="5">
+            <button class="btn-primary" onclick="iniciarJogo()">APOSTAR</button>
         </div>
 
-        <div class="history">
-            <h3>Histórico</h3>
-            <div id="historyList"></div>
+        <div id="result"></div>
+        <div id="acoes" class="acoes hidden">
+            <button class="btn-success" onclick="sacar()">💰 SACAR</button>
+            <button class="btn-secondary" onclick="continuar()">🔄 CONTINUAR</button>
         </div>
     </div>
 
     <script>
-        // Dados do usuário
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user.id) window.location.href = '/login.html';
 
-        // Estado do jogo
-        let winningCup = null;
-        let active = false;
-        let valorAcumulado = 0; // usado na mecânica de continuar (opcional)
-        let ultimoResultado = null;
+        let estado = {
+            apostaAtual: 0,
+            valorAcumulado: 0,
+            posicaoCorreta: null,
+            podeJogar: true,
+            copoSelecionado: null,
+            jogoAtivo: false
+        };
 
-        const historyList = document.getElementById("historyList");
-        const statusDiv = document.getElementById("status");
-        const startBtn = document.getElementById("startBtn");
-        const sacarBtn = document.getElementById("sacarBtn");
-        const continuarBtn = document.getElementById("continuarBtn");
-        const acoesDiv = document.getElementById("acoes");
-        const betInput = document.getElementById("bet");
+        function selecionar(copo) {
+            if (!estado.podeJogar || estado.jogoAtivo) return;
+            document.querySelectorAll('.copo').forEach(c => c.classList.remove('selecionado'));
+            document.getElementById(`copo${copo}`).classList.add('selecionado');
+            estado.copoSelecionado = copo - 1; // backend usa 0,1,2
+        }
 
-        // Atualizar saldo na tela
+        function resetarCopos() {
+            document.querySelectorAll('.copo').forEach(c => {
+                c.classList.remove('revelado', 'bolinha', 'selecionado', 'shuffling');
+                c.style.backgroundColor = '';
+            });
+        }
+
+        function animarEmbaralhamento(callback) {
+            // Adiciona classe de animação a todos os copos
+            document.querySelectorAll('.copo').forEach(c => c.classList.add('shuffling'));
+            // Após um tempo, remove e chama callback
+            setTimeout(() => {
+                document.querySelectorAll('.copo').forEach(c => c.classList.remove('shuffling'));
+                if (callback) callback();
+            }, 1500); // 1.5 segundos de animação
+        }
+
+        async function iniciarJogo() {
+            if (estado.jogoAtivo) return;
+            if (!estado.copoSelecionado && estado.copoSelecionado !== 0) {
+                alert('Selecione um copo primeiro!');
+                return;
+            }
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            if (isNaN(bet) || bet < 5) {
+                alert('Aposta mínima: R$5');
+                return;
+            }
+
+            estado.jogoAtivo = true;
+            document.getElementById('info').innerText = 'Embaralhando...';
+
+            animarEmbaralhamento(async () => {
+                const res = await fetch('/api/game/thimbles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        betAmount: bet,
+                        escolha: estado.copoSelecionado
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert(data.error);
+                    estado.jogoAtivo = false;
+                    estado.podeJogar = true;
+                    document.getElementById('info').innerText = 'Clique em um copo para apostar';
+                    return;
+                }
+
+                atualizarSaldo();
+
+                resetarCopos();
+                document.getElementById(`copo${data.posicaoCorreta+1}`).classList.add('bolinha');
+                estado.posicaoCorreta = data.posicaoCorreta;
+
+                if (data.ganhou) {
+                    estado.valorAcumulado = data.winAmount;
+                    estado.apostaAtual = bet;
+                    document.getElementById('result').innerHTML = `🎉 Acertou! Ganhou R$ ${data.winAmount.toFixed(2)}!`;
+                    document.getElementById('acoes').classList.remove('hidden');
+                    document.getElementById('controles').classList.add('hidden');
+                    estado.podeJogar = false;
+                } else {
+                    estado.valorAcumulado = 0;
+                    estado.apostaAtual = 0;
+                    document.getElementById('result').innerHTML = `😢 Errou! A bolinha estava no copo ${data.posicaoCorreta+1}.`;
+                    document.getElementById('acoes').classList.add('hidden');
+                    document.getElementById('controles').classList.remove('hidden');
+                    estado.podeJogar = true;
+                    estado.copoSelecionado = null;
+                }
+                estado.jogoAtivo = false;
+                document.getElementById('info').innerText = 'Clique em um copo para apostar';
+            });
+        }
+
+        async function continuar() {
+            if (estado.jogoAtivo) return;
+            if (estado.valorAcumulado <= 0) return;
+            const bet = estado.valorAcumulado;
+            if (!estado.copoSelecionado && estado.copoSelecionado !== 0) {
+                alert('Selecione um copo para continuar!');
+                return;
+            }
+
+            estado.jogoAtivo = true;
+            document.getElementById('info').innerText = 'Embaralhando...';
+
+            animarEmbaralhamento(async () => {
+                const res = await fetch('/api/game/thimbles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        betAmount: bet,
+                        escolha: estado.copoSelecionado
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert(data.error);
+                    estado.jogoAtivo = false;
+                    document.getElementById('info').innerText = 'Clique em um copo para apostar';
+                    return;
+                }
+
+                atualizarSaldo();
+
+                resetarCopos();
+                document.getElementById(`copo${data.posicaoCorreta+1}`).classList.add('bolinha');
+                estado.posicaoCorreta = data.posicaoCorreta;
+
+                if (data.ganhou) {
+                    estado.valorAcumulado = data.winAmount;
+                    document.getElementById('result').innerHTML = `🎉 Acertou! Agora você tem R$ ${data.winAmount.toFixed(2)}!`;
+                    document.getElementById('acoes').classList.remove('hidden');
+                    document.getElementById('controles').classList.add('hidden');
+                    estado.podeJogar = false;
+                } else {
+                    estado.valorAcumulado = 0;
+                    estado.apostaAtual = 0;
+                    document.getElementById('result').innerHTML = `😢 Errou! A bolinha estava no copo ${data.posicaoCorreta+1}. Você perdeu tudo.`;
+                    document.getElementById('acoes').classList.add('hidden');
+                    document.getElementById('controles').classList.remove('hidden');
+                    estado.podeJogar = true;
+                    estado.copoSelecionado = null;
+                }
+                estado.jogoAtivo = false;
+                document.getElementById('info').innerText = 'Clique em um copo para apostar';
+            });
+        }
+
+        async function sacar() {
+            alert(`💰 Você sacou R$ ${estado.valorAcumulado.toFixed(2)}! O valor já está no seu saldo.`);
+            document.getElementById('acoes').classList.add('hidden');
+            document.getElementById('controles').classList.remove('hidden');
+            resetarCopos();
+            estado.podeJogar = true;
+            estado.copoSelecionado = null;
+            estado.valorAcumulado = 0;
+            estado.apostaAtual = 0;
+            document.getElementById('info').innerText = 'Clique em um copo para apostar';
+        }
+
         async function atualizarSaldo() {
             const res = await fetch(`/api/user/${user.id}/balance`);
             const data = await res.json();
@@ -202,156 +322,8 @@
             user.bonus_balance = data.bonus_balance;
             document.getElementById('balance').innerText = `R$ ${(data.balance + data.bonus_balance).toFixed(2)}`;
         }
+
         atualizarSaldo();
-
-        // Iniciar rodada
-        startBtn.addEventListener("click", () => {
-            if (active) return;
-            const bet = parseFloat(betInput.value);
-            if (bet < 5) {
-                alert("Aposta mínima: R$5");
-                return;
-            }
-            // Verifica saldo localmente (backend também verifica)
-            const total = (user.balance || 0) + (user.bonus_balance || 0);
-            if (total < bet) {
-                alert("Saldo insuficiente!");
-                return;
-            }
-
-            active = true;
-            statusDiv.innerText = "Escolha um dedal";
-            shuffleAnimation();
-            // Esconde botões de ação
-            acoesDiv.style.display = "none";
-            ultimoResultado = null;
-        });
-
-        // Clique nos copos
-        document.querySelectorAll(".cup").forEach(cup => {
-            cup.addEventListener("click", async function () {
-                if (!active) return;
-
-                const selected = parseInt(this.dataset.id);
-                const bet = parseFloat(betInput.value);
-
-                // Desabilita novos cliques enquanto processa
-                active = false;
-
-                try {
-                    const res = await fetch('/api/game/thimbles', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: user.id,
-                            betAmount: bet,
-                            escolha: selected
-                        })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) {
-                        alert(data.error);
-                        active = true;
-                        return;
-                    }
-
-                    winningCup = data.posicaoCorreta;
-                    ultimoResultado = data;
-
-                    // Revelar todos os copos
-                    reveal(winningCup);
-
-                    if (data.ganhou) {
-                        statusDiv.innerText = `🎉 GANHOU: R$ ${data.winAmount.toFixed(2)}`;
-                        valorAcumulado = data.winAmount;
-                        // Mostra botões de sacar/continuar
-                        acoesDiv.style.display = "flex";
-                    } else {
-                        statusDiv.innerText = `😢 Perdeu! A bolinha estava no copo ${data.posicaoCorreta+1}`;
-                        valorAcumulado = 0;
-                        acoesDiv.style.display = "none";
-                        // Aguarda 1.5s e reseta para nova rodada
-                        setTimeout(() => {
-                            resetarCopos();
-                            active = true;
-                        }, 1500);
-                    }
-
-                    // Atualiza saldo
-                    user.balance = data.newBalance; // simplificado, mas o backend retorna o novo saldo
-                    document.getElementById('balance').innerText = `R$ ${data.newBalance.toFixed(2)}`;
-
-                    // Adiciona ao histórico
-                    addHistory(data.ganhou ? "G" : "P");
-
-                } catch (error) {
-                    alert("Erro na comunicação com o servidor");
-                    active = true;
-                }
-            });
-        });
-
-        // Botão sacar
-        sacarBtn.addEventListener("click", async () => {
-            if (!ultimoResultado || !ultimoResultado.ganhou) return;
-            // Aqui você pode implementar uma rota para sacar o valor acumulado
-            // Como exemplo, vamos apenas adicionar ao saldo real (já foi adicionado na jogada)
-            // Mas se quiser uma lógica de "acumular", precisaria de estado no backend.
-            // Por simplicidade, vamos apenas resetar.
-            alert("Valor já creditado no saldo!");
-            acoesDiv.style.display = "none";
-            resetarCopos();
-            active = true;
-            ultimoResultado = null;
-        });
-
-        // Botão continuar (aposta o valor acumulado)
-        continuarBtn.addEventListener("click", () => {
-            if (!ultimoResultado || !ultimoResultado.ganhou) return;
-            // Define a aposta como o valor acumulado
-            betInput.value = valorAcumulado.toFixed(2);
-            acoesDiv.style.display = "none";
-            resetarCopos();
-            active = true;
-            // Inicia nova rodada automaticamente? O usuário precisará clicar em JOGAR novamente
-            // Mas podemos chamar start automático se quiser.
-            statusDiv.innerText = "Aposte o valor acumulado";
-        });
-
-        function reveal(winningCup) {
-            document.querySelectorAll(".cup").forEach(cup => {
-                if (parseInt(cup.dataset.id) === winningCup) {
-                    cup.classList.add("win");
-                }
-            });
-        }
-
-        function resetarCopos() {
-            document.querySelectorAll(".cup").forEach(cup => {
-                cup.classList.remove("win");
-            });
-        }
-
-        function addHistory(result) {
-            let span = document.createElement("span");
-            span.innerText = result;
-            historyList.prepend(span);
-            // Limitar histórico a 20 itens
-            if (historyList.children.length > 20) {
-                historyList.removeChild(historyList.lastChild);
-            }
-        }
-
-        function shuffleAnimation() {
-            document.querySelectorAll(".cup").forEach(cup => {
-                cup.style.transform = "translateX(" + (Math.random() * 60 - 30) + "px)";
-            });
-            setTimeout(() => {
-                document.querySelectorAll(".cup").forEach(cup => {
-                    cup.style.transform = "translateX(0)";
-                });
-            }, 600);
-        }
     </script>
 </body>
 </html>
